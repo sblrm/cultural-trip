@@ -226,7 +226,7 @@ git push origin feature/your-feature
 
 [![Portfolio](https://img.shields.io/badge/Portfolio-FF5722?style=for-the-badge&logo=firefox&logoColor=white)](https://sblrm.dev)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/sblrm)
-[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:subhan.larasati@gmail.com)
+[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:sabilillah1324@gmail.com)
 
 </div>
 
@@ -242,7 +242,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **⭐ If you find this project interesting, please give it a star!**
 
-Made with ❤️ by [Subhan Larasati Mulyono](https://github.com/sblrm)
+Made with ❤️ by [Sabilillah Ramaniya Widodo](https://github.com/sblrm)
 
 ![Profile Views](https://komarev.com/ghpvc/?username=sblrm&color=brightgreen&style=flat-square)
 
