@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![CulturalTrip Banner](https://via.placeholder.com/800x200/2563eb/ffffff?text=CulturalTrip+-+Explore+Indonesia%27s+Heritage)
+![CulturalTrip Banner](docs/screenshots/orangutan-ape.jpg)
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
