@@ -16,7 +16,7 @@
 
 **CulturalTrip** is a modern web application that helps users explore and plan trips to Indonesia's rich cultural heritage sites. Built with cutting-edge technologies, this platform combines interactive mapping, AI-powered trip planning, and comprehensive cultural information to create an immersive travel planning experience.
 
-> 🎯 **Built by**: [Sabilillah Ramaniya Widodo (sblrm)](https://github.com/sblrm)  
+> 🎯 **Built by**: [Sabilillah Ramaniya Widodo (sblrm)](https://github.com/sblrm) & [Ryan Hanif Dwihandoyo (Rayen142)](https://github.com/Rayen142)
 > 📅 **Project Timeline**: 2024 - Present  
 > 🏗️ **Status**: Active Development
 
@@ -242,7 +242,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **⭐ If you find this project interesting, please give it a star!**
 
-Made with ❤️ by [Sabilillah Ramaniya Widodo](https://github.com/sblrm)
+Made by [Sabilillah Ramaniya Widodo](https://github.com/sblrm) & [Ryan Hanif Dwihandoyo](https://github.com/Rayen142)
 
 ![Profile Views](https://komarev.com/ghpvc/?username=sblrm&color=brightgreen&style=flat-square)
 
