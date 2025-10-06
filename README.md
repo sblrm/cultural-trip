@@ -1,4 +1,4 @@
-# 🏛️ CulturalTrip - Indonesia Cultural Heritage Explorer
+# 🏛️ CulturalTrip - Indonesia Cultural Heritage Explorer (Group Project w/ Ryan Hanif Dwihandoyo)
 
 <div align="center">
 
