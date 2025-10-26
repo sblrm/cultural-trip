@@ -8,7 +8,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-bold text-xl mb-4">CulturalTrip</h3>
+            <h3 className="font-bold text-xl mb-4">TravoMate</h3>
             <p className="text-gray-400 mb-4">
               Jelajahi destinasi budaya Indonesia dan rencanakan perjalanan Anda dengan mudah.
             </p>
@@ -140,14 +140,14 @@ const Footer = () => {
               </li>
               <li className="flex items-center">
                 <Mail className="mr-2 h-5 w-5 text-indonesia-gold" />
-                <span className="text-gray-400">info@culturaltrip.id</span>
+                <span className="text-gray-400">info@TravoMate.id</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} CulturalTrip Indonesia. Hak Cipta Dilindungi.</p>
+          <p>&copy; {new Date().getFullYear()} TravoMate Indonesia. Hak Cipta Dilindungi.</p>
         </div>
       </div>
     </footer>

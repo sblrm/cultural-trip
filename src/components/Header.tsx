@@ -50,7 +50,7 @@ const Header = () => {
               <path d="M22 12h-2" />
             </svg>
             <div>
-              <h1 className="text-xl font-bold gradient-text">CulturalTrip</h1>
+              <h1 className="text-xl font-bold gradient-text">TravoMate</h1>
               <p className="text-xs text-muted-foreground">Temukan Indonesia</p>
             </div>
           </Link>

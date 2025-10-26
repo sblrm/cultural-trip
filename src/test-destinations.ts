@@ -1,5 +1,8 @@
 import * as dotenv from 'dotenv';
-dotenv.config();
+import { resolve } from 'path';
+
+// Load .env.local file
+dotenv.config({ path: resolve(process.cwd(), '.env.local') });
 
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types/supabase';

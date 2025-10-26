@@ -141,7 +141,7 @@ const HomePage = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Kenapa Memilih Kami?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              CulturalTrip menawarkan pengalaman terbaik untuk menjelajahi kekayaan budaya Indonesia.
+              TravoMate menawarkan pengalaman terbaik untuk menjelajahi kekayaan budaya Indonesia.
             </p>
           </div>
 

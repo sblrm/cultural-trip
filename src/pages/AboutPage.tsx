@@ -109,7 +109,7 @@ const AboutPage = () => {
             </div>
             <div>
               <h3 className="font-bold">Email</h3>
-              <p className="text-gray-600">info@culturaltrip.id</p>
+              <p className="text-gray-600">info@TravoMate.id</p>
             </div>
           </div>
           

@@ -8,7 +8,11 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:connection": "node --import tsx --no-warnings src/test-connection.ts",
+    "test:destinations": "node --import tsx --no-warnings src/test-destinations.ts",
+    "setup:verify": "powershell -ExecutionPolicy Bypass -File ./scripts/verify-supabase.ps1",
+    "setup:check": "node scripts/check-setup.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

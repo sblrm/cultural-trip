@@ -1,3 +1,35 @@
+# Node & build
+node_modules/
+dist/
+/.turbo/
+/.vercel/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env files (do not commit secrets)
+.env
+.env.local
+.env.*.local
+.env.*.secret
+.env.*.key
+.env.*.pem
+
+# Logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+.cache/
+.parcel-cache/
+coverage/
 /vendor/
 node_modules/
 npm-debug.log
