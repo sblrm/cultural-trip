@@ -437,7 +437,7 @@ const MyAccount = () => {
                   <div className="space-y-2">
                     <div className="flex gap-2">
                       <Input
-                        placeholder="+628112000143 atau 08112000143"
+                        placeholder="+628XXX atau 08XXX"
                         value={newPhoneInput}
                         onChange={(e) => setNewPhoneInput(e.target.value)}
                         onKeyPress={(e) => {
