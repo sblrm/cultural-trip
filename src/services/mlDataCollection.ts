@@ -233,21 +233,46 @@ export async function logPrediction(
   predictionTimeMs?: number,
   tripDataId?: number
 ): Promise<void> {
-  const { error } = await supabase
-    .from('prediction_logs')
-    .insert({
-      trip_data_id: tripDataId || null,
-      features: features,
-      predicted_cost: predictedCost,
-      prediction_method: predictionMethod,
-      model_version: modelVersion || null,
-      confidence_score: confidenceScore || null,
-      prediction_time_ms: predictionTimeMs || null,
-    });
+  try {
+    // Sanitize features for JSON storage
+    const sanitizedFeatures = Object.entries(features).reduce((acc, [key, value]) => {
+      if (value !== undefined && value !== null) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Record<string, any>);
 
-  if (error) {
-    console.error('Error logging prediction:', error);
-    // Don't throw - logging failure shouldn't break the app
+    // Ensure confidence_score is within bounds (0-1) and properly formatted
+    // Database expects numeric(3,2) which means max 0.99
+    let sanitizedConfidence = confidenceScore;
+    if (sanitizedConfidence !== undefined && sanitizedConfidence !== null) {
+      sanitizedConfidence = Math.max(0, Math.min(0.99, sanitizedConfidence));
+      sanitizedConfidence = parseFloat(sanitizedConfidence.toFixed(2));
+    }
+
+    const { error } = await supabase
+      .from('prediction_logs')
+      .insert({
+        trip_data_id: tripDataId || null,
+        features: sanitizedFeatures,
+        predicted_cost: predictedCost,
+        prediction_method: predictionMethod,
+        model_version: modelVersion || null,
+        confidence_score: sanitizedConfidence || null,
+        prediction_time_ms: predictionTimeMs ? Math.round(predictionTimeMs) : null,
+      });
+
+    if (error) {
+      // Check if table doesn't exist
+      if (error.code === '42P01') {
+        console.warn('⚠️ prediction_logs table not found. Run SQL migration: add_ml_pipeline_schema.sql');
+      } else {
+        console.error('Error logging prediction:', error);
+      }
+      // Don't throw - logging failure shouldn't break the app
+    }
+  } catch (err) {
+    console.warn('Failed to log prediction (non-critical):', err);
   }
 }
 
