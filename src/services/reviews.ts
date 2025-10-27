@@ -9,7 +9,7 @@ export async function getDestinationReviews(destinationId: number): Promise<Revi
     .from('reviews')
     .select(`
       *,
-      profiles!reviews_user_id_fkey (
+      profiles (
         username,
         full_name,
         avatar_url
@@ -139,7 +139,7 @@ export async function getUserReviews(userId: string): Promise<ReviewWithProfile[
     .from('reviews')
     .select(`
       *,
-      profiles!reviews_user_id_fkey (
+      profiles (
         username,
         full_name,
         avatar_url

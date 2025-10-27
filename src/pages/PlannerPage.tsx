@@ -8,6 +8,8 @@ import PlannerSettingsCard from "@/components/planner/PlannerSettingsCard";
 import PlannedRouteCard from "@/components/planner/PlannedRouteCard";
 import ChatSidebar from "@/components/planner/ChatSidebar";
 import EmptyRouteState from "@/components/planner/EmptyRouteState";
+import { saveTripData, logPrediction } from "@/services/mlDataCollection";
+import { getCurrentFuelPrice } from "@/services/dynamicPricing";
 
 const PlannerPage = () => {
   const { destinations, loading } = useDestinations();
@@ -74,16 +76,75 @@ const PlannerPage = () => {
       // Show loading toast with real-time data info
       toast.loading("Menghitung rute optimal dengan data real-time...");
       
+      const departureTime = new Date();
+      const startTime = performance.now();
+      
       const route = await findOptimalRoute(
         userLocation.latitude,
         userLocation.longitude,
         filteredDestinations,
         maxDestinations,
         optimizationMode,
-        new Date() // Use current time for dynamic pricing
+        departureTime
       );
       
+      const endTime = performance.now();
+      const predictionTimeMs = endTime - startTime;
+      
       setPlannedRoute(route);
+      
+      // === ML DATA COLLECTION ===
+      try {
+        // Get current fuel price
+        const fuelPrice = getCurrentFuelPrice();
+        
+        // Prepare features for ML
+        const features = {
+          distance: route.totalDistance,
+          duration: route.totalDuration,
+          optimizationMode,
+          departureTime: departureTime.toISOString(),
+          hourOfDay: departureTime.getHours(),
+          dayOfWeek: departureTime.getDay(),
+          isWeekend: departureTime.getDay() === 0 || departureTime.getDay() === 6,
+          fuelPrice,
+          tollRoadsUsed: true, // Assume toll roads used for inter-city routes
+          trafficLevel: 'medium', // Default traffic level
+          dataSource: route.dataSource,
+        };
+        
+        // Log prediction for monitoring
+        await logPrediction(
+          features,
+          route.totalCost,
+          'rule_based', // Currently using rule-based pricing
+          'v1.0.0', // Rule-based version
+          route.isRealTimeData ? 0.9 : 0.7, // Higher confidence for real-time data
+          predictionTimeMs
+        );
+        
+        // Save trip data for future ML training
+        // Note: actualCost will be updated when user completes the trip
+        const savedTrip = await saveTripData({
+          distance: route.totalDistance,
+          duration: route.totalDuration,
+          optimizationMode,
+          departureTime,
+          fuelPrice,
+          tollRoadsUsed: true, // Assume toll roads for inter-city
+          actualCost: route.totalCost, // Initially set to predicted
+          predictedCost: route.totalCost,
+          dataSource: route.isRealTimeData ? 'gps_tracked' : 'estimated',
+          predictionMethod: 'rule_based',
+          modelVersion: 'v1.0.0',
+          confidenceScore: route.isRealTimeData ? 0.9 : 0.7,
+        });
+        
+        console.log('✅ Trip data saved for ML training:', savedTrip.id);
+      } catch (mlError) {
+        // Don't break the app if ML logging fails
+        console.error('⚠️ ML data collection failed (non-critical):', mlError);
+      }
       
       // Show success message with optimization mode and data source
       const modeText = optimizationMode === 'fastest' ? 'tercepat' : 
