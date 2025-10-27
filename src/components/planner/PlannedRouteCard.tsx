@@ -60,7 +60,7 @@ const PlannedRouteCard = ({ route }: PlannedRouteCardProps) => {
               <Clock className="h-5 w-5 text-primary mb-2" />
               <div className="text-sm text-muted-foreground">Total Waktu Perjalanan</div>
               <div className="font-bold text-lg">
-                {Math.floor(route.totalDuration / 60)} jam {route.totalDuration % 60} menit
+                {Math.floor(Math.round(route.totalDuration) / 60)} jam {Math.round(route.totalDuration) % 60} menit
               </div>
             </div>
             
@@ -120,16 +120,16 @@ const PlannedRouteCard = ({ route }: PlannedRouteCardProps) => {
                             <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                               <div>
                                 <span className="text-muted-foreground">Jarak: </span>
-                                {node.distance.toFixed(1)} km
+                                {Math.round(node.distance * 10) / 10} km
                               </div>
                               <div>
                                 <span className="text-muted-foreground">Waktu Tempuh: </span>
-                                {Math.floor(node.duration / 60) > 0 ? `${Math.floor(node.duration / 60)} jam ` : ""}
-                                {node.duration % 60} menit
+                                {Math.floor(Math.round(node.duration) / 60) > 0 ? `${Math.floor(Math.round(node.duration) / 60)} jam ` : ""}
+                                {Math.round(node.duration) % 60} menit
                               </div>
                               <div>
                                 <span className="text-muted-foreground">Biaya: </span>
-                                Rp {node.cost.toLocaleString('id-ID')}
+                                Rp {Math.round(node.cost).toLocaleString('id-ID')}
                               </div>
                             </div>
                             

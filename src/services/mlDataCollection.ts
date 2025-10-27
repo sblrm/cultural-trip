@@ -80,15 +80,21 @@ export async function saveTripData(input: TripDataInput): Promise<TripData> {
   // Auto-estimate traffic if not provided
   const trafficLevel = input.trafficLevel || estimateTrafficLevel(departureTime);
 
+  // Sanitize numeric values to avoid floating-point precision issues
+  const sanitizeNumber = (value: number | undefined, decimals: number = 2): number | null => {
+    if (value === undefined || value === null) return null;
+    return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals);
+  };
+
   const { data, error } = await supabase
     .from('trip_data')
     .insert({
       user_id: user.id,
       route_id: input.routeId || null,
       
-      // Features
-      distance: input.distance,
-      duration: input.duration,
+      // Features (rounded to avoid floating-point issues)
+      distance: sanitizeNumber(input.distance, 2),
+      duration: Math.round(input.duration), // Integer for minutes
       optimization_mode: input.optimizationMode,
       
       // Time features
@@ -100,25 +106,25 @@ export async function saveTripData(input: TripDataInput): Promise<TripData> {
       
       // Traffic features
       traffic_level: trafficLevel,
-      estimated_traffic_delay: input.estimatedTrafficDelay || 0,
+      estimated_traffic_delay: Math.round(input.estimatedTrafficDelay || 0),
       
-      // Cost features
-      fuel_price: input.fuelPrice,
+      // Cost features (rounded to avoid floating-point issues)
+      fuel_price: sanitizeNumber(input.fuelPrice, 0), // Rp (no decimals)
       toll_roads_used: input.tollRoadsUsed,
       
       // Weather features
       weather_condition: input.weatherCondition || null,
-      temperature: input.temperature || null,
+      temperature: sanitizeNumber(input.temperature, 1),
       
-      // Target
-      actual_cost: input.actualCost,
-      predicted_cost: input.predictedCost,
+      // Target (rounded to avoid floating-point issues)
+      actual_cost: sanitizeNumber(input.actualCost, 0),
+      predicted_cost: sanitizeNumber(input.predictedCost, 0),
       
-      // Cost breakdown
-      fuel_cost: input.fuelCost || null,
-      toll_cost: input.tollCost || null,
-      parking_cost: input.parkingCost || null,
-      other_costs: input.otherCosts || null,
+      // Cost breakdown (rounded to avoid floating-point issues)
+      fuel_cost: sanitizeNumber(input.fuelCost, 0),
+      toll_cost: sanitizeNumber(input.tollCost, 0),
+      parking_cost: sanitizeNumber(input.parkingCost, 0),
+      other_costs: sanitizeNumber(input.otherCosts, 0),
       
       // Metadata
       data_source: input.dataSource,
@@ -152,16 +158,22 @@ export async function completeTripData(
     otherCosts?: number;
   }
 ): Promise<TripData> {
+  // Sanitize numeric values
+  const sanitizeNumber = (value: number | undefined): number | null => {
+    if (value === undefined || value === null) return null;
+    return Math.round(value);
+  };
+
   const { data, error } = await supabase
     .from('trip_data')
     .update({
       completed: true,
       completion_time: new Date().toISOString(),
-      actual_cost: actualCost,
-      fuel_cost: costBreakdown?.fuelCost || null,
-      toll_cost: costBreakdown?.tollCost || null,
-      parking_cost: costBreakdown?.parkingCost || null,
-      other_costs: costBreakdown?.otherCosts || null,
+      actual_cost: sanitizeNumber(actualCost),
+      fuel_cost: sanitizeNumber(costBreakdown?.fuelCost),
+      toll_cost: sanitizeNumber(costBreakdown?.tollCost),
+      parking_cost: sanitizeNumber(costBreakdown?.parkingCost),
+      other_costs: sanitizeNumber(costBreakdown?.otherCosts),
     })
     .eq('id', tripDataId)
     .select()
@@ -250,16 +262,22 @@ export async function logPrediction(
       sanitizedConfidence = parseFloat(sanitizedConfidence.toFixed(2));
     }
 
+    // Round predicted_cost to avoid floating-point precision issues
+    const sanitizedPredictedCost = Math.round(predictedCost);
+    
+    // Round prediction_time_ms to integer
+    const sanitizedPredictionTime = predictionTimeMs ? Math.round(predictionTimeMs) : null;
+
     const { error } = await supabase
       .from('prediction_logs')
       .insert({
         trip_data_id: tripDataId || null,
         features: sanitizedFeatures,
-        predicted_cost: predictedCost,
+        predicted_cost: sanitizedPredictedCost,
         prediction_method: predictionMethod,
         model_version: modelVersion || null,
         confidence_score: sanitizedConfidence || null,
-        prediction_time_ms: predictionTimeMs ? Math.round(predictionTimeMs) : null,
+        prediction_time_ms: sanitizedPredictionTime,
       });
 
     if (error) {
