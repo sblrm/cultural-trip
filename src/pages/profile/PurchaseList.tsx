@@ -95,84 +95,80 @@ const PurchaseList = () => {
         <div>Belum ada pembelian.</div>
       ) : (
         <div className="space-y-4">
-          {purchases.map((p) => (
-            <Card key={p.id}>
-              <div className="flex">
-                <div className="w-24 h-24 sm:w-32 sm:h-32">
-                  <img
-                    src={p.tickets?.destinations?.image}
-                    alt={p.tickets?.destinations?.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="flex-1 p-4">
-                  <CardHeader className="p-0">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Receipt className="h-4 w-4" />
-                      {p.tickets?.destinations?.name || 'Pembelian Tiket'}
-                    </CardTitle>
-                    <CardDescription className="flex items-center gap-2">
-                      <MapPin className="h-3 w-3" />
-                      {p.tickets?.destinations?.city}, {p.tickets?.destinations?.province}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-0 pt-2 text-sm">
-                    {p.tickets?.visit_date && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(p.tickets.visit_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
+          {purchases.map((p) => {
+            // Support both new bookings system and legacy tickets system
+            const bookingData = p.bookings || p.tickets;
+            const destination = bookingData?.destinations;
+            const image = destination?.image || '/placeholder-destination.jpg';
+            const name = destination?.name || 'Pembelian Tiket';
+            const city = destination?.city || '-';
+            const province = destination?.province || '-';
+            const visitDate = bookingData?.visit_date;
+            const quantity = bookingData?.quantity || bookingData?.ticket_quantity || '-';
+            const amount = p.amount || bookingData?.total_price || 0;
+            const status = p.status || 'unknown';
+            const bookingCode = bookingData?.booking_code;
+
+            return (
+              <Card key={p.id}>
+                <div className="flex">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0">
+                    <img
+                      src={image}
+                      alt={name}
+                      className="w-full h-full object-cover rounded-l-lg"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder-destination.jpg';
+                      }}
+                    />
+                  </div>
+                  <div className="flex-1 p-4">
+                    <CardHeader className="p-0">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Receipt className="h-4 w-4" />
+                        {name}
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-2 text-xs">
+                        <MapPin className="h-3 w-3" />
+                        {city}, {province}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-0 pt-2 text-sm space-y-1">
+                      {bookingCode && (
+                        <div className="font-mono text-xs text-muted-foreground">
+                          Kode: {bookingCode}
+                        </div>
+                      )}
+                      {visitDate && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(visitDate).toLocaleDateString('id-ID', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                          })}
+                        </div>
+                      )}
+                      <div>Jumlah: {quantity} tiket</div>
+                      <div className="font-semibold">
+                        Total: Rp {Number(amount).toLocaleString('id-ID')}
                       </div>
-                    )}
-                    <div className="mt-1">Jumlah: {p.tickets?.quantity ?? '-'}</div>
-                    <div>Total: Rp {Number(p.amount ?? p.tickets?.total_price ?? 0).toLocaleString('id-ID')}</div>
-                    <div>
-                      <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs bg-muted">{p.status}</span>
-                    </div>
-                    {p.tickets?.id && (
-                      <div className="mt-3">
-                        <Dialog open={refundOpen} onOpenChange={setRefundOpen}>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={() => openRefund(p.tickets.id, p.tickets?.status)}
-                              disabled={p.tickets?.status !== 'confirmed'}
-                              title={p.tickets?.status !== 'confirmed' ? 'Refund hanya untuk tiket confirmed' : undefined}
-                            >
-                              Ajukan Refund
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Ajukan Refund</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-3">
-                              <div>
-                                <label className="block text-sm mb-1">Alasan</label>
-                                <Input
-                                  placeholder="Tuliskan alasan refund"
-                                  value={refundReason}
-                                  onChange={(e) => setRefundReason(e.target.value)}
-                                />
-                              </div>
-                              <div className="flex justify-end gap-2">
-                                <Button variant="outline" onClick={() => setRefundOpen(false)}>
-                                  Batal
-                                </Button>
-                                <Button onClick={submitRefund} disabled={submitting}>
-                                  {submitting ? "Mengirim..." : "Kirim"}
-                                </Button>
-                              </div>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                      <div>
+                        <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                          status === 'paid' ? 'bg-green-100 text-green-800' :
+                          status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          status === 'failed' ? 'bg-red-100 text-red-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {status}
+                        </span>
                       </div>
-                    )}
-                  </CardContent>
+                    </CardContent>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

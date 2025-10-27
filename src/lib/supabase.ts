@@ -262,13 +262,32 @@ export const getUserPurchases = async (userId: string) => {
     .from('purchases')
     .select(`
       *,
-      tickets:tickets (
+      bookings:booking_id (
+        id,
+        booking_code,
+        quantity,
+        ticket_quantity,
+        total_price,
+        visit_date,
+        status,
+        qr_code_url,
+        destination_id,
+        destinations:destination_id (
+          id,
+          name,
+          city,
+          province,
+          image,
+          price
+        )
+      ),
+      tickets:ticket_id (
         id,
         quantity,
         total_price,
         visit_date,
         status,
-        destinations:destinations (
+        destinations:destination_id (
           id,
           name,
           city,

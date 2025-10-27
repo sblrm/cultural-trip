@@ -1,4 +1,5 @@
 # Node & build
+copilot-instructions.md
 node_modules/
 dist/
 /.turbo/
