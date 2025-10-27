@@ -24,11 +24,21 @@ MIDTRANS_SERVER_KEY=SB-Mid-server-GkyMPSAEnrAzM1DMNzepISnB
 MIDTRANS_MERCHANT_ID=G404807411
 VITE_MIDTRANS_CLIENT_KEY=SB-Mid-client-hdE4MHh7J0QtxgAn
 VITE_MIDTRANS_ENVIRONMENT=sandbox  # 'sandbox' or 'production'
+
+# App URL for payment redirect callbacks
+# For local development
+APP_URL=http://localhost:5173
+# For production (set in Vercel environment variables)
+# APP_URL=https://yourdomain.vercel.app
 ```
 
 **Important:**
 - `MIDTRANS_SERVER_KEY` - Server-side only, TIDAK exposed ke browser
 - `VITE_MIDTRANS_CLIENT_KEY` - Safe untuk exposed ke browser (untuk Snap script)
+- `APP_URL` - **Server-side only**, digunakan untuk redirect URLs setelah payment
+  - **Local:** `http://localhost:5173`
+  - **Production:** URL domain Anda (e.g., `https://culturaltrip.vercel.app`)
+  - **WAJIB** diset di Vercel Environment Variables saat deploy!
 - Set `VITE_MIDTRANS_ENVIRONMENT=production` untuk production deployment
 
 ### 2. Database Migration
@@ -383,8 +393,9 @@ MIDTRANS_MERCHANT_ID=G404807411
 VITE_MIDTRANS_CLIENT_KEY=SB-Mid-client-hdE4MHh7J0QtxgAn
 VITE_MIDTRANS_ENVIRONMENT=sandbox  # Change to 'production' for live
 
-# Application URL (for callbacks)
-VITE_APP_URL=https://your-app.vercel.app
+# Application URL for payment redirect callbacks
+# IMPORTANT: Must be your production domain, not localhost!
+APP_URL=https://your-app.vercel.app
 ```
 
 **Apply to:** Production, Preview, Development
