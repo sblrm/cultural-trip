@@ -7,6 +7,19 @@
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import midtransClient from 'midtrans-client';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const getSupabaseClient = () => {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Supabase configuration missing');
+  }
+  
+  return createClient(supabaseUrl, supabaseServiceKey);
+};
 
 // CORS headers
 const corsHeaders = {
@@ -130,9 +143,9 @@ async function createTransaction(req: VercelRequest, res: VercelResponse) {
         },
       ],
       callbacks: {
-        finish: `${process.env.APP_URL || 'http://travo-mate.vercel.app'}/payment/finish`,
-        error: `${process.env.APP_URL || 'http://travo-mate.vercel.app'}/payment/error`,
-        pending: `${process.env.APP_URL || 'http://travo-mate.vercel.app'}/payment/pending`,
+        finish: `${process.env.APP_URL || 'https://travo-mate.vercel.app'}/payment/finish`,
+        error: `${process.env.APP_URL || 'https://travo-mate.vercel.app'}/payment/error`,
+        pending: `${process.env.APP_URL || 'https://travo-mate.vercel.app'}/payment/pending`,
       },
       credit_card: {
         secure: true,
@@ -295,8 +308,65 @@ async function handleTransactionNotification(notification: any, res: VercelRespo
       finalStatus = 'pending';
     }
 
-    // TODO: Update database with payment status
-    // Example: await updateTransactionStatus(order_id, finalStatus, statusResponse);
+    // Update transaction status in database
+    try {
+      const supabase = getSupabaseClient();
+      
+      // Update transactions table
+      const { error: updateError } = await supabase
+        .from('transactions')
+        .update({
+          transaction_status: finalStatus,
+          payment_type: payment_type,
+          midtrans_response: statusResponse,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('order_id', order_id);
+
+      if (updateError) {
+        console.error('Failed to update transaction:', updateError);
+      }
+
+      // If payment successful, create booking
+      if (finalStatus === 'success') {
+        // Get transaction details
+        const { data: transaction, error: txError } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('order_id', order_id)
+          .single();
+
+        if (txError || !transaction) {
+          console.error('Failed to get transaction details:', txError);
+        } else {
+          // Extract destination ID from item_details or trip_data_id
+          const destinationId = transaction.trip_data_id || transaction.item_details?.[0]?.id;
+          
+          if (destinationId && transaction.user_id) {
+            // Create booking record
+            const { error: bookingError } = await supabase
+              .from('bookings')
+              .insert({
+                user_id: transaction.user_id,
+                destination_id: parseInt(destinationId),
+                booking_date: new Date().toISOString().split('T')[0],
+                quantity: transaction.item_details?.[0]?.quantity || 1,
+                total_price: transaction.gross_amount,
+                status: 'confirmed',
+              });
+
+            if (bookingError) {
+              console.error('Failed to create booking:', bookingError);
+            } else {
+              console.log(`Booking created for order ${order_id}`);
+            }
+          }
+        }
+      }
+    } catch (dbError: any) {
+      console.error('Database update error:', dbError);
+      // Continue - don't fail the notification response
+    }
     
     console.log(`Transaction ${order_id} status updated to: ${finalStatus}`);
 

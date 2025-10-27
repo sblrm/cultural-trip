@@ -27,7 +27,7 @@ VITE_MIDTRANS_ENVIRONMENT=sandbox  # 'sandbox' or 'production'
 
 # App URL for payment redirect callbacks
 # For local development
-APP_URL=http://localhost:5173
+APP_URL=http://travo-mate.vercel.app
 # For production (set in Vercel environment variables)
 # APP_URL=https://yourdomain.vercel.app
 ```
@@ -37,7 +37,7 @@ APP_URL=http://localhost:5173
 - `VITE_MIDTRANS_CLIENT_KEY` - Safe untuk exposed ke browser (untuk Snap script)
 - `APP_URL` - **Server-side only**, digunakan untuk redirect URLs setelah payment
   - **Local:** `http://localhost:5173`
-  - **Production:** URL domain Anda (e.g., `https://culturaltrip.vercel.app`)
+  - **Production:** URL domain Anda (e.g., `https://travo-mate.vercel.app`)
   - **WAJIB** diset di Vercel Environment Variables saat deploy!
 - Set `VITE_MIDTRANS_ENVIRONMENT=production` untuk production deployment
 
@@ -67,7 +67,16 @@ Untuk deployment di Vercel, tambahkan environment variables:
    - `MIDTRANS_MERCHANT_ID` = `G404807411`
    - `VITE_MIDTRANS_CLIENT_KEY` = `SB-Mid-client-hdE4MHh7J0QtxgAn`
    - `VITE_MIDTRANS_ENVIRONMENT` = `sandbox` (atau `production`)
+   - `APP_URL` = `https://your-domain.vercel.app` (untuk payment redirects)
+   - `VITE_SUPABASE_URL` = Your Supabase URL
+   - `VITE_SUPABASE_ANON_KEY` = Your Supabase anon key
+   - **`SUPABASE_SERVICE_ROLE_KEY`** = Your Supabase service_role key (**CRITICAL for webhook!**)
 3. Redeploy aplikasi
+
+**⚠️ IMPORTANT:** 
+- `SUPABASE_SERVICE_ROLE_KEY` diperlukan untuk webhook membuat booking otomatis
+- Get from: Supabase Dashboard > Settings > API > service_role key
+- **NEVER** expose service_role key to client-side (no VITE_ prefix!)
 
 ## 🏗️ Architecture
 
@@ -140,7 +149,28 @@ Body: (Otomatis dari Midtrans)
   transaction_status: string,
   // ... other Midtrans notification fields
 }
+
+Response:
+{
+  success: true,
+  message: 'Transaction notification processed',
+  status: 'success' | 'pending' | 'failed'
+}
 ```
+
+**What Happens on Webhook:**
+1. ✅ Verifies transaction authenticity with Midtrans
+2. ✅ Updates `transactions` table with payment status
+3. ✅ **Auto-creates booking** in `bookings` table if payment successful
+4. ✅ Returns 200 OK to Midtrans (required!)
+
+**Auto-Booking Creation:**
+When payment status = `settlement` or `capture` (success):
+- Extracts destination ID from transaction metadata
+- Creates booking record with user_id, destination_id, quantity, total_price
+- Sets booking status to 'confirmed'
+- User immediately sees booking in "My Booking" page
+
 
 ### Frontend Services (`src/services/paymentService.ts`)
 
@@ -395,7 +425,7 @@ VITE_MIDTRANS_ENVIRONMENT=sandbox  # Change to 'production' for live
 
 # Application URL for payment redirect callbacks
 # IMPORTANT: Must be your production domain, not localhost!
-APP_URL=https://your-app.vercel.app
+APP_URL=https://travo-mate.vercel.app
 ```
 
 **Apply to:** Production, Preview, Development
