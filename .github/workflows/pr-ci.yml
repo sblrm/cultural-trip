@@ -24,12 +24,13 @@ jobs:
         run: npm run build
 
       - name: Run Supabase connection test
-        if: ${{ secrets.VITE_SUPABASE_URL != '' && secrets.VITE_SUPABASE_ANON_KEY != '' }}
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        run: npm run test:connection
-
-      - name: Skip Supabase test (no secrets configured)
-        if: ${{ secrets.VITE_SUPABASE_URL == '' || secrets.VITE_SUPABASE_ANON_KEY == '' }}
-        run: echo "Skipping Supabase test because VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is not set in repository secrets."
+        run: |
+          if [ -n "$VITE_SUPABASE_URL" ] && [ -n "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo "Running Supabase connection test..."
+            npm run test:connection
+          else
+            echo "Skipping Supabase test because VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is not set in repository secrets."
+          fi
