@@ -214,7 +214,7 @@ async function checkTransactionStatus(req: VercelRequest, res: VercelResponse) {
 
 /**
  * Handle Midtrans webhook notification
- * This endpoint receives payment status updates from Midtrans
+ * Supports: transaction, recurring, and pay-account notifications
  */
 async function handleNotification(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -223,6 +223,41 @@ async function handleNotification(req: VercelRequest, res: VercelResponse) {
 
   try {
     const notification = req.body;
+    const notificationType = (req.query.type as string) || 'transaction';
+
+    console.log('Notification received:', {
+      type: notificationType,
+      order_id: notification.order_id,
+      subscription_id: notification.subscription_id,
+      account_id: notification.account_id,
+    });
+
+    // Route to appropriate handler based on notification type
+    switch (notificationType) {
+      case 'recurring':
+        return await handleRecurringNotification(notification, res);
+      
+      case 'pay-account':
+        return await handlePayAccountNotification(notification, res);
+      
+      default:
+        return await handleTransactionNotification(notification, res);
+    }
+  } catch (error: any) {
+    console.error('Notification handling error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to process notification',
+      message: error.message,
+    });
+  }
+}
+
+/**
+ * Handle transaction payment notification
+ */
+async function handleTransactionNotification(notification: any, res: VercelResponse) {
+  try {
     const coreApi = getCoreApiClient();
 
     // Verify notification authenticity
@@ -236,7 +271,7 @@ async function handleNotification(req: VercelRequest, res: VercelResponse) {
       gross_amount,
     } = statusResponse;
 
-    console.log('Payment notification received:', {
+    console.log('Transaction notification:', {
       orderId: order_id,
       transactionStatus: transaction_status,
       fraudStatus: fraud_status,
@@ -260,22 +295,91 @@ async function handleNotification(req: VercelRequest, res: VercelResponse) {
       finalStatus = 'pending';
     }
 
-    // Here you would update your database with the payment status
-    // Example: await updatePaymentStatus(order_id, finalStatus, statusResponse);
+    // TODO: Update database with payment status
+    // Example: await updateTransactionStatus(order_id, finalStatus, statusResponse);
     
-    // For now, just log it
-    console.log(`Payment ${order_id} status updated to: ${finalStatus}`);
+    console.log(`Transaction ${order_id} status updated to: ${finalStatus}`);
 
     return res.status(200).json({
       success: true,
-      message: 'Notification processed successfully',
+      message: 'Transaction notification processed',
       status: finalStatus,
     });
   } catch (error: any) {
-    console.error('Notification handling error:', error);
+    console.error('Transaction notification error:', error);
     return res.status(500).json({
       success: false,
-      error: 'Failed to process notification',
+      error: 'Failed to process transaction notification',
+      message: error.message,
+    });
+  }
+}
+
+/**
+ * Handle recurring/subscription notification
+ */
+async function handleRecurringNotification(notification: any, res: VercelResponse) {
+  try {
+    const {
+      subscription_id,
+      transaction_status,
+      order_id,
+      payment_type,
+    } = notification;
+
+    console.log('Recurring notification:', {
+      subscriptionId: subscription_id,
+      orderId: order_id,
+      transactionStatus: transaction_status,
+      paymentType: payment_type,
+    });
+
+    // TODO: Update subscription status in database
+    // Example: await updateSubscriptionStatus(subscription_id, transaction_status);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Recurring notification processed',
+    });
+  } catch (error: any) {
+    console.error('Recurring notification error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to process recurring notification',
+      message: error.message,
+    });
+  }
+}
+
+/**
+ * Handle pay account linking notification
+ */
+async function handlePayAccountNotification(notification: any, res: VercelResponse) {
+  try {
+    const {
+      account_id,
+      account_status,
+      payment_type,
+    } = notification;
+
+    console.log('Pay Account notification:', {
+      accountId: account_id,
+      accountStatus: account_status,
+      paymentType: payment_type,
+    });
+
+    // TODO: Update linked account status in database
+    // Example: await updatePayAccountStatus(account_id, account_status);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Pay Account notification processed',
+    });
+  } catch (error: any) {
+    console.error('Pay Account notification error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to process pay account notification',
       message: error.message,
     });
   }

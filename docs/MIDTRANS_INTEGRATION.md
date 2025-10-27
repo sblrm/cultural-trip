@@ -244,10 +244,210 @@ Midtrans provides test cards untuk testing:
 
 ## 🔔 Webhook Configuration
 
-Setup Midtrans webhook notification URL:
+Setup Midtrans webhook notification URLs di dashboard:
+
+### Midtrans Dashboard Setup
 
 1. Login ke [Midtrans Dashboard](https://dashboard.midtrans.com/)
-2. Settings → Configuration
+2. Go to **Settings** → **Configuration**
+3. Set notification URLs:
+
+#### Production URLs:
+
+```bash
+# Payment Notification (WAJIB)
+Payment Notification URL: 
+https://your-domain.com/api/midtrans?action=notification
+
+# Recurring/Subscription Notification (Optional - untuk subscription)
+Recurring Notification URL: 
+https://your-domain.com/api/midtrans?action=notification&type=recurring
+
+# Pay Account Notification (Optional - untuk linked accounts)
+Pay Account Notification URL: 
+https://your-domain.com/api/midtrans?action=notification&type=pay-account
+```
+
+#### Redirect URLs:
+
+```bash
+# Success - User selesai bayar
+Finish Redirect URL: 
+https://your-domain.com/payment/finish
+
+# Pending - User belum selesai bayar (close popup)
+Unfinish Redirect URL: 
+https://your-domain.com/payment/pending
+
+# Error - Pembayaran gagal
+Error Redirect URL: 
+https://your-domain.com/payment/error
+```
+
+### Penjelasan Notification URLs
+
+| Notification Type | Purpose | When Used |
+|------------------|---------|-----------|
+| **Payment Notification** | Update status transaksi | Settlement, cancel, expire, dll |
+| **Recurring Notification** | Update subscription payment | Pembayaran recurring/berlangganan |
+| **Pay Account Notification** | Account linking status | GoPay/ShopeePay one-click payment |
+
+### Redirect URLs Explained
+
+| Redirect Type | User Scenario | Action |
+|--------------|---------------|--------|
+| **Finish** | Pembayaran berhasil | Show success message, send email |
+| **Unfinish** | Tutup popup sebelum selesai | Show pending message, retry button |
+| **Error** | Pembayaran gagal/ditolak | Show error message, retry button |
+
+### Testing Notifications Locally
+
+**Option 1: Using ngrok (Recommended)**
+
+```bash
+# Install ngrok
+npm install -g ngrok
+
+# Start your dev server
+npm run dev
+
+# In another terminal, expose local server
+ngrok http 5173
+
+# Copy ngrok URL (e.g., https://abc123.ngrok.io)
+# Use it in Midtrans Dashboard:
+# https://abc123.ngrok.io/api/midtrans?action=notification
+```
+
+**Option 2: Manual Testing with cURL**
+
+```bash
+# Simulate payment notification
+curl -X POST http://localhost:5173/api/midtrans?action=notification \
+  -H "Content-Type: application/json" \
+  -d '{
+    "transaction_status": "settlement",
+    "order_id": "TICKET-123",
+    "gross_amount": "100000",
+    "payment_type": "credit_card",
+    "transaction_time": "2024-01-15 10:30:00",
+    "signature_key": "test",
+    "status_code": "200",
+    "fraud_status": "accept"
+  }'
+
+# Simulate recurring notification
+curl -X POST "http://localhost:5173/api/midtrans?action=notification&type=recurring" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subscription_id": "SUB-123",
+    "order_id": "ORDER-456",
+    "transaction_status": "settlement",
+    "payment_type": "gopay"
+  }'
+
+# Simulate pay account notification
+curl -X POST "http://localhost:5173/api/midtrans?action=notification&type=pay-account" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "account_id": "ACC-789",
+    "account_status": "ENABLED",
+    "payment_type": "gopay"
+  }'
+```
+
+### Notification Flow
+
+```
+User pays → Midtrans processes → Sends notification to your server
+                                          ↓
+                              Update database status
+                                          ↓
+                              Send confirmation email
+                                          ↓
+                              Return 200 OK to Midtrans
+```
+
+**Important:** Always return `200 OK` to acknowledge notification, or Midtrans will retry!
+
+## 🚀 Vercel Deployment
+
+### Environment Variables Setup
+
+Add these to Vercel Dashboard (Settings → Environment Variables):
+
+```bash
+# Midtrans Credentials
+MIDTRANS_SERVER_KEY=SB-Mid-server-GkyMPSAEnrAzM1DMNzepISnB
+MIDTRANS_MERCHANT_ID=G404807411
+VITE_MIDTRANS_CLIENT_KEY=SB-Mid-client-hdE4MHh7J0QtxgAn
+VITE_MIDTRANS_ENVIRONMENT=sandbox  # Change to 'production' for live
+
+# Application URL (for callbacks)
+VITE_APP_URL=https://your-app.vercel.app
+```
+
+**Apply to:** Production, Preview, Development
+
+### After Deployment
+
+1. ✅ Get your Vercel domain (e.g., `https://your-app.vercel.app`)
+2. ✅ Update Midtrans Dashboard notification URLs with Vercel domain
+3. ✅ Test payment flow in production
+4. ✅ Monitor logs in Vercel Dashboard
+
+## 🔐 Security Best Practices
+
+### 1. Signature Verification (TODO: Implement)
+
+```typescript
+// Verify Midtrans signature
+import crypto from 'crypto';
+
+function verifySignature(notification: any, serverKey: string): boolean {
+  const { signature_key, order_id, status_code, gross_amount } = notification;
+  
+  const hash = crypto
+    .createHash('sha512')
+    .update(`${order_id}${status_code}${gross_amount}${serverKey}`)
+    .digest('hex');
+  
+  return hash === signature_key;
+}
+
+// Use in notification handler
+if (!verifySignature(notification, process.env.MIDTRANS_SERVER_KEY!)) {
+  return res.status(401).json({ error: 'Invalid signature' });
+}
+```
+
+### 2. Idempotency Handling
+
+```typescript
+// Check if notification already processed
+const existingTx = await supabase
+  .from('transactions')
+  .select('id, transaction_status')
+  .eq('order_id', order_id)
+  .single();
+
+if (existingTx && existingTx.transaction_status === 'success') {
+  // Already processed, return OK but don't update
+  return res.status(200).json({ message: 'Already processed' });
+}
+```
+
+### 3. Rate Limiting
+
+```typescript
+// Implement rate limiting for API endpoints
+import rateLimit from 'express-rate-limit';
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+});
+```
 3. Payment Notification URL: `https://your-domain.com/api/midtrans?action=notification`
 4. Finish Redirect URL: `https://your-domain.com/payment/finish`
 5. Error Redirect URL: `https://your-domain.com/payment/error`
