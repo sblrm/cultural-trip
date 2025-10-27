@@ -166,10 +166,10 @@ const saveTransactionToDb = async (data: {
   metadata?: PaymentMetadata;
 }) => {
   try {
-    const { data: userData } = await supabase.auth.getUser();
-    const userId = userData.user?.id || data.userId;
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || data.userId;
 
-    const insertData = {
+    const { error } = await supabase.from('transactions').insert({
       order_id: data.orderId,
       user_id: userId,
       booking_type: data.metadata?.bookingType || 'trip',
@@ -181,20 +181,14 @@ const saveTransactionToDb = async (data: {
       customer_phone: data.customerDetails.phone,
       snap_token: data.snapToken,
       redirect_url: data.redirectUrl,
-      trip_data_id: data.metadata?.tripDataId || null,
+      trip_data_id: data.metadata?.tripDataId,
       item_details: data.itemDetails,
       transaction_time: new Date().toISOString(),
-    };
-
-    console.log('Saving transaction to database:', insertData);
-
-    const { error } = await supabase.from('transactions').insert(insertData);
+    });
 
     if (error) {
       console.error('Failed to save transaction to database:', error);
       // Don't throw - payment can still proceed
-    } else {
-      console.log('✅ Transaction saved successfully:', data.orderId);
     }
   } catch (error) {
     console.error('Database save error:', error);

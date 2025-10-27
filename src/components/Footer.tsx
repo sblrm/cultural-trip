@@ -140,7 +140,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center">
                 <Mail className="mr-2 h-5 w-5 text-indonesia-gold" />
-                <span className="text-gray-400">info@TravoMate.id</span>
+                <span className="text-gray-400">info@travomate.id</span>
               </li>
             </ul>
           </div>
