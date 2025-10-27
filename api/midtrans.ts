@@ -130,9 +130,9 @@ async function createTransaction(req: VercelRequest, res: VercelResponse) {
         },
       ],
       callbacks: {
-        finish: `${process.env.APP_URL || 'http://localhost:5173'}/payment/finish`,
-        error: `${process.env.APP_URL || 'http://localhost:5173'}/payment/error`,
-        pending: `${process.env.APP_URL || 'http://localhost:5173'}/payment/pending`,
+        finish: `${process.env.APP_URL || 'http://travo-mate.vercel.app'}/payment/finish`,
+        error: `${process.env.APP_URL || 'http://travo-mate.vercel.app'}/payment/error`,
+        pending: `${process.env.APP_URL || 'http://travo-mate.vercel.app'}/payment/pending`,
       },
       credit_card: {
         secure: true,
