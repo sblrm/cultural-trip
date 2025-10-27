@@ -1,8 +1,8 @@
-# 🏛️ CulturalTrip - Indonesia Cultural Heritage Explorer (Group Project w/ Ryan Hanif Dwihandoyo)
+# 🏛️ TravoMate - Indonesia Cultural Heritage Explorer (Group Project w/ Ryan Hanif Dwihandoyo)
 
 <div align="center">
 
-![CulturalTrip Banner](docs/screenshots/patung-bali.jpg)
+![TravoMate Banner](docs/screenshots/patung-bali.jpg)
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -14,7 +14,7 @@
 
 ## 🌟 Overview
 
-**CulturalTrip** is a modern web application that helps users explore and plan trips to Indonesia's rich cultural heritage sites. Built with cutting-edge technologies, this platform combines interactive mapping, AI-powered trip planning, and comprehensive cultural information to create an immersive travel planning experience.
+**TravoMate** is a modern web application that helps users explore and plan trips to Indonesia's rich cultural heritage sites. Built with cutting-edge technologies, this platform combines interactive mapping, AI-powered trip planning, and comprehensive cultural information to create an immersive travel planning experience.
 
 > 🎯 **Built by**: [Sabilillah Ramaniya Widodo (sblrm)](https://github.com/sblrm) & [Ryan Hanif Dwihandoyo (Rayen142)](https://github.com/Rayen142)
 > 📅 **Project Timeline**: 2024 - Present  

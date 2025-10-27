@@ -1,6 +1,6 @@
-# 🧮 Algoritma yang Digunakan di CulturalTrip
+# 🧮 Algoritma yang Digunakan di TravoMate
 
-Dokumentasi teknis tentang algoritma-algoritma yang digunakan dalam aplikasi CulturalTrip untuk route planning dan cost estimation.
+Dokumentasi teknis tentang algoritma-algoritma yang digunakan dalam aplikasi TravoMate untuk route planning dan cost estimation.
 
 ---
 
@@ -347,4 +347,4 @@ const predictedCost = await mlModel.predict(features);
 
 **Last Updated**: October 27, 2025  
 **Version**: 2.0 (A\* Algorithm Implementation)  
-**Author**: CulturalTrip Development Team
+**Author**: TravoMate Development Team
