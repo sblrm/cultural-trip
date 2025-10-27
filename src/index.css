@@ -135,3 +135,19 @@
   background-clip: text;
   text-fill-color: transparent;
 }
+
+/* Fix Leaflet map z-index to stay below navbar */
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 10 !important;
+}
+
+.leaflet-control {
+  z-index: 10 !important;
+}
+
+/* Ensure navbar stays on top */
+header {
+  z-index: 50 !important;
+}
