@@ -73,6 +73,7 @@ bun run setup:check
 - **Auto-booking**: Database trigger `create_booking_after_payment` automatically creates `bookings` and `purchases` when transaction status = 'settlement' or 'capture'
 - **Key metadata**: `trip_data_id` stores destination ID for auto-booking creation
 - **Status flow**: pending → settlement/capture → trigger fires → booking created
+- **Phone selection**: Checkout auto-loads up to 3 saved phone numbers from profile for easy selection
 
 ## ML Pipeline Integration
 

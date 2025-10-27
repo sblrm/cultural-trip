@@ -25,6 +25,8 @@ interface ProfileRow {
   username: string | null;
   full_name: string | null;
   avatar_url: string | null;
+  phone_numbers?: string[] | null;
+  primary_phone?: string | null;
 }
 
 const MyAccount = () => {
@@ -32,6 +34,10 @@ const MyAccount = () => {
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [phoneNumbers, setPhoneNumbers] = useState<string[]>([]);
+  const [primaryPhone, setPrimaryPhone] = useState<string>("");
+  const [newPhoneInput, setNewPhoneInput] = useState("");
+  const [addingPhone, setAddingPhone] = useState(false);
 
   // Additional UI-only fields to match the provided layout
   const [gender, setGender] = useState<string>("Male");
@@ -49,7 +55,7 @@ const MyAccount = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url")
+        .select("id, username, full_name, avatar_url, phone_numbers, primary_phone")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -57,14 +63,17 @@ const MyAccount = () => {
         console.error(error);
         toast.error("Gagal memuat profil");
       } else {
-        setProfile(
-          data ?? {
-            id: user.id,
-            username: user.name || user.email?.split("@")[0] || null,
-            full_name: user.name || null,
-            avatar_url: null,
-          }
-        );
+        const profileData = data ?? {
+          id: user.id,
+          username: user.name || user.email?.split("@")[0] || null,
+          full_name: user.name || null,
+          avatar_url: null,
+          phone_numbers: [],
+          primary_phone: null,
+        };
+        setProfile(profileData);
+        setPhoneNumbers(profileData.phone_numbers || []);
+        setPrimaryPhone(profileData.primary_phone || "");
       }
       setLoading(false);
     };
@@ -128,6 +137,109 @@ const MyAccount = () => {
       }
     }
     setSaving(false);
+  };
+
+  const handleAddPhone = async () => {
+    if (!user || !newPhoneInput.trim()) {
+      toast.error("Masukkan nomor telepon");
+      return;
+    }
+
+    // Validate phone format
+    if (!newPhoneInput.match(/^\+?[0-9]{10,15}$/)) {
+      toast.error("Format nomor telepon tidak valid (gunakan +62xxx atau 08xxx)");
+      return;
+    }
+
+    setAddingPhone(true);
+    try {
+      const { data, error } = await supabase.rpc('add_phone_number', {
+        p_user_id: user.id,
+        p_phone_number: newPhoneInput.trim(),
+      });
+
+      if (error) throw error;
+
+      const result = data as { success: boolean; message: string };
+      if (!result.success) {
+        toast.error(result.message);
+      } else {
+        toast.success(result.message);
+        setNewPhoneInput("");
+        // Refresh profile
+        const { data: updated } = await supabase
+          .from("profiles")
+          .select("phone_numbers, primary_phone")
+          .eq("id", user.id)
+          .single();
+        if (updated) {
+          setPhoneNumbers(updated.phone_numbers || []);
+          setPrimaryPhone(updated.primary_phone || "");
+        }
+      }
+    } catch (error: any) {
+      console.error("Error adding phone:", error);
+      toast.error(error.message || "Gagal menambahkan nomor telepon");
+    } finally {
+      setAddingPhone(false);
+    }
+  };
+
+  const handleRemovePhone = async (phone: string) => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase.rpc('remove_phone_number', {
+        p_user_id: user.id,
+        p_phone_number: phone,
+      });
+
+      if (error) throw error;
+
+      const result = data as { success: boolean; message: string };
+      if (!result.success) {
+        toast.error(result.message);
+      } else {
+        toast.success(result.message);
+        // Refresh profile
+        const { data: updated } = await supabase
+          .from("profiles")
+          .select("phone_numbers, primary_phone")
+          .eq("id", user.id)
+          .single();
+        if (updated) {
+          setPhoneNumbers(updated.phone_numbers || []);
+          setPrimaryPhone(updated.primary_phone || "");
+        }
+      }
+    } catch (error: any) {
+      console.error("Error removing phone:", error);
+      toast.error(error.message || "Gagal menghapus nomor telepon");
+    }
+  };
+
+  const handleSetPrimaryPhone = async (phone: string) => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase.rpc('set_primary_phone', {
+        p_user_id: user.id,
+        p_phone_number: phone,
+      });
+
+      if (error) throw error;
+
+      const result = data as { success: boolean; message: string };
+      if (!result.success) {
+        toast.error(result.message);
+      } else {
+        toast.success(result.message);
+        setPrimaryPhone(phone);
+      }
+    } catch (error: any) {
+      console.error("Error setting primary phone:", error);
+      toast.error(error.message || "Gagal mengatur nomor utama");
+    }
   };
 
   if (!user) {
@@ -277,14 +389,82 @@ const MyAccount = () => {
                     <h2 className="text-lg font-semibold">Mobile Number</h2>
                     <p className="text-sm text-muted-foreground">You may use up to 3 mobile number(s)</p>
                   </div>
-                  <Button variant="outline" onClick={() => toast.info('Add Mobile Number yet to be implemented')}>
-                    + Add Mobile Number
-                  </Button>
                 </div>
-                <div className="rounded-md border p-4">
-                  <div className="font-medium">1. +628112000143</div>
-                  <div className="text-xs text-emerald-600 mt-1">Recipient for notifications</div>
+
+                {/* Existing phone numbers */}
+                <div className="space-y-3 mb-4">
+                  {phoneNumbers.length === 0 ? (
+                    <div className="text-sm text-muted-foreground text-center py-4">
+                      Belum ada nomor telepon tersimpan
+                    </div>
+                  ) : (
+                    phoneNumbers.map((phone, index) => (
+                      <div key={phone} className="rounded-md border p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-medium">{index + 1}. {phone}</div>
+                            {phone === primaryPhone && (
+                              <div className="text-xs text-emerald-600 mt-1">Recipient for notifications</div>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            {phone !== primaryPhone && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleSetPrimaryPhone(phone)}
+                              >
+                                Set Primary
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemovePhone(phone)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
+
+                {/* Add new phone number */}
+                {phoneNumbers.length < 3 && (
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="+628112000143 atau 08112000143"
+                        value={newPhoneInput}
+                        onChange={(e) => setNewPhoneInput(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddPhone();
+                          }
+                        }}
+                      />
+                      <Button 
+                        onClick={handleAddPhone} 
+                        disabled={addingPhone || !newPhoneInput.trim()}
+                      >
+                        {addingPhone ? 'Adding...' : '+ Add'}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Format: +62xxx atau 08xxx (minimal 10 digit)
+                    </p>
+                  </div>
+                )}
+
+                {phoneNumbers.length >= 3 && (
+                  <div className="text-xs text-muted-foreground text-center py-2">
+                    Maksimal 3 nomor telepon. Hapus salah satu untuk menambah yang baru.
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

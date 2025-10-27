@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   createTransaction,
   showSnapPayment,
@@ -38,17 +39,53 @@ const CheckoutPage = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingScript, setIsLoadingScript] = useState(true);
+  const [profilePhones, setProfilePhones] = useState<string[]>([]);
+  const [useCustomPhone, setUseCustomPhone] = useState(false);
+  const [selectedPhone, setSelectedPhone] = useState("");
 
   const destination = getDestinationById(Number(id));
 
   useEffect(() => {
-    if (isAuthenticated && user) {
-      setFormData(prev => ({
-        ...prev,
-        fullName: user.name,
-        email: user.email
-      }));
-    }
+    const loadProfileData = async () => {
+      if (isAuthenticated && user) {
+        // Load basic user data
+        setFormData(prev => ({
+          ...prev,
+          fullName: user.name,
+          email: user.email
+        }));
+
+        // Load phone numbers from profile
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('phone_numbers, primary_phone')
+            .eq('id', user.id)
+            .single();
+
+          if (!error && data) {
+            const phones = data.phone_numbers || [];
+            setProfilePhones(phones);
+            
+            // Auto-select primary phone or first phone
+            if (data.primary_phone) {
+              setSelectedPhone(data.primary_phone);
+              setFormData(prev => ({ ...prev, phone: data.primary_phone }));
+            } else if (phones.length > 0) {
+              setSelectedPhone(phones[0]);
+              setFormData(prev => ({ ...prev, phone: phones[0] }));
+            } else {
+              // No saved phone numbers, show custom input
+              setUseCustomPhone(true);
+            }
+          }
+        } catch (error) {
+          console.error('Error loading phone numbers:', error);
+        }
+      }
+    };
+
+    loadProfileData();
   }, [isAuthenticated, user]);
 
   useEffect(() => {
@@ -240,13 +277,64 @@ const CheckoutPage = () => {
                   
                   <div className="space-y-2">
                     <Label htmlFor="phone">Nomor Telepon</Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      required
-                    />
+                    
+                    {profilePhones.length > 0 && !useCustomPhone ? (
+                      <div className="space-y-3">
+                        <RadioGroup 
+                          value={selectedPhone} 
+                          onValueChange={(value) => {
+                            setSelectedPhone(value);
+                            setFormData(prev => ({ ...prev, phone: value }));
+                          }}
+                        >
+                          {profilePhones.map((phone, index) => (
+                            <div key={phone} className="flex items-center space-x-2">
+                              <RadioGroupItem value={phone} id={`phone-${index}`} />
+                              <Label htmlFor={`phone-${index}`} className="flex-1 cursor-pointer">
+                                {phone}
+                              </Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                        
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setUseCustomPhone(true)}
+                          className="w-full"
+                        >
+                          Gunakan nomor lain
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Input
+                          id="phone"
+                          name="phone"
+                          placeholder="+62812XXXXXXXX"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          required
+                        />
+                        {profilePhones.length > 0 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setUseCustomPhone(false);
+                              if (selectedPhone) {
+                                setFormData(prev => ({ ...prev, phone: selectedPhone }));
+                              }
+                            }}
+                            className="w-full"
+                          >
+                            Pilih dari nomor tersimpan
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                   
                   <div className="space-y-2">
