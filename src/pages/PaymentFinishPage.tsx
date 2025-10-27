@@ -125,7 +125,7 @@ const PaymentFinishPage = () => {
 
             <div className="flex gap-3">
               <Button 
-                onClick={() => navigate('/profile/bookings')} 
+                onClick={() => navigate('/profile/mybooking')} 
                 className="flex-1"
               >
                 Lihat Pesanan Saya <ArrowRight className="ml-2 h-4 w-4" />
