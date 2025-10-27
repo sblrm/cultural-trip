@@ -123,16 +123,6 @@ const PurchaseList = () => {
             return (
               <Card key={p.id}>
                 <div className="flex">
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 bg-muted">
-                    <img
-                      src={image}
-                      alt={name}
-                      className="w-full h-full object-cover rounded-l-lg"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image';
-                      }}
-                    />
-                  </div>
                   <div className="flex-1 p-4">
                     <CardHeader className="p-0">
                       <CardTitle className="text-base flex items-center gap-2">
