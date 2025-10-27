@@ -27,6 +27,8 @@ interface ProfileRow {
   avatar_url: string | null;
   phone_numbers?: string[] | null;
   primary_phone?: string | null;
+  email_addresses?: string[] | null;
+  primary_email?: string | null;
 }
 
 const MyAccount = () => {
@@ -38,6 +40,12 @@ const MyAccount = () => {
   const [primaryPhone, setPrimaryPhone] = useState<string>("");
   const [newPhoneInput, setNewPhoneInput] = useState("");
   const [addingPhone, setAddingPhone] = useState(false);
+  
+  // Email management states
+  const [emailAddresses, setEmailAddresses] = useState<string[]>([]);
+  const [primaryEmail, setPrimaryEmail] = useState<string>("");
+  const [newEmailInput, setNewEmailInput] = useState("");
+  const [addingEmail, setAddingEmail] = useState(false);
 
   // Additional UI-only fields to match the provided layout
   const [gender, setGender] = useState<string>("Male");
@@ -55,7 +63,7 @@ const MyAccount = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, phone_numbers, primary_phone")
+        .select("id, username, full_name, avatar_url, phone_numbers, primary_phone, email_addresses, primary_email")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -70,10 +78,14 @@ const MyAccount = () => {
           avatar_url: null,
           phone_numbers: [],
           primary_phone: null,
+          email_addresses: [],
+          primary_email: null,
         };
         setProfile(profileData);
         setPhoneNumbers(profileData.phone_numbers || []);
         setPrimaryPhone(profileData.primary_phone || "");
+        setEmailAddresses(profileData.email_addresses || []);
+        setPrimaryEmail(profileData.primary_email || "");
       }
       setLoading(false);
     };
@@ -242,6 +254,111 @@ const MyAccount = () => {
     }
   };
 
+  // Email management functions
+  const handleAddEmail = async () => {
+    if (!user || !newEmailInput.trim()) {
+      toast.error("Masukkan alamat email");
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmailInput.trim())) {
+      toast.error("Format email tidak valid");
+      return;
+    }
+
+    setAddingEmail(true);
+    try {
+      const { data, error } = await supabase.rpc('add_email_address', {
+        p_user_id: user.id,
+        p_email_address: newEmailInput.trim(),
+      });
+
+      if (error) throw error;
+
+      const result = data as { success: boolean; message: string };
+      if (!result.success) {
+        toast.error(result.message);
+      } else {
+        toast.success(result.message);
+        setNewEmailInput("");
+        // Refresh profile
+        const { data: updated } = await supabase
+          .from("profiles")
+          .select("email_addresses, primary_email")
+          .eq("id", user.id)
+          .single();
+        if (updated) {
+          setEmailAddresses(updated.email_addresses || []);
+          setPrimaryEmail(updated.primary_email || "");
+        }
+      }
+    } catch (error: any) {
+      console.error("Error adding email:", error);
+      toast.error(error.message || "Gagal menambahkan email");
+    } finally {
+      setAddingEmail(false);
+    }
+  };
+
+  const handleRemoveEmail = async (email: string) => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase.rpc('remove_email_address', {
+        p_user_id: user.id,
+        p_email_address: email,
+      });
+
+      if (error) throw error;
+
+      const result = data as { success: boolean; message: string };
+      if (!result.success) {
+        toast.error(result.message);
+      } else {
+        toast.success(result.message);
+        // Refresh profile
+        const { data: updated } = await supabase
+          .from("profiles")
+          .select("email_addresses, primary_email")
+          .eq("id", user.id)
+          .single();
+        if (updated) {
+          setEmailAddresses(updated.email_addresses || []);
+          setPrimaryEmail(updated.primary_email || "");
+        }
+      }
+    } catch (error: any) {
+      console.error("Error removing email:", error);
+      toast.error(error.message || "Gagal menghapus email");
+    }
+  };
+
+  const handleSetPrimaryEmail = async (email: string) => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase.rpc('set_primary_email', {
+        p_user_id: user.id,
+        p_email_address: email,
+      });
+
+      if (error) throw error;
+
+      const result = data as { success: boolean; message: string };
+      if (!result.success) {
+        toast.error(result.message);
+      } else {
+        toast.success(result.message);
+        setPrimaryEmail(email);
+      }
+    } catch (error: any) {
+      console.error("Error setting primary email:", error);
+      toast.error(error.message || "Gagal mengatur email utama");
+    }
+  };
+
   if (!user) {
     return <div>Silakan login untuk mengatur akun.</div>;
   }
@@ -366,18 +483,77 @@ const MyAccount = () => {
                     <h2 className="text-lg font-semibold">Email</h2>
                     <p className="text-sm text-muted-foreground">You may use up to 3 email(s)</p>
                   </div>
-                  <Button variant="outline" onClick={() => toast.info('Add Email yet to be implemented')}>
-                    + Add Email
-                  </Button>
                 </div>
-                <div className="rounded-md border p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="font-medium">
-                      1. {user.email}
+
+                {/* Existing email addresses */}
+                <div className="space-y-3 mb-4">
+                  {emailAddresses.length === 0 ? (
+                    <div className="text-sm text-muted-foreground text-center py-4">
+                      Belum ada email tambahan tersimpan
                     </div>
-                  </div>
-                  <div className="text-xs text-emerald-600 mt-1">Recipient for notifications</div>
+                  ) : (
+                    emailAddresses.map((email, index) => (
+                      <div key={email} className="rounded-md border p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-medium">{index + 1}. {email}</div>
+                            {email === primaryEmail && (
+                              <div className="text-xs text-emerald-600 mt-1">Recipient for notifications</div>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            {email !== primaryEmail && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleSetPrimaryEmail(email)}
+                              >
+                                Set as Primary
+                              </Button>
+                            )}
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleRemoveEmail(email)}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
+
+                {/* Add new email */}
+                {emailAddresses.length < 3 && (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter email address"
+                      type="email"
+                      value={newEmailInput}
+                      onChange={(e) => setNewEmailInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddEmail();
+                        }
+                      }}
+                    />
+                    <Button
+                      onClick={handleAddEmail}
+                      disabled={addingEmail || !newEmailInput.trim()}
+                    >
+                      {addingEmail ? "Adding..." : "+ Add Email"}
+                    </Button>
+                  </div>
+                )}
+
+                {emailAddresses.length >= 3 && (
+                  <div className="text-sm text-muted-foreground text-center py-2">
+                    Maksimal 3 email telah tercapai
+                  </div>
+                )}
               </CardContent>
             </Card>
 
