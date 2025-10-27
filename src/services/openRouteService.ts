@@ -4,10 +4,11 @@
  * Provides real-time routing, distance matrix, and traffic data
  * Free tier: 2,000 requests/day, 40 requests/minute
  * Docs: https://openrouteservice.org/dev/#/api-docs
+ * 
+ * Security: API key is kept server-side via /api/openroute proxy
  */
 
-const ORS_API_KEY = import.meta.env.VITE_ORS_API_KEY;
-const ORS_BASE_URL = 'https://api.openrouteservice.org';
+const ORS_PROXY_URL = '/api/openroute';
 
 export interface ORSCoordinate {
   lat: number;
@@ -67,15 +68,11 @@ export interface MatrixData {
 
 /**
  * Get distance and duration matrix between multiple locations
- * Uses ORS Matrix API for efficient batch calculations
+ * Uses ORS Matrix API via server-side proxy
  */
 export const getDistanceMatrix = async (
   locations: ORSCoordinate[]
 ): Promise<MatrixData[]> => {
-  if (!ORS_API_KEY) {
-    throw new Error('OpenRouteService API key not configured');
-  }
-
   if (locations.length < 2) {
     throw new Error('At least 2 locations required for matrix calculation');
   }
@@ -84,23 +81,25 @@ export const getDistanceMatrix = async (
     // Convert to ORS format: [lng, lat] (not lat, lng!)
     const coordinates = locations.map(loc => [loc.lng, loc.lat]);
 
-    const response = await fetch(`${ORS_BASE_URL}/v2/matrix/driving-car`, {
+    const response = await fetch(ORS_PROXY_URL, {
       method: 'POST',
       headers: {
-        'Authorization': ORS_API_KEY,
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
       },
       body: JSON.stringify({
+        endpoint: 'matrix',
         locations: coordinates,
         metrics: ['distance', 'duration'],
-        units: 'km'
+        profile: 'driving-car'
       })
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`ORS Matrix API error: ${response.status} - ${errorText}`);
+      const errorData = await response.json();
+      if (errorData.fallback) {
+        throw new Error('OpenRouteService API key not configured');
+      }
+      throw new Error(`ORS Matrix API error: ${response.status} - ${errorData.error}`);
     }
 
     const data: ORSMatrixResponse = await response.json();
@@ -129,17 +128,13 @@ export const getDistanceMatrix = async (
 
 /**
  * Get detailed route between two points
- * Uses ORS Directions API for turn-by-turn navigation
+ * Uses ORS Directions API via server-side proxy
  */
 export const getRoute = async (
   start: ORSCoordinate,
   end: ORSCoordinate,
   profile: 'driving-car' | 'driving-hgv' | 'cycling-regular' | 'foot-walking' = 'driving-car'
 ): Promise<RouteData> => {
-  if (!ORS_API_KEY) {
-    throw new Error('OpenRouteService API key not configured');
-  }
-
   try {
     // Convert to ORS format: [lng, lat]
     const coordinates = [
@@ -147,33 +142,33 @@ export const getRoute = async (
       [end.lng, end.lat]
     ];
 
-    const response = await fetch(`${ORS_BASE_URL}/v2/directions/${profile}/json`, {
+    const response = await fetch(ORS_PROXY_URL, {
       method: 'POST',
       headers: {
-        'Authorization': ORS_API_KEY,
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
       },
       body: JSON.stringify({
+        endpoint: 'directions',
         coordinates,
-        instructions: true,
-        preference: 'recommended' // Balances distance, duration, and road quality
+        profile
       })
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`ORS Directions API error: ${response.status} - ${errorText}`);
+      const errorData = await response.json();
+      if (errorData.fallback) {
+        throw new Error('OpenRouteService API key not configured');
+      }
+      throw new Error(`ORS Directions API error: ${response.status} - ${errorData.error}`);
     }
 
-    const data: ORSDirectionResponse = await response.json();
-    const route = data.features[0];
+    const data = await response.json();
+    const route = data.routes[0];
 
     return {
-      distance: route.properties.summary.distance / 1000, // meters to km
-      duration: route.properties.summary.duration / 60, // seconds to minutes
-      instructions: route.properties.segments[0]?.steps.map(step => step.instruction),
-      geometry: route.geometry.coordinates
+      distance: route.summary.distance / 1000, // meters to km
+      duration: route.summary.duration / 60, // seconds to minutes
+      geometry: route.geometry
     };
   } catch (error) {
     console.error('Error fetching ORS route:', error);
@@ -183,47 +178,44 @@ export const getRoute = async (
 
 /**
  * Get route with traffic consideration (fastest route)
- * Uses avoid_features to optimize for speed
+ * Uses ORS Directions API via proxy
  */
 export const getFastestRoute = async (
   start: ORSCoordinate,
   end: ORSCoordinate
 ): Promise<RouteData> => {
-  if (!ORS_API_KEY) {
-    throw new Error('OpenRouteService API key not configured');
-  }
-
   try {
     const coordinates = [
       [start.lng, start.lat],
       [end.lng, end.lat]
     ];
 
-    const response = await fetch(`${ORS_BASE_URL}/v2/directions/driving-car/json`, {
+    const response = await fetch(ORS_PROXY_URL, {
       method: 'POST',
       headers: {
-        'Authorization': ORS_API_KEY,
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
       },
       body: JSON.stringify({
+        endpoint: 'directions',
         coordinates,
-        preference: 'fastest', // Prioritize speed
-        instructions: false
+        profile: 'driving-car'
       })
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`ORS Fastest Route API error: ${response.status} - ${errorText}`);
+      const errorData = await response.json();
+      if (errorData.fallback) {
+        throw new Error('OpenRouteService API key not configured');
+      }
+      throw new Error(`ORS Fastest Route API error: ${response.status} - ${errorData.error}`);
     }
 
-    const data: ORSDirectionResponse = await response.json();
-    const route = data.features[0];
+    const data = await response.json();
+    const route = data.routes[0];
 
     return {
-      distance: route.properties.summary.distance / 1000,
-      duration: route.properties.summary.duration / 60
+      distance: route.summary.distance / 1000,
+      duration: route.summary.duration / 60
     };
   } catch (error) {
     console.error('Error fetching fastest route:', error);
@@ -238,44 +230,38 @@ export const getCheapestRoute = async (
   start: ORSCoordinate,
   end: ORSCoordinate
 ): Promise<RouteData> => {
-  if (!ORS_API_KEY) {
-    throw new Error('OpenRouteService API key not configured');
-  }
-
   try {
     const coordinates = [
       [start.lng, start.lat],
       [end.lng, end.lat]
     ];
 
-    const response = await fetch(`${ORS_BASE_URL}/v2/directions/driving-car/json`, {
+    const response = await fetch(ORS_PROXY_URL, {
       method: 'POST',
       headers: {
-        'Authorization': ORS_API_KEY,
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
       },
       body: JSON.stringify({
+        endpoint: 'directions',
         coordinates,
-        preference: 'shortest', // Prioritize distance (cheaper)
-        options: {
-          avoid_features: ['tollways', 'ferries'] // Avoid expensive routes
-        },
-        instructions: false
+        profile: 'driving-car'
       })
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`ORS Cheapest Route API error: ${response.status} - ${errorText}`);
+      const errorData = await response.json();
+      if (errorData.fallback) {
+        throw new Error('OpenRouteService API key not configured');
+      }
+      throw new Error(`ORS Cheapest Route API error: ${response.status} - ${errorData.error}`);
     }
 
-    const data: ORSDirectionResponse = await response.json();
-    const route = data.features[0];
+    const data = await response.json();
+    const route = data.routes[0];
 
     return {
-      distance: route.properties.summary.distance / 1000,
-      duration: route.properties.summary.duration / 60
+      distance: route.summary.distance / 1000,
+      duration: route.summary.duration / 60
     };
   } catch (error) {
     console.error('Error fetching cheapest route:', error);
