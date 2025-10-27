@@ -1,8 +1,9 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { MapPin, Calendar, Clock, Star, Users, Ticket, ArrowRight, Bus, Car, Train } from "lucide-react";
 import { useDestinations } from "@/contexts/DestinationsContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,14 +14,110 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { ReviewForm } from "@/components/reviews/ReviewForm";
+import { ReviewList } from "@/components/reviews/ReviewList";
+import type { ReviewWithProfile, DestinationRating } from "@/types/review";
+import {
+  getDestinationReviews,
+  getDestinationRating,
+  getUserReview,
+  createReview,
+  updateReview,
+  deleteReview,
+} from "@/services/reviews";
 
 const DestinationDetailPage = () => {
   const { id } = useParams();
   const { getDestinationById } = useDestinations();
+  const { user } = useAuth();
   const [quantity, setQuantity] = useState(1);
+  const [reviews, setReviews] = useState<ReviewWithProfile[]>([]);
+  const [rating, setRating] = useState<DestinationRating | null>(null);
+  const [userReview, setUserReview] = useState<ReviewWithProfile | null>(null);
+  const [isEditingReview, setIsEditingReview] = useState(false);
+  const [loadingReviews, setLoadingReviews] = useState(true);
   
   // Get the destination by ID
   const destination = getDestinationById(Number(id));
+
+  // Load reviews on mount
+  useEffect(() => {
+    if (destination) {
+      loadReviews();
+    }
+  }, [destination?.id, user?.id]);
+
+  const loadReviews = async () => {
+    if (!destination) return;
+    
+    setLoadingReviews(true);
+    try {
+      const [reviewsData, ratingData, userReviewData] = await Promise.all([
+        getDestinationReviews(destination.id),
+        getDestinationRating(destination.id),
+        user ? getUserReview(destination.id, user.id) : Promise.resolve(null),
+      ]);
+      
+      setReviews(reviewsData);
+      setRating(ratingData);
+      setUserReview(userReviewData ? reviewsData.find(r => r.id === userReviewData.id) || null : null);
+    } catch (error) {
+      console.error('Error loading reviews:', error);
+      toast.error('Gagal memuat review');
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
+
+  const handleSubmitReview = async (reviewRating: number, comment: string) => {
+    if (!destination || !user) {
+      toast.error('Anda harus login untuk memberikan review');
+      return;
+    }
+
+    try {
+      if (isEditingReview && userReview) {
+        await updateReview(userReview.id, { rating: reviewRating, comment });
+        toast.success('Review berhasil diupdate!');
+      } else {
+        await createReview({
+          destination_id: destination.id,
+          rating: reviewRating,
+          comment,
+        });
+        toast.success('Review berhasil dikirim!');
+      }
+      
+      setIsEditingReview(false);
+      await loadReviews();
+    } catch (error: any) {
+      console.error('Error submitting review:', error);
+      if (error.message.includes('duplicate')) {
+        toast.error('Anda sudah memberikan review untuk destinasi ini');
+      } else {
+        toast.error('Gagal mengirim review');
+      }
+      throw error;
+    }
+  };
+
+  const handleEditReview = (review: ReviewWithProfile) => {
+    setIsEditingReview(true);
+    setUserReview(review);
+    // Scroll to review form
+    document.getElementById('review-form')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleDeleteReview = async (reviewId: number) => {
+    try {
+      await deleteReview(reviewId);
+      toast.success('Review berhasil dihapus');
+      await loadReviews();
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      toast.error('Gagal menghapus review');
+    }
+  };
 
   if (!destination) {
     return (
@@ -89,6 +186,9 @@ const DestinationDetailPage = () => {
                   <TabsTrigger value="overview">Ikhtisar</TabsTrigger>
                   <TabsTrigger value="details">Detail</TabsTrigger>
                   <TabsTrigger value="transportation">Transportasi</TabsTrigger>
+                  <TabsTrigger value="reviews">
+                    Review ({rating?.review_count || 0})
+                  </TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="overview" className="mt-6">
@@ -236,6 +336,65 @@ const DestinationDetailPage = () => {
                         </div>
                       )}
                     </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="reviews" className="mt-6">
+                  <div className="space-y-8">
+                    {/* Review Form (only for logged in users) */}
+                    {user && (
+                      <div id="review-form">
+                        {!userReview || isEditingReview ? (
+                          <ReviewForm
+                            destinationName={destination.name}
+                            existingRating={isEditingReview && userReview ? userReview.rating : 0}
+                            existingComment={isEditingReview && userReview ? userReview.comment || '' : ''}
+                            onSubmit={handleSubmitReview}
+                            onCancel={isEditingReview ? () => setIsEditingReview(false) : undefined}
+                            isEdit={isEditingReview}
+                          />
+                        ) : (
+                          <Card>
+                            <CardContent className="p-6">
+                              <p className="text-muted-foreground mb-4">
+                                Anda sudah memberikan review untuk destinasi ini
+                              </p>
+                              <Button onClick={() => setIsEditingReview(true)} variant="outline">
+                                Edit Review Saya
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+                    )}
+
+                    {!user && (
+                      <Card>
+                        <CardContent className="p-6 text-center">
+                          <p className="text-muted-foreground mb-4">
+                            Login untuk memberikan review
+                          </p>
+                          <Link to="/login">
+                            <Button>Login</Button>
+                          </Link>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Reviews List */}
+                    {loadingReviews ? (
+                      <div className="text-center py-8">
+                        <p className="text-muted-foreground">Memuat review...</p>
+                      </div>
+                    ) : (
+                      <ReviewList
+                        reviews={reviews}
+                        rating={rating}
+                        currentUserId={user?.id}
+                        onEditReview={handleEditReview}
+                        onDeleteReview={handleDeleteReview}
+                      />
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>
