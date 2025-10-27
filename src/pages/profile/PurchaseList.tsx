@@ -24,6 +24,7 @@ const PurchaseList = () => {
       if (!isAuthenticated || !user) return;
       try {
         const data = await getUserPurchases(user.id);
+        console.log('Purchases data:', data); // Debug log
         setPurchases(data || []);
       } catch (e) {
         console.error(e);
@@ -99,7 +100,17 @@ const PurchaseList = () => {
             // Support both new bookings system and legacy tickets system
             const bookingData = p.bookings || p.tickets;
             const destination = bookingData?.destinations;
-            const image = destination?.image || '/placeholder-destination.jpg';
+            
+            // Debug log for troubleshooting
+            console.log('Purchase item:', {
+              id: p.id,
+              hasBookings: !!p.bookings,
+              hasTickets: !!p.tickets,
+              destination: destination,
+              image: destination?.image
+            });
+            
+            const image = destination?.image || 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image';
             const name = destination?.name || 'Pembelian Tiket';
             const city = destination?.city || '-';
             const province = destination?.province || '-';
@@ -112,13 +123,13 @@ const PurchaseList = () => {
             return (
               <Card key={p.id}>
                 <div className="flex">
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 bg-muted">
                     <img
                       src={image}
                       alt={name}
                       className="w-full h-full object-cover rounded-l-lg"
                       onError={(e) => {
-                        e.currentTarget.src = '/placeholder-destination.jpg';
+                        e.currentTarget.src = 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image';
                       }}
                     />
                   </div>
