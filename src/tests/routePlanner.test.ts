@@ -95,86 +95,95 @@ console.log("========================================\n");
 console.log("📍 Starting Point: Jakarta (-6.2088, 106.8456)");
 console.log("🎯 Target: Visit 3 destinations in Jawa Tengah & DIY\n");
 
-// Test 1: FASTEST Mode
-console.log("⚡ TEST 1: FASTEST MODE (Prioritize Time)");
-console.log("-".repeat(50));
-const fastestRoute = findOptimalRoute(jakartaLat, jakartaLng, mockDestinations, 3, 'fastest');
-console.log("Route Order:");
-fastestRoute.nodes.forEach((node, idx) => {
-  console.log(`  ${idx + 1}. ${node.destination.name}`);
-  console.log(`     - Distance: ${node.distance.toFixed(2)} km`);
-  console.log(`     - Duration: ${node.duration} minutes`);
-  console.log(`     - Cost: Rp ${node.cost.toLocaleString('id-ID')}`);
-});
-console.log(`\n📊 Total Stats (Fastest):`);
-console.log(`   Total Distance: ${fastestRoute.totalDistance.toFixed(2)} km`);
-console.log(`   Total Duration: ${fastestRoute.totalDuration} minutes (${(fastestRoute.totalDuration/60).toFixed(1)} hours)`);
-console.log(`   Total Cost: Rp ${fastestRoute.totalCost.toLocaleString('id-ID')}`);
-console.log();
+// Async test runner
+(async () => {
+  try {
+    // Test 1: FASTEST Mode
+    console.log("⚡ TEST 1: FASTEST MODE (Prioritize Time)");
+    console.log("-".repeat(50));
+    const fastestRoute = await findOptimalRoute(jakartaLat, jakartaLng, mockDestinations, 3, 'fastest');
+    console.log("Route Order:");
+    fastestRoute.nodes.forEach((node, idx) => {
+      console.log(`  ${idx + 1}. ${node.destination.name}`);
+      console.log(`     - Distance: ${node.distance.toFixed(2)} km`);
+      console.log(`     - Duration: ${node.duration} minutes`);
+      console.log(`     - Cost: Rp ${node.cost.toLocaleString('id-ID')}`);
+    });
+    console.log(`\n📊 Total Stats (Fastest):`);
+    console.log(`   Data Source: ${fastestRoute.dataSource === 'ors' ? '🌐 Real-time (OpenRouteService)' : '📏 Haversine Estimate'}`);
+    console.log(`   Total Distance: ${fastestRoute.totalDistance.toFixed(2)} km`);
+    console.log(`   Total Duration: ${fastestRoute.totalDuration} minutes (${(fastestRoute.totalDuration/60).toFixed(1)} hours)`);
+    console.log(`   Total Cost: Rp ${fastestRoute.totalCost.toLocaleString('id-ID')}`);
+    console.log();
 
-// Test 2: CHEAPEST Mode
-console.log("💰 TEST 2: CHEAPEST MODE (Prioritize Cost)");
-console.log("-".repeat(50));
-const cheapestRoute = findOptimalRoute(jakartaLat, jakartaLng, mockDestinations, 3, 'cheapest');
-console.log("Route Order:");
-cheapestRoute.nodes.forEach((node, idx) => {
-  console.log(`  ${idx + 1}. ${node.destination.name}`);
-  console.log(`     - Distance: ${node.distance.toFixed(2)} km`);
-  console.log(`     - Duration: ${node.duration} minutes`);
-  console.log(`     - Cost: Rp ${node.cost.toLocaleString('id-ID')}`);
-});
-console.log(`\n📊 Total Stats (Cheapest):`);
-console.log(`   Total Distance: ${cheapestRoute.totalDistance.toFixed(2)} km`);
-console.log(`   Total Duration: ${cheapestRoute.totalDuration} minutes (${(cheapestRoute.totalDuration/60).toFixed(1)} hours)`);
-console.log(`   Total Cost: Rp ${cheapestRoute.totalCost.toLocaleString('id-ID')}`);
-console.log();
+    // Test 2: CHEAPEST Mode
+    console.log("💰 TEST 2: CHEAPEST MODE (Prioritize Cost)");
+    console.log("-".repeat(50));
+    const cheapestRoute = await findOptimalRoute(jakartaLat, jakartaLng, mockDestinations, 3, 'cheapest');
+    console.log("Route Order:");
+    cheapestRoute.nodes.forEach((node, idx) => {
+      console.log(`  ${idx + 1}. ${node.destination.name}`);
+      console.log(`     - Distance: ${node.distance.toFixed(2)} km`);
+      console.log(`     - Duration: ${node.duration} minutes`);
+      console.log(`     - Cost: Rp ${node.cost.toLocaleString('id-ID')}`);
+    });
+    console.log(`\n📊 Total Stats (Cheapest):`);
+    console.log(`   Data Source: ${cheapestRoute.dataSource === 'ors' ? '🌐 Real-time (OpenRouteService)' : '📏 Haversine Estimate'}`);
+    console.log(`   Total Distance: ${cheapestRoute.totalDistance.toFixed(2)} km`);
+    console.log(`   Total Duration: ${cheapestRoute.totalDuration} minutes (${(cheapestRoute.totalDuration/60).toFixed(1)} hours)`);
+    console.log(`   Total Cost: Rp ${cheapestRoute.totalCost.toLocaleString('id-ID')}`);
+    console.log();
 
-// Test 3: BALANCED Mode
-console.log("⚖️  TEST 3: BALANCED MODE (Best of Both)");
-console.log("-".repeat(50));
-const balancedRoute = findOptimalRoute(jakartaLat, jakartaLng, mockDestinations, 3, 'balanced');
-console.log("Route Order:");
-balancedRoute.nodes.forEach((node, idx) => {
-  console.log(`  ${idx + 1}. ${node.destination.name}`);
-  console.log(`     - Distance: ${node.distance.toFixed(2)} km`);
-  console.log(`     - Duration: ${node.duration} minutes`);
-  console.log(`     - Cost: Rp ${node.cost.toLocaleString('id-ID')}`);
-});
-console.log(`\n📊 Total Stats (Balanced):`);
-console.log(`   Total Distance: ${balancedRoute.totalDistance.toFixed(2)} km`);
-console.log(`   Total Duration: ${balancedRoute.totalDuration} minutes (${(balancedRoute.totalDuration/60).toFixed(1)} hours)`);
-console.log(`   Total Cost: Rp ${balancedRoute.totalCost.toLocaleString('id-ID')}`);
-console.log();
+    // Test 3: BALANCED Mode
+    console.log("⚖️  TEST 3: BALANCED MODE (Best of Both)");
+    console.log("-".repeat(50));
+    const balancedRoute = await findOptimalRoute(jakartaLat, jakartaLng, mockDestinations, 3, 'balanced');
+    console.log("Route Order:");
+    balancedRoute.nodes.forEach((node, idx) => {
+      console.log(`  ${idx + 1}. ${node.destination.name}`);
+      console.log(`     - Distance: ${node.distance.toFixed(2)} km`);
+      console.log(`     - Duration: ${node.duration} minutes`);
+      console.log(`     - Cost: Rp ${node.cost.toLocaleString('id-ID')}`);
+    });
+    console.log(`\n📊 Total Stats (Balanced):`);
+    console.log(`   Data Source: ${balancedRoute.dataSource === 'ors' ? '🌐 Real-time (OpenRouteService)' : '📏 Haversine Estimate'}`);
+    console.log(`   Total Distance: ${balancedRoute.totalDistance.toFixed(2)} km`);
+    console.log(`   Total Duration: ${balancedRoute.totalDuration} minutes (${(balancedRoute.totalDuration/60).toFixed(1)} hours)`);
+    console.log(`   Total Cost: Rp ${balancedRoute.totalCost.toLocaleString('id-ID')}`);
+    console.log();
 
-// Comparison
-console.log("📈 COMPARISON SUMMARY");
-console.log("=".repeat(70));
-console.log("Mode        | Duration (hours) | Cost (IDR)      | Distance (km)");
-console.log("-".repeat(70));
-console.log(`Fastest     | ${(fastestRoute.totalDuration/60).toFixed(1).padEnd(16)} | Rp ${fastestRoute.totalCost.toLocaleString('id-ID').padEnd(13)} | ${fastestRoute.totalDistance.toFixed(2)}`);
-console.log(`Cheapest    | ${(cheapestRoute.totalDuration/60).toFixed(1).padEnd(16)} | Rp ${cheapestRoute.totalCost.toLocaleString('id-ID').padEnd(13)} | ${cheapestRoute.totalDistance.toFixed(2)}`);
-console.log(`Balanced    | ${(balancedRoute.totalDuration/60).toFixed(1).padEnd(16)} | Rp ${balancedRoute.totalCost.toLocaleString('id-ID').padEnd(13)} | ${balancedRoute.totalDistance.toFixed(2)}`);
-console.log("=".repeat(70));
+    // Comparison
+    console.log("📈 COMPARISON SUMMARY");
+    console.log("=".repeat(70));
+    console.log("Mode        | Duration (hours) | Cost (IDR)      | Distance (km)");
+    console.log("-".repeat(70));
+    console.log(`Fastest     | ${(fastestRoute.totalDuration/60).toFixed(1).padEnd(16)} | Rp ${fastestRoute.totalCost.toLocaleString('id-ID').padEnd(13)} | ${fastestRoute.totalDistance.toFixed(2)}`);
+    console.log(`Cheapest    | ${(cheapestRoute.totalDuration/60).toFixed(1).padEnd(16)} | Rp ${cheapestRoute.totalCost.toLocaleString('id-ID').padEnd(13)} | ${cheapestRoute.totalDistance.toFixed(2)}`);
+    console.log(`Balanced    | ${(balancedRoute.totalDuration/60).toFixed(1).padEnd(16)} | Rp ${balancedRoute.totalCost.toLocaleString('id-ID').padEnd(13)} | ${balancedRoute.totalDistance.toFixed(2)}`);
+    console.log("=".repeat(70));
 
-// Analysis
-console.log("\n🎯 ANALYSIS:");
-console.log("-".repeat(50));
+    // Analysis
+    console.log("\n🎯 ANALYSIS:");
+    console.log("-".repeat(50));
 
-const timeSaved = cheapestRoute.totalDuration - fastestRoute.totalDuration;
-const costSaved = fastestRoute.totalCost - cheapestRoute.totalCost;
+    const timeSaved = cheapestRoute.totalDuration - fastestRoute.totalDuration;
+    const costSaved = fastestRoute.totalCost - cheapestRoute.totalCost;
 
-console.log(`✅ Fastest mode saves ${Math.abs(timeSaved)} minutes (${(Math.abs(timeSaved)/60).toFixed(1)} hours)`);
-console.log(`✅ Cheapest mode saves Rp ${Math.abs(costSaved).toLocaleString('id-ID')}`);
-console.log(`✅ Balanced mode provides optimal trade-off`);
+    console.log(`✅ Fastest mode saves ${Math.abs(timeSaved)} minutes (${(Math.abs(timeSaved)/60).toFixed(1)} hours)`);
+    console.log(`✅ Cheapest mode saves Rp ${Math.abs(costSaved).toLocaleString('id-ID')}`);
+    console.log(`✅ Balanced mode provides optimal trade-off`);
 
-console.log("\n💡 RECOMMENDATIONS:");
-if (timeSaved > 120) {
-  console.log("   → Use 'Fastest' for day trips (saves 2+ hours)");
-}
-if (costSaved > 200000) {
-  console.log("   → Use 'Cheapest' for budget travelers (saves Rp 200k+)");
-}
-console.log("   → Use 'Balanced' for most tourists (best overall value)");
+    console.log("\n💡 RECOMMENDATIONS:");
+    if (timeSaved > 120) {
+      console.log("   → Use 'Fastest' for day trips (saves 2+ hours)");
+    }
+    if (costSaved > 200000) {
+      console.log("   → Use 'Cheapest' for budget travelers (saves Rp 200k+)");
+    }
+    console.log("   → Use 'Balanced' for most travelers (best value)\n");
 
-console.log("\n✨ A* Algorithm successfully optimizes routes based on user preferences!");
-console.log("========================================\n");
+    console.log("========================================\n");
+  } catch (error) {
+    console.error("❌ Test failed:", error);
+  }
+})();

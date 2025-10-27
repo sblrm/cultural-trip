@@ -1,11 +1,27 @@
 
 import { Destination } from "@/contexts/DestinationsContext";
+import {
+  getDistanceMatrix,
+  getFastestRoute,
+  getCheapestRoute,
+  getRoute,
+  getCachedOrFetch,
+  type ORSCoordinate,
+  type RouteData
+} from './openRouteService';
+import {
+  calculateDynamicPrice,
+  estimateTrafficLevel,
+  getCurrentFuelPrice,
+  type PricingBreakdown
+} from './dynamicPricing';
 
 export interface RouteNode {
   destination: Destination;
   distance: number;
   duration: number;
   cost: number;
+  pricingBreakdown?: PricingBreakdown;
 }
 
 export interface Route {
@@ -13,6 +29,8 @@ export interface Route {
   totalDistance: number;
   totalDuration: number;
   totalCost: number;
+  isRealTimeData: boolean; // Indicates if using ORS API or fallback
+  dataSource: 'ors' | 'fallback';
 }
 
 export type OptimizationMode = 'fastest' | 'cheapest' | 'balanced';
@@ -56,6 +74,7 @@ interface AStarState {
   fScore: number; // gScore + heuristic
 }
 
+// Haversine formula untuk fallback calculation
 export const calculateDistance = (
   lat1: number,
   lon1: number,
@@ -76,29 +95,97 @@ export const calculateDistance = (
   return parseFloat(distance.toFixed(2));
 };
 
-// Enhanced cost calculation dengan realistic factors
+/**
+ * Get real-time route data from ORS API with fallback to Haversine
+ */
+export const getRouteData = async (
+  startLat: number,
+  startLng: number,
+  endLat: number,
+  endLng: number,
+  mode: OptimizationMode
+): Promise<{ data: RouteData; isRealTime: boolean }> => {
+  const start: ORSCoordinate = { lat: startLat, lng: startLng };
+  const end: ORSCoordinate = { lat: endLat, lng: endLng };
+
+  try {
+    // Try to use real-time API based on optimization mode
+    let routeData: RouteData;
+
+    if (mode === 'fastest') {
+      routeData = await getCachedOrFetch(
+        `fastest_${startLat}_${startLng}_${endLat}_${endLng}`,
+        () => getFastestRoute(start, end)
+      );
+    } else if (mode === 'cheapest') {
+      routeData = await getCachedOrFetch(
+        `cheapest_${startLat}_${startLng}_${endLat}_${endLng}`,
+        () => getCheapestRoute(start, end)
+      );
+    } else {
+      routeData = await getCachedOrFetch(
+        `balanced_${startLat}_${startLng}_${endLat}_${endLng}`,
+        () => getRoute(start, end, 'driving-car')
+      );
+    }
+
+    return { data: routeData, isRealTime: true };
+  } catch (error) {
+    console.warn('ORS API unavailable, falling back to Haversine calculation:', error);
+
+    // Fallback to Haversine calculation
+    const distance = calculateDistance(startLat, startLng, endLat, endLng);
+    const duration = calculateTravelDuration(distance, mode);
+
+    return {
+      data: { distance, duration },
+      isRealTime: false
+    };
+  }
+};
+
+// Enhanced cost calculation dengan dynamic pricing
 export const calculateTravelCost = (
   distance: number,
-  mode: 'fastest' | 'cheapest' | 'balanced' = 'balanced'
+  mode: 'fastest' | 'cheapest' | 'balanced' = 'balanced',
+  departureTime?: Date
 ): number => {
-  const baseCost = 50000; // Base cost untuk perjalanan
-  
-  // Different cost per km based on optimization mode
-  const costPerKm = {
-    fastest: 8000,    // Toll roads, faster but more expensive
-    cheapest: 3000,   // Avoid tolls, cheaper but slower
-    balanced: 5000    // Mix of both
-  };
-  
-  // Fuel efficiency factor (realistic)
-  const fuelPrice = 10000; // Rp per liter
-  const fuelConsumption = 12; // km per liter (average)
-  const fuelCost = (distance / fuelConsumption) * fuelPrice;
-  
-  // Base travel cost + fuel
-  const travelCost = costPerKm[mode] * distance;
-  
-  return Math.round(baseCost + travelCost + fuelCost);
+  const now = departureTime || new Date();
+  const trafficLevel = estimateTrafficLevel(now);
+
+  const pricing = calculateDynamicPrice({
+    baseCost: 50000,
+    fuelPrice: getCurrentFuelPrice(),
+    fuelConsumption: 12,
+    timeOfDay: now,
+    dayOfWeek: now.getDay(),
+    trafficLevel,
+    distance,
+    mode
+  });
+
+  return pricing.totalCost;
+};
+
+// Get detailed pricing breakdown
+export const getTravelCostBreakdown = (
+  distance: number,
+  mode: 'fastest' | 'cheapest' | 'balanced' = 'balanced',
+  departureTime?: Date
+): PricingBreakdown => {
+  const now = departureTime || new Date();
+  const trafficLevel = estimateTrafficLevel(now);
+
+  return calculateDynamicPrice({
+    baseCost: 50000,
+    fuelPrice: getCurrentFuelPrice(),
+    fuelConsumption: 12,
+    timeOfDay: now,
+    dayOfWeek: now.getDay(),
+    trafficLevel,
+    distance,
+    mode
+  });
 };
 
 // Enhanced duration calculation dengan realistic speeds
@@ -185,23 +272,29 @@ const calculateGScore = (
   }
 };
 
-// A* Algorithm for Optimal Route Finding
-export const findOptimalRoute = (
+// A* Algorithm for Optimal Route Finding dengan Real-time Data
+export const findOptimalRoute = async (
   startLat: number,
   startLng: number,
   destinations: Destination[],
   maxDestinations: number = 3,
-  mode: OptimizationMode = 'balanced'
-): Route => {
+  mode: OptimizationMode = 'balanced',
+  departureTime?: Date
+): Promise<Route> => {
   if (destinations.length === 0) {
     throw new Error("No destinations provided");
   }
+
+  const now = departureTime || new Date();
 
   // Limit destinations
   const targetDestinations = Math.min(maxDestinations, destinations.length);
   
   // Priority queue for A* (sorted by f-score)
   const openSet = new PriorityQueue<AStarState>();
+  
+  // Track if we're using real-time data
+  let usedRealTimeData = false;
   
   // Initial state: start from user location
   const initialState: AStarState = {
@@ -232,7 +325,9 @@ export const findOptimalRoute = (
         nodes: currentState.path,
         totalDistance,
         totalDuration,
-        totalCost
+        totalCost,
+        isRealTimeData: usedRealTimeData,
+        dataSource: usedRealTimeData ? 'ors' : 'fallback'
       };
       
       // Keep best route
@@ -252,15 +347,25 @@ export const findOptimalRoute = (
     const unvisited = destinations.filter(dest => !currentState.visited.has(dest.id));
     
     for (const nextDest of unvisited) {
-      const distance = calculateDistance(
+      // Try to get real-time route data with fallback
+      const routeResult = await getRouteData(
         fromLat,
         fromLng,
         nextDest.coordinates.latitude,
-        nextDest.coordinates.longitude
+        nextDest.coordinates.longitude,
+        mode
       );
+
+      if (routeResult.isRealTime) {
+        usedRealTimeData = true;
+      }
+
+      const distance = routeResult.data.distance;
+      const duration = routeResult.data.duration;
       
-      const duration = calculateTravelDuration(distance, mode);
-      const cost = calculateTravelCost(distance, mode);
+      // Calculate cost with dynamic pricing
+      const costBreakdown = getTravelCostBreakdown(distance, mode, now);
+      const cost = costBreakdown.totalCost;
       
       const edgeCost = calculateGScore(distance, mode);
       const newGScore = currentState.gScore + edgeCost;
@@ -275,7 +380,8 @@ export const findOptimalRoute = (
           destination: nextDest,
           distance,
           duration,
-          cost
+          cost,
+          pricingBreakdown: costBreakdown
         }
       ];
       

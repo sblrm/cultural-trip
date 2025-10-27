@@ -1,9 +1,16 @@
 
 import { Link } from "react-router-dom";
-import { Clock, Wallet, Map, MapPin, ArrowRight } from "lucide-react";
+import { Clock, Wallet, Map, MapPin, ArrowRight, Info, TrendingUp, Database } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Route as TravelRoute } from "@/services/routePlanner";
 
 interface PlannedRouteCardProps {
@@ -14,10 +21,39 @@ const PlannedRouteCard = ({ route }: PlannedRouteCardProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Rute Wisata Anda</CardTitle>
+        <CardTitle className="flex items-center justify-between">
+          <span>Rute Wisata Anda</span>
+          <div className="flex items-center gap-2 text-sm font-normal">
+            <Database className="h-4 w-4" />
+            <span className="text-muted-foreground">
+              {route.dataSource === 'ors' ? 'Real-time Data' : 'Estimasi'}
+            </span>
+          </div>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
+          {/* Data Source Info */}
+          {route.dataSource === 'ors' && (
+            <Alert>
+              <TrendingUp className="h-4 w-4" />
+              <AlertDescription>
+                Rute ini menggunakan data real-time dari OpenRouteService untuk akurasi terbaik.
+                Biaya telah disesuaikan dengan kondisi lalu lintas dan waktu perjalanan.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {route.dataSource === 'fallback' && (
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Menggunakan estimasi jarak (Haversine formula). Untuk data real-time, 
+                pastikan API key OpenRouteService telah dikonfigurasi.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {/* Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-muted p-4 rounded-lg flex flex-col items-center justify-center">
@@ -96,6 +132,29 @@ const PlannedRouteCard = ({ route }: PlannedRouteCardProps) => {
                                 Rp {node.cost.toLocaleString('id-ID')}
                               </div>
                             </div>
+                            
+                            {/* Price Breakdown Accordion */}
+                            {node.pricingBreakdown && (
+                              <Accordion type="single" collapsible className="mt-2">
+                                <AccordionItem value="breakdown" className="border-none">
+                                  <AccordionTrigger className="text-sm py-2 hover:no-underline">
+                                    <span className="flex items-center gap-2 text-muted-foreground">
+                                      <Info className="h-3 w-3" />
+                                      Lihat rincian biaya
+                                    </span>
+                                  </AccordionTrigger>
+                                  <AccordionContent>
+                                    <div className="bg-muted/50 p-3 rounded-md space-y-1 text-sm">
+                                      {node.pricingBreakdown.breakdown.map((item, idx) => (
+                                        <div key={idx} className="text-muted-foreground">
+                                          • {item}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </AccordionContent>
+                                </AccordionItem>
+                              </Accordion>
+                            )}
                             
                             <div className="mt-2">
                               <Link to={`/destinations/${node.destination.id}`}>

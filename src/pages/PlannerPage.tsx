@@ -71,23 +71,32 @@ const PlannerPage = () => {
         return;
       }
       
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Show loading toast with real-time data info
+      toast.loading("Menghitung rute optimal dengan data real-time...");
       
-      const route = findOptimalRoute(
+      const route = await findOptimalRoute(
         userLocation.latitude,
         userLocation.longitude,
         filteredDestinations,
         maxDestinations,
-        optimizationMode
+        optimizationMode,
+        new Date() // Use current time for dynamic pricing
       );
       
       setPlannedRoute(route);
       
-      // Show success message with optimization mode
+      // Show success message with optimization mode and data source
       const modeText = optimizationMode === 'fastest' ? 'tercepat' : 
                        optimizationMode === 'cheapest' ? 'terhemat' : 'seimbang';
-      toast.success(`Rute wisata ${modeText} telah dibuat dengan A* Algorithm!`);
+      const dataSourceText = route.dataSource === 'ors' ? 'real-time' : 'estimasi';
+      
+      toast.dismiss(); // Dismiss loading toast
+      toast.success(
+        `Rute ${modeText} telah dibuat dengan A* Algorithm!\n` +
+        `Menggunakan data ${dataSourceText} dari ${route.dataSource === 'ors' ? 'OpenRouteService' : 'Haversine formula'}`
+      );
     } catch (error) {
+      toast.dismiss();
       toast.error("Gagal merencanakan rute: " + error.message);
     } finally {
       setIsPlanning(false);
