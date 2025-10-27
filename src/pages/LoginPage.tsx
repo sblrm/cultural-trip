@@ -76,12 +76,6 @@ const LoginPage = () => {
                 "Masuk"
               )}
             </Button>
-            
-            <div className="text-center text-sm text-muted-foreground">
-              <p>Untuk demo, gunakan:</p>
-              <p>Email: user@example.com</p>
-              <p>Password: password</p>
-            </div>
           </form>
         </CardContent>
         <CardFooter className="text-center">
