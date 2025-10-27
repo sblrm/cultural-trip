@@ -47,6 +47,7 @@ export interface PaymentMetadata {
   tripDataId?: number;
   userId?: string;
   bookingType?: 'trip' | 'ticket' | 'package';
+  visitDate?: string; // ISO date string for visit date
 }
 
 /**

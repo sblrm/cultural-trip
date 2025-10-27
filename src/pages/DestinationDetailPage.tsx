@@ -1,12 +1,14 @@
 
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { MapPin, Calendar, Clock, Star, Users, Ticket, ArrowRight, Bus, Car, Train } from "lucide-react";
 import { useDestinations } from "@/contexts/DestinationsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Tabs,
   TabsContent,
@@ -28,9 +30,11 @@ import {
 
 const DestinationDetailPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { getDestinationById } = useDestinations();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [quantity, setQuantity] = useState(1);
+  const [visitDate, setVisitDate] = useState("");
   const [reviews, setReviews] = useState<ReviewWithProfile[]>([]);
   const [rating, setRating] = useState<DestinationRating | null>(null);
   const [userReview, setUserReview] = useState<ReviewWithProfile | null>(null);
@@ -136,7 +140,52 @@ const DestinationDetailPage = () => {
     }
   };
 
+  const handleBuyTicket = () => {
+    // Validate visit date
+    if (!visitDate) {
+      toast.error("Silakan pilih tanggal kunjungan");
+      document.getElementById('visit-date-input')?.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+
+    // Check if date is in the past
+    const selectedDate = new Date(visitDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      toast.error("Tanggal kunjungan tidak boleh di masa lalu");
+      return;
+    }
+
+    // Check authentication
+    if (!isAuthenticated || !user) {
+      toast.info("Silakan login terlebih dahulu untuk melanjutkan pembelian");
+      // Save booking data to sessionStorage
+      sessionStorage.setItem('pendingBooking', JSON.stringify({
+        destinationId: destination.id,
+        quantity,
+        visitDate,
+        returnUrl: window.location.pathname
+      }));
+      navigate('/login');
+      return;
+    }
+
+    // Navigate to checkout with booking details
+    navigate(`/checkout/${destination.id}?quantity=${quantity}&visitDate=${visitDate}`);
+  };
+
   const totalPrice = destination.price * quantity;
+
+  // Calculate minimum and maximum visit dates
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDate = tomorrow.toISOString().split('T')[0];
+
+  const maxDate = new Date();
+  maxDate.setMonth(maxDate.getMonth() + 3);
+  const maxDateStr = maxDate.toISOString().split('T')[0];
 
   return (
     <div>
@@ -407,52 +456,96 @@ const DestinationDetailPage = () => {
                   <h2 className="text-xl font-bold mb-4">Pesan Tiket</h2>
                   
                   <div className="space-y-4">
+                    {/* Visit Date Picker */}
                     <div>
-                      <label className="block text-sm mb-1">Jumlah Tiket</label>
+                      <Label htmlFor="visit-date-input" className="block text-sm mb-2">
+                        Tanggal Kunjungan
+                      </Label>
+                      <div className="relative">
+                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="visit-date-input"
+                          type="date"
+                          min={minDate}
+                          max={maxDateStr}
+                          value={visitDate}
+                          onChange={(e) => setVisitDate(e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Pilih tanggal kunjungan (minimal besok)
+                      </p>
+                    </div>
+
+                    {/* Quantity Selector */}
+                    <div>
+                      <Label className="block text-sm mb-2">Jumlah Tiket</Label>
                       <div className="flex items-center">
                         <button
-                          className="bg-muted rounded-l-md px-3 py-2 border border-input"
+                          className="bg-muted rounded-l-md px-3 py-2 border border-input hover:bg-muted/80 transition-colors"
                           onClick={() => handleQuantityChange(quantity - 1)}
                           disabled={quantity <= 1}
                         >
                           -
                         </button>
-                        <div className="px-4 py-2 border-t border-b border-input bg-white text-center min-w-[50px]">
+                        <div className="px-4 py-2 border-t border-b border-input bg-white text-center min-w-[50px] font-medium">
                           {quantity}
                         </div>
                         <button
-                          className="bg-muted rounded-r-md px-3 py-2 border border-input"
+                          className="bg-muted rounded-r-md px-3 py-2 border border-input hover:bg-muted/80 transition-colors"
                           onClick={() => handleQuantityChange(quantity + 1)}
                           disabled={quantity >= 10}
                         >
                           +
                         </button>
                       </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Maksimal 10 tiket per transaksi
+                      </p>
                     </div>
                     
-                    <div>
-                      <label className="block text-sm mb-1">Detail Harga</label>
-                      <div className="bg-muted p-3 rounded-md">
-                        <div className="flex justify-between mb-2">
-                          <span>Tiket x {quantity}</span>
-                          <span>Rp {destination.price.toLocaleString('id-ID')} x {quantity}</span>
-                        </div>
-                        <Separator className="my-2" />
-                        <div className="flex justify-between font-semibold">
-                          <span>Total</span>
-                          <span>Rp {totalPrice.toLocaleString('id-ID')}</span>
-                        </div>
+                    <Separator />
+                    
+                    {/* Price Summary */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Harga per tiket</span>
+                        <span>Rp {destination.price.toLocaleString('id-ID')}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Jumlah tiket</span>
+                        <span>× {quantity}</span>
+                      </div>
+                      <Separator />
+                      <div className="flex justify-between font-bold text-lg">
+                        <span>Total</span>
+                        <span className="text-primary">Rp {totalPrice.toLocaleString('id-ID')}</span>
                       </div>
                     </div>
                     
-                    <Link to={`/checkout/${destination.id}?quantity=${quantity}`}>
-                      <Button className="w-full">
-                        Lanjut ke Pembayaran <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                    
-                    <div className="text-xs text-muted-foreground text-center">
-                      Dengan menekan tombol di atas, Anda menyetujui syarat dan ketentuan kami.
+                    {/* Buy Button */}
+                    <Button 
+                      className="w-full" 
+                      size="lg"
+                      onClick={handleBuyTicket}
+                      disabled={!visitDate}
+                    >
+                      {!visitDate ? (
+                        "Pilih Tanggal Kunjungan"
+                      ) : !isAuthenticated ? (
+                        <>Login & Beli Tiket <ArrowRight className="ml-2 h-4 w-4" /></>
+                      ) : (
+                        <>Lanjut ke Pembayaran <ArrowRight className="ml-2 h-4 w-4" /></>
+                      )}
+                    </Button>
+
+                    {/* Info */}
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>✓ Pembayaran aman dengan Midtrans</p>
+                      <p>✓ E-Ticket dikirim via email</p>
+                      <p>✓ Tiket dapat diunduh dari akun Anda</p>
                     </div>
                   </div>
                 </CardContent>

@@ -27,6 +27,7 @@ const CheckoutPage = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const quantity = parseInt(searchParams.get("quantity") || "1", 10);
+  const visitDate = searchParams.get("visitDate") || "";
   const { getDestinationById } = useDestinations();
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -35,7 +36,6 @@ const CheckoutPage = () => {
     fullName: "",
     email: "",
     phone: "",
-    date: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingScript, setIsLoadingScript] = useState(true);
@@ -127,8 +127,15 @@ const CheckoutPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.date) {
+    // Validate form data and visitDate from URL
+    if (!formData.fullName || !formData.email || !formData.phone) {
       toast.error("Mohon isi semua data pengunjung");
+      setIsSubmitting(false);
+      return;
+    }
+    
+    if (!visitDate) {
+      toast.error("Tanggal kunjungan tidak valid");
       setIsSubmitting(false);
       return;
     }
@@ -162,11 +169,12 @@ const CheckoutPage = () => {
         },
       ];
 
-      // Prepare metadata - include destination_id for booking creation
+      // Prepare metadata - include destination_id AND visit_date for booking creation
       const metadata: PaymentMetadata = {
         userId: user.id,
         bookingType: 'ticket',
         tripDataId: destination.id, // Store destination ID for auto-booking
+        visitDate: visitDate, // Store visit date for booking
       };
 
       // Create Midtrans transaction
@@ -223,14 +231,6 @@ const CheckoutPage = () => {
     }
   };
 
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split('T')[0];
-
-  const maxDate = new Date();
-  maxDate.setMonth(maxDate.getMonth() + 3);
-  const maxDateStr = maxDate.toISOString().split('T')[0];
-
   return (
     <div className="container mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold mb-2">Checkout</h1>
@@ -244,10 +244,10 @@ const CheckoutPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <User className="mr-2 h-5 w-5" />
-                  Data Pengunjung
+                  Konfirmasi Data Pengunjung
                 </CardTitle>
                 <CardDescription>
-                  Masukkan informasi pengunjung
+                  Pastikan data Anda sudah benar
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -260,6 +260,7 @@ const CheckoutPage = () => {
                       value={formData.fullName}
                       onChange={handleInputChange}
                       required
+                      placeholder="Nama lengkap sesuai KTP"
                     />
                   </div>
                   
@@ -272,7 +273,11 @@ const CheckoutPage = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       required
+                      placeholder="Email untuk menerima e-ticket"
                     />
+                    <p className="text-xs text-muted-foreground">
+                      E-ticket akan dikirim ke email ini
+                    </p>
                   </div>
                   
                   <div className="space-y-2">
@@ -337,18 +342,20 @@ const CheckoutPage = () => {
                     )}
                   </div>
                   
+                  {/* Visit Date Display (Read-only) */}
                   <div className="space-y-2">
-                    <Label htmlFor="date">Tanggal Kunjungan</Label>
-                    <Input
-                      id="date"
-                      name="date"
-                      type="date"
-                      min={minDate}
-                      max={maxDateStr}
-                      value={formData.date}
-                      onChange={handleInputChange}
-                      required
-                    />
+                    <Label>Tanggal Kunjungan</Label>
+                    <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">
+                        {new Date(visitDate).toLocaleDateString('id-ID', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -449,10 +456,24 @@ const CheckoutPage = () => {
               
               <div>
                 <div className="font-medium mb-2">Detail Pesanan</div>
-                <div className="space-y-1 text-sm">
+                <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span>Tiket x {quantity}</span>
-                    <span>Rp {destination.price.toLocaleString('id-ID')} x {quantity}</span>
+                    <span className="text-muted-foreground">Tanggal Kunjungan</span>
+                    <span className="font-medium">
+                      {new Date(visitDate).toLocaleDateString('id-ID', { 
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Jumlah Tiket</span>
+                    <span>× {quantity}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Harga per tiket</span>
+                    <span>Rp {destination.price.toLocaleString('id-ID')}</span>
                   </div>
                 </div>
               </div>
