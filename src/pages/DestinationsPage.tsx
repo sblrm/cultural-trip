@@ -13,8 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 const DestinationsPage = () => {
+  const { t } = useTranslation();
   const { destinations, loading } = useDestinations();
   const [filteredDestinations, setFilteredDestinations] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -72,10 +74,9 @@ const DestinationsPage = () => {
           <div className="absolute inset-0 bg-black/50"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">Destinasi Budaya Indonesia</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">{t('destinations.title')}</h1>
           <p className="text-lg max-w-2xl">
-            Jelajahi keindahan dan kekayaan budaya Indonesia melalui berbagai destinasi wisata 
-            budaya yang menakjubkan.
+            {t('destinations.subtitle')}
           </p>
         </div>
       </section>
@@ -87,7 +88,7 @@ const DestinationsPage = () => {
             <div>
               <Input
                 type="text"
-                placeholder="Cari destinasi, kota, atau provinsi..."
+                placeholder={t('destinations.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full"
@@ -97,12 +98,12 @@ const DestinationsPage = () => {
             <div>
               <Select value={provinceFilter} onValueChange={setProvinceFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Filter berdasarkan provinsi" />
+                  <SelectValue placeholder={t('destinations.filterProvince')} />
                 </SelectTrigger>
                 <SelectContent>
                   {provinces.map((province) => (
                     <SelectItem key={province} value={province}>
-                      {province === "all" ? "Semua Provinsi" : province}
+                      {province === "all" ? t('destinations.allProvinces') : province}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -112,12 +113,12 @@ const DestinationsPage = () => {
             <div>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Filter berdasarkan jenis" />
+                  <SelectValue placeholder={t('destinations.filterType')} />
                 </SelectTrigger>
                 <SelectContent>
                   {types.map((type) => (
                     <SelectItem key={type} value={type}>
-                      {type === "all" ? "Semua Jenis" : type}
+                      {type === "all" ? t('destinations.allTypes') : type}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -136,16 +137,16 @@ const DestinationsPage = () => {
             </div>
           ) : filteredDestinations.length === 0 ? (
             <div className="text-center py-12">
-              <h3 className="text-xl font-semibold mb-2">Tidak ada destinasi yang ditemukan</h3>
+              <h3 className="text-xl font-semibold mb-2">{t('destinations.noResults')}</h3>
               <p className="text-muted-foreground mb-4">
-                Coba ubah filter pencarian Anda
+                {t('destinations.changeFilters')}
               </p>
               <Button onClick={() => {
                 setSearchTerm("");
                 setProvinceFilter("all");
                 setTypeFilter("all");
               }}>
-                Reset Filter
+                {t('destinations.resetFilters')}
               </Button>
             </div>
           ) : (
@@ -183,7 +184,7 @@ const DestinationsPage = () => {
                           Rp {destination.price.toLocaleString('id-ID')}
                         </div>
                         <Button size="sm" variant="outline">
-                          Detail
+                          {t('common.detail')}
                         </Button>
                       </div>
                     </CardContent>

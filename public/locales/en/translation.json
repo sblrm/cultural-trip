@@ -1,0 +1,183 @@
+{
+  "common": {
+    "appName": "CulturalTrip",
+    "tagline": "Discover Indonesia",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "viewMore": "View More",
+    "viewLess": "View Less"
+  },
+  "nav": {
+    "home": "Home",
+    "destinations": "Destinations",
+    "planner": "Planner",
+    "about": "About",
+    "profile": "Profile",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "home": {
+    "hero": {
+      "title": "Explore Indonesia's Cultural Beauty",
+      "subtitle": "Discover the best cultural destinations and plan your journey",
+      "cta": "Explore Destinations"
+    },
+    "features": {
+      "title": "Why Choose Us?",
+      "subtitle": "TravoMate offers the best experience to explore Indonesia's rich culture.",
+      "map": {
+        "title": "Interactive Map",
+        "desc": "Discover destinations with interactive map"
+      },
+      "planner": {
+        "title": "AI Trip Planner",
+        "desc": "Plan your trip with AI assistance"
+      },
+      "booking": {
+        "title": "Easy Booking",
+        "desc": "Book destination tickets easily"
+      }
+    }
+  },
+  "destinations": {
+    "title": "Cultural Destinations",
+    "subtitle": "Explore Indonesia's rich culture",
+    "filters": {
+      "all": "All",
+      "province": "Province",
+      "type": "Type",
+      "rating": "Rating"
+    },
+    "card": {
+      "from": "From",
+      "perPerson": "/ person",
+      "reviews": "reviews",
+      "viewDetails": "View Details"
+    },
+    "notFound": "No destinations found",
+    "tryOtherFilters": "Try other filters"
+  },
+  "detail": {
+    "tabs": {
+      "overview": "Overview",
+      "details": "Details",
+      "transportation": "Transportation",
+      "reviews": "Reviews"
+    },
+    "about": "About",
+    "operatingHours": "Operating Hours",
+    "visitDuration": "Visit Duration",
+    "minutes": "minutes",
+    "culturalType": "Cultural Type",
+    "location": "Location",
+    "coordinates": "Coordinates",
+    "facilities": "Facilities",
+    "tipsTitle": "Visit Tips",
+    "transportAccess": "Transport Access",
+    "bookTicket": "Book Ticket",
+    "ticketQuantity": "Ticket Quantity",
+    "priceDetails": "Price Details",
+    "ticket": "Ticket",
+    "total": "Total",
+    "proceedPayment": "Proceed to Payment",
+    "termsAgree": "By pressing the button above, you agree to our terms and conditions."
+  },
+  "reviews": {
+    "title": "Ratings & Reviews",
+    "writeReview": "Write Review",
+    "editReview": "Edit Review",
+    "yourRating": "Your Rating",
+    "yourReview": "Your Review",
+    "reviewPlaceholder": "Tell us about your experience at this destination... (minimum 10 characters)",
+    "characters": "characters",
+    "submitReview": "Submit Review",
+    "updateReview": "Update Review",
+    "deleteReview": "Delete Review",
+    "deleteConfirm": "Delete Review?",
+    "deleteMessage": "Are you sure you want to delete this review? This action cannot be undone.",
+    "alreadyReviewed": "You have already reviewed this destination",
+    "editMyReview": "Edit My Review",
+    "loginToReview": "Login to write a review",
+    "noReviews": "No reviews yet for this destination. Be the first!",
+    "allReviews": "All Reviews",
+    "from": "From",
+    "reviewCount": "reviews",
+    "avgRating": "Average Rating",
+    "minCharacters": "Review must be at least 10 characters",
+    "selectRating": "Please select a star rating"
+  },
+  "auth": {
+    "login": {
+      "title": "Login to Your Account",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Login",
+      "noAccount": "Don't have an account?",
+      "register": "Register now",
+      "success": "Login successful!",
+      "error": "Invalid email or password"
+    },
+    "register": {
+      "title": "Create New Account",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Register",
+      "hasAccount": "Already have an account?",
+      "login": "Login",
+      "success": "Registration successful! Please check your email.",
+      "error": "Registration failed",
+      "passwordMismatch": "Passwords do not match"
+    }
+  },
+  "footer": {
+    "tagline": "Explore Indonesia's cultural destinations and plan your journey easily.",
+    "quickLinks": "Quick Links",
+    "support": "Support",
+    "faq": "FAQ",
+    "privacy": "Privacy Policy",
+    "terms": "Terms & Conditions",
+    "contact": "Contact",
+    "address": "Jakarta, Indonesia",
+    "email": "info@TravoMate.id",
+    "copyright": "TravoMate Indonesia. All Rights Reserved."
+  },
+  "planner": {
+    "title": "Trip Planner",
+    "subtitle": "Plan your cultural journey",
+    "settings": {
+      "title": "Route Settings",
+      "startLocation": "Start Location",
+      "addDestinations": "Add Destinations",
+      "selectDestinations": "Select destinations to visit",
+      "generateRoute": "Generate Route",
+      "clearRoute": "Clear Route"
+    },
+    "route": {
+      "title": "Trip Route",
+      "distance": "Distance",
+      "duration": "Duration",
+      "cost": "Cost",
+      "km": "km",
+      "minutes": "minutes"
+    },
+    "chat": {
+      "title": "AI Assistant",
+      "placeholder": "Ask about the route...",
+      "send": "Send",
+      "sending": "Sending...",
+      "greeting": "Hi! I'm your cultural travel assistant. Ask me anything about this route: local food, alternative destinations, cost estimates, or transportation tips."
+    }
+  }
+}
