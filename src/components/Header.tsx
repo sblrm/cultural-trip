@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, User, LogOut, Map, Navigation, Home, Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,12 +10,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout, isAuthenticated } = useAuth();
-  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const toggleMenu = () => {
@@ -53,28 +50,26 @@ const Header = () => {
               <path d="M22 12h-2" />
             </svg>
             <div>
-              <h1 className="text-xl font-bold gradient-text">{t('common.appName')}</h1>
-              <p className="text-xs text-muted-foreground">{t('common.tagline')}</p>
+              <h1 className="text-xl font-bold gradient-text">TravoMate</h1>
+              <p className="text-xs text-muted-foreground">Temukan Indonesia</p>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link to="/" className="text-foreground hover:text-accent-foreground font-medium">
-              {t('nav.home')}
+              Beranda
             </Link>
             <Link to="/destinations" className="text-foreground hover:text-accent-foreground font-medium">
-              {t('nav.destinations')}
+              Destinasi
             </Link>
             <Link to="/planner" className="text-foreground hover:text-accent-foreground font-medium">
-              {t('nav.planner')}
+              Rute Wisata
             </Link>
           </nav>
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <LanguageSwitcher />
-            
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -86,21 +81,21 @@ const Header = () => {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
                     <Link to="/profile" className="cursor-pointer">
-                      <User size={16} className="mr-2" /> {t('nav.profile')}
+                      <User size={16} className="mr-2" /> Profil Saya
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                    <LogOut size={16} className="mr-2" /> {t('nav.logout')}
+                    <LogOut size={16} className="mr-2" /> Keluar
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="outline">{t('nav.login')}</Button>
+                  <Button variant="outline">Masuk</Button>
                 </Link>
                 <Link to="/register">
-                  <Button>{t('nav.register')}</Button>
+                  <Button>Daftar</Button>
                 </Link>
               </>
             )}
@@ -123,7 +118,7 @@ const Header = () => {
               onClick={toggleMenu}
             >
               <Home size={18} />
-              <span>{t('nav.home')}</span>
+              <span>Beranda</span>
             </Link>
             <Link
               to="/destinations"
@@ -131,7 +126,7 @@ const Header = () => {
               onClick={toggleMenu}
             >
               <Calendar size={18} />
-              <span>{t('nav.destinations')}</span>
+              <span>Destinasi</span>
             </Link>
             <Link
               to="/planner"
@@ -139,12 +134,8 @@ const Header = () => {
               onClick={toggleMenu}
             >
               <Map size={18} />
-              <span>{t('nav.planner')}</span>
+              <span>Rute Wisata</span>
             </Link>
-
-            <div className="px-2">
-              <LanguageSwitcher />
-            </div>
 
             <div className="pt-2 border-t">
               {isAuthenticated ? (
@@ -155,7 +146,7 @@ const Header = () => {
                     onClick={toggleMenu}
                   >
                     <User size={18} />
-                    <span>{t('nav.profile')}</span>
+                    <span>Profil Saya</span>
                   </Link>
                   <button
                     onClick={() => {
@@ -165,18 +156,18 @@ const Header = () => {
                     className="flex items-center space-x-2 p-2 hover:bg-muted rounded-md w-full text-left"
                   >
                     <LogOut size={18} />
-                    <span>{t('nav.logout')}</span>
+                    <span>Keluar</span>
                   </button>
                 </>
               ) : (
                 <div className="flex flex-col space-y-2">
                   <Link to="/login" onClick={toggleMenu}>
                     <Button variant="outline" className="w-full">
-                      {t('nav.login')}
+                      Masuk
                     </Button>
                   </Link>
                   <Link to="/register" onClick={toggleMenu}>
-                    <Button className="w-full">{t('nav.register')}</Button>
+                    <Button className="w-full">Daftar</Button>
                   </Link>
                 </div>
               )}

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useDestinations } from "@/contexts/DestinationsContext";
 import { useMap } from "@/contexts/MapContext";
-import { findOptimalRoute, Route as TravelRoute } from "@/services/routePlanner";
+import { findOptimalRoute, Route as TravelRoute, OptimizationMode } from "@/services/routePlanner";
 import PlannerSettingsCard from "@/components/planner/PlannerSettingsCard";
 import PlannedRouteCard from "@/components/planner/PlannedRouteCard";
 import ChatSidebar from "@/components/planner/ChatSidebar";
@@ -15,6 +15,7 @@ const PlannerPage = () => {
   
   const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);
   const [maxDestinations, setMaxDestinations] = useState<number>(3);
+  const [optimizationMode, setOptimizationMode] = useState<OptimizationMode>('balanced');
   const [plannedRoute, setPlannedRoute] = useState<TravelRoute | null>(null);
   const [isPlanning, setIsPlanning] = useState<boolean>(false);
   const [currentPosition, setCurrentPosition] = useState<[number, number] | null>(null);
@@ -76,11 +77,16 @@ const PlannerPage = () => {
         userLocation.latitude,
         userLocation.longitude,
         filteredDestinations,
-        maxDestinations
+        maxDestinations,
+        optimizationMode
       );
       
       setPlannedRoute(route);
-      toast.success("Rute wisata telah dibuat!");
+      
+      // Show success message with optimization mode
+      const modeText = optimizationMode === 'fastest' ? 'tercepat' : 
+                       optimizationMode === 'cheapest' ? 'terhemat' : 'seimbang';
+      toast.success(`Rute wisata ${modeText} telah dibuat dengan A* Algorithm!`);
     } catch (error) {
       toast.error("Gagal merencanakan rute: " + error.message);
     } finally {
@@ -138,6 +144,8 @@ const PlannerPage = () => {
                 handleProvinceChange={handleProvinceChange}
                 maxDestinations={maxDestinations}
                 setMaxDestinations={setMaxDestinations}
+                optimizationMode={optimizationMode}
+                setOptimizationMode={setOptimizationMode}
                 handlePlanRoute={handlePlanRoute}
                 isPlanning={isPlanning}
                 isTracking={isTracking}

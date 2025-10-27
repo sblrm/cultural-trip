@@ -6,10 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTranslation } from "react-i18next";
 
 const RegisterPage = () => {
-  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +22,7 @@ const RegisterPage = () => {
     setError("");
 
     if (password !== confirmPassword) {
-      setError(t('auth.passwordMismatch'));
+      setError("Password tidak sama");
       return;
     }
 
@@ -44,37 +42,37 @@ const RegisterPage = () => {
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 batik-pattern">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">{t('auth.register.title')}</CardTitle>
+          <CardTitle className="text-2xl font-bold">Daftar Akun</CardTitle>
           <CardDescription>
-            {t('auth.register.subtitle')}
+            Buat akun baru untuk menjelajahi keindahan budaya Indonesia
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">{t('auth.fullName')}</Label>
+              <Label htmlFor="name">Nama Lengkap</Label>
               <Input
                 id="name"
                 type="text"
-                placeholder={t('auth.fullNamePlaceholder')}
+                placeholder="Nama lengkap Anda"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">{t('auth.email')}</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder={t('auth.emailPlaceholder')}
+                placeholder="contoh@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">{t('auth.password')}</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -85,7 +83,7 @@ const RegisterPage = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">{t('auth.confirmPassword')}</Label>
+              <Label htmlFor="confirmPassword">Konfirmasi Password</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -100,10 +98,10 @@ const RegisterPage = () => {
               {isLoading ? (
                 <span className="flex items-center">
                   <span className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
-                  {t('auth.processing')}
+                  Memproses...
                 </span>
               ) : (
-                t('auth.registerButton')
+                "Daftar"
               )}
             </Button>
           </form>
@@ -111,9 +109,9 @@ const RegisterPage = () => {
         <CardFooter className="text-center">
           <div className="w-full">
             <p className="text-sm text-muted-foreground">
-              {t('auth.haveAccount')}{" "}
+              Sudah memiliki akun?{" "}
               <Link to="/login" className="text-primary hover:underline">
-                {t('auth.loginLink')}
+                Masuk
               </Link>
             </p>
           </div>

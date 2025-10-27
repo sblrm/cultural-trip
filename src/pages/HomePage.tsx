@@ -6,10 +6,8 @@ import { useDestinations } from "@/contexts/DestinationsContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { useTranslation } from "react-i18next";
 
 const HomePage = () => {
-  const { t } = useTranslation();
   const { destinations, loading } = useDestinations();
   const [featuredDestinations, setFeaturedDestinations] = useState([]);
 
@@ -50,19 +48,19 @@ const HomePage = () => {
         
         <div className="container mx-auto px-4 relative z-10 text-white">
           <div className="max-w-3xl mx-auto text-center hero-animation">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">{t('home.hero.title')}</h1>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">Jelajahi Keindahan Budaya Indonesia</h1>
             <p className="text-xl md:text-2xl mb-8">
-              {t('home.hero.subtitle')}
+              Temukan destinasi budaya menakjubkan dengan rute wisata yang dirancang khusus untuk Anda
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/destinations">
                 <Button size="lg" className="bg-indonesia-red hover:bg-indonesia-red/90 text-white">
-                  {t('home.hero.exploreButton')}
+                  Jelajahi Destinasi
                 </Button>
               </Link>
               <Link to="/planner">
                 <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/20">
-                  {t('home.hero.planButton')}
+                  Rencanakan Perjalanan
                 </Button>
               </Link>
             </div>
@@ -74,9 +72,9 @@ const HomePage = () => {
       <section className="py-16 bg-secondary/30 batik-pattern">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold">{t('home.featured.title')}</h2>
+            <h2 className="text-3xl font-bold">Destinasi Unggulan</h2>
             <Link to="/destinations" className="text-primary flex items-center hover:underline">
-              {t('home.featured.viewAll')} <ChevronRight className="h-4 w-4 ml-1" />
+              Lihat Semua <ChevronRight className="h-4 w-4 ml-1" />
             </Link>
           </div>
 
@@ -113,7 +111,7 @@ const HomePage = () => {
                           <div className="flex items-center text-muted-foreground">
                             <Calendar className="h-4 w-4 mr-1" />
                             <span className="text-sm">
-                              {destination.duration} {t('common.minutes')}
+                              {destination.duration} menit
                             </span>
                           </div>
                           <div className="mt-4 flex justify-between items-center">
@@ -121,7 +119,7 @@ const HomePage = () => {
                               Rp {destination.price.toLocaleString('id-ID')}
                             </div>
                             <Button size="sm" variant="outline">
-                              {t('common.detail')}
+                              Detail
                             </Button>
                           </div>
                         </CardContent>
@@ -141,9 +139,9 @@ const HomePage = () => {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">{t('home.features.title')}</h2>
+            <h2 className="text-3xl font-bold mb-4">Kenapa Memilih Kami?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              {t('home.features.subtitle')}
+              TravoMate menawarkan pengalaman terbaik untuk menjelajahi kekayaan budaya Indonesia.
             </p>
           </div>
 
@@ -166,9 +164,9 @@ const HomePage = () => {
                   <circle cx="12" cy="10" r="3" />
                 </svg>
               </div>
-              <h3 className="font-bold text-xl mb-2">{t('home.features.smartRoute.title')}</h3>
+              <h3 className="font-bold text-xl mb-2">Rute Wisata Cerdas</h3>
               <p className="text-muted-foreground">
-                {t('home.features.smartRoute.description')}
+                Algoritma AI kami merencanakan rute wisata paling efisien berdasarkan lokasi Anda dengan estimasi biaya yang akurat.
               </p>
             </div>
 
@@ -195,9 +193,9 @@ const HomePage = () => {
                   <path d="M10 15h7" />
                 </svg>
               </div>
-              <h3 className="font-bold text-xl mb-2">{t('home.features.completeInfo.title')}</h3>
+              <h3 className="font-bold text-xl mb-2">Informasi Lengkap</h3>
               <p className="text-muted-foreground">
-                {t('home.features.completeInfo.description')}
+                Dapatkan informasi lengkap tentang destinasi budaya, sejarah, jam buka, dan fasilitas yang tersedia.
               </p>
             </div>
 
@@ -220,9 +218,9 @@ const HomePage = () => {
                   <path d="m12.2 8.2.01-.2M14 8.2l.01-.2M16 8.2l.01-.2" />
                 </svg>
               </div>
-              <h3 className="font-bold text-xl mb-2">{t('home.features.easyBooking.title')}</h3>
+              <h3 className="font-bold text-xl mb-2">Pemesanan Tiket Mudah</h3>
               <p className="text-muted-foreground">
-                {t('home.features.easyBooking.description')}
+                Pesan tiket dengan cepat dan aman untuk destinasi budaya favorit Anda tanpa kerumitan.
               </p>
             </div>
           </div>
@@ -233,13 +231,13 @@ const HomePage = () => {
       <section className="py-16 bg-primary text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">{t('home.cta.title')}</h2>
+            <h2 className="text-3xl font-bold mb-4">Mulai Petualangan Budaya Anda Sekarang</h2>
             <p className="text-xl mb-8">
-              {t('home.cta.subtitle')}
+              Jelajahi keindahan budaya Indonesia dan temukan destinasi baru yang menakjubkan.
             </p>
             <Link to="/planner">
               <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90">
-                {t('home.cta.button')}
+                Rencanakan Perjalanan
               </Button>
             </Link>
           </div>

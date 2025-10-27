@@ -1,19 +1,16 @@
 
 import { Link } from "react-router-dom";
 import { MapPin, Mail, Phone } from "lucide-react";
-import { useTranslation } from "react-i18next";
 
 const Footer = () => {
-  const { t } = useTranslation();
-  
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-bold text-xl mb-4">{t('common.appName')}</h3>
+            <h3 className="font-bold text-xl mb-4">TravoMate</h3>
             <p className="text-gray-400 mb-4">
-              {t('footer.description')}
+              Jelajahi destinasi budaya Indonesia dan rencanakan perjalanan Anda dengan mudah.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-white hover:text-indonesia-gold">
@@ -67,7 +64,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="font-bold text-lg mb-4">{t('footer.popularDestinations')}</h3>
+            <h3 className="font-bold text-lg mb-4">Destinasi Populer</h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/destinations/7" className="text-gray-400 hover:text-white">
@@ -98,38 +95,38 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="font-bold text-lg mb-4">{t('footer.quickLinks')}</h3>
+            <h3 className="font-bold text-lg mb-4">Tautan Cepat</h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/" className="text-gray-400 hover:text-white">
-                  {t('nav.home')}
+                  Beranda
                 </Link>
               </li>
               <li>
                 <Link to="/destinations" className="text-gray-400 hover:text-white">
-                  {t('nav.destinations')}
+                  Destinasi
                 </Link>
               </li>
               <li>
                 <Link to="/planner" className="text-gray-400 hover:text-white">
-                  {t('nav.planner')}
+                  Rute Wisata
                 </Link>
               </li>
               <li>
                 <Link to="/register" className="text-gray-400 hover:text-white">
-                  {t('nav.register')}
+                  Daftar
                 </Link>
               </li>
               <li>
                 <Link to="/login" className="text-gray-400 hover:text-white">
-                  {t('nav.login')}
+                  Masuk
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="font-bold text-lg mb-4">{t('footer.contact')}</h3>
+            <h3 className="font-bold text-lg mb-4">Kontak</h3>
             <ul className="space-y-4">
               <li className="flex items-start">
                 <MapPin className="mr-2 h-5 w-5 text-indonesia-gold" />
@@ -150,7 +147,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} {t('common.appName')} Indonesia. {t('footer.copyright')}</p>
+          <p>&copy; {new Date().getFullYear()} TravoMate Indonesia. Hak Cipta Dilindungi.</p>
         </div>
       </div>
     </footer>
