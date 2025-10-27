@@ -34,7 +34,7 @@ export default function ChatSidebar({ route }: { route: Route | null }) {
     try {
       const summary = summarizeRoute(route);
       const prompt = buildRouteAwarePrompt(summary, text);
-      const reply = await generateGeminiResponse(prompt, import.meta.env.VITE_GEMINI_API_KEY || undefined);
+      const reply = await generateGeminiResponse(prompt);
       setMessages((m) => [...m, { role: 'assistant', content: reply }]);
     } catch (e: any) {
       setMessages((m) => [...m, { role: 'assistant', content: e?.message || 'Maaf, terjadi kesalahan memanggil AI.' }]);

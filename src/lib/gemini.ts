@@ -32,7 +32,14 @@ export async function generateGeminiResponse(prompt: string): Promise<string> {
 }
 
 export function buildRouteAwarePrompt(routeSummary: string, userMessage: string) {
-  return `Anda adalah asisten pariwisata budaya Indonesia. Gunakan ringkasan rute berikut sebagai konteks dan berikan saran kuliner, budaya, dan tips lokal yang relevan.
+  return `Anda adalah asisten pariwisata budaya Indonesia yang ramah dan singkat. 
+
+INSTRUKSI PENTING:
+- Jawab dengan SINGKAT dan LANGSUNG ke intinya (maksimal 3-4 kalimat)
+- Gunakan bahasa Indonesia yang casual dan mudah dipahami
+- JANGAN gunakan format Markdown (*, #, --, bullet points, dll)
+- Tulis dalam paragraf biasa, gunakan emoji sesekali untuk friendly tone
+- Fokus pada informasi praktis dan berguna
 
 RINGKASAN RUTE:
 ${routeSummary}
