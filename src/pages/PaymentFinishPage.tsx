@@ -21,21 +21,40 @@ const PaymentFinishPage = () => {
   const transactionStatus = searchParams.get('transaction_status');
 
   useEffect(() => {
-    if (orderId) {
-      // Verify transaction status from server
-      checkTransactionStatus(orderId)
-        .then((data) => {
-          setOrderDetails(data);
-          setStatus(data.transactionStatus);
-        })
-        .catch((error) => {
-          console.error('Failed to verify transaction:', error);
-          setStatus(transactionStatus || 'unknown');
-        });
-    } else {
-      setStatus(transactionStatus || 'unknown');
-    }
-  }, [orderId, transactionStatus]);
+    const verifyPayment = async () => {
+      if (!orderId) {
+        // If no order_id from URL params, check transaction_status directly
+        const urlStatus = transactionStatus || 'unknown';
+        setStatus(urlStatus);
+        return;
+      }
+
+      try {
+        // Verify transaction status from server
+        const data = await checkTransactionStatus(orderId);
+        setOrderDetails(data);
+        setStatus(data.transactionStatus);
+      } catch (error) {
+        console.error('Failed to verify transaction:', error);
+        
+        // Fallback to URL params if API check fails
+        const fallbackStatus = transactionStatus || 'unknown';
+        setStatus(fallbackStatus);
+        
+        // Create fallback order details from URL params
+        if (orderId) {
+          setOrderDetails({
+            orderId: orderId,
+            transactionStatus: fallbackStatus,
+            statusCode: statusCode || '000',
+            grossAmount: '0',
+          });
+        }
+      }
+    };
+
+    verifyPayment();
+  }, [orderId, transactionStatus, statusCode]);
 
   const isSuccess = status === 'settlement' || status === 'capture' || status === 'success';
   const isPending = status === 'pending';
@@ -86,7 +105,7 @@ const PaymentFinishPage = () => {
           </CardHeader>
           
           <CardContent className="space-y-4">
-            {orderDetails && (
+            {orderDetails && orderDetails.grossAmount !== '0' && (
               <div className="bg-muted p-4 rounded-lg space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Order ID:</span>
@@ -96,13 +115,24 @@ const PaymentFinishPage = () => {
                   <span className="text-muted-foreground">Total:</span>
                   <span className="font-semibold">Rp {parseInt(orderDetails.grossAmount).toLocaleString('id-ID')}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Metode Pembayaran:</span>
-                  <span className="capitalize">{orderDetails.paymentType?.replace('_', ' ')}</span>
-                </div>
+                {orderDetails.paymentType && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Metode Pembayaran:</span>
+                    <span className="capitalize">{orderDetails.paymentType?.replace('_', ' ')}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Status:</span>
                   <span className="font-semibold">{getPaymentStatusLabel(status)}</span>
+                </div>
+              </div>
+            )}
+
+            {orderId && !orderDetails && status === 'unknown' && (
+              <div className="bg-muted p-4 rounded-lg">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Order ID:</span>
+                  <span className="font-mono">{orderId}</span>
                 </div>
               </div>
             )}

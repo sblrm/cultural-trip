@@ -339,27 +339,70 @@ async function handleTransactionNotification(notification: any, res: VercelRespo
         if (txError || !transaction) {
           console.error('Failed to get transaction details:', txError);
         } else {
-          // Extract destination ID from item_details or trip_data_id
-          const destinationId = transaction.trip_data_id || transaction.item_details?.[0]?.id;
+          // Extract destination ID from trip_data_id or item_details
+          let destinationId = transaction.trip_data_id;
+          
+          // If not in trip_data_id, try to parse from item_details
+          if (!destinationId && transaction.item_details && Array.isArray(transaction.item_details)) {
+            const firstItem = transaction.item_details[0];
+            if (firstItem && firstItem.id) {
+              // Extract ID from format "DEST-123" or just "123"
+              const match = String(firstItem.id).match(/\d+/);
+              if (match) {
+                destinationId = parseInt(match[0]);
+              }
+            }
+          }
           
           if (destinationId && transaction.user_id) {
+            const quantity = transaction.item_details?.[0]?.quantity || 1;
+            
             // Create booking record
-            const { error: bookingError } = await supabase
+            const { data: booking, error: bookingError } = await supabase
               .from('bookings')
               .insert({
                 user_id: transaction.user_id,
-                destination_id: parseInt(destinationId),
+                destination_id: destinationId,
                 booking_date: new Date().toISOString().split('T')[0],
-                quantity: transaction.item_details?.[0]?.quantity || 1,
+                quantity: quantity,
                 total_price: transaction.gross_amount,
                 status: 'confirmed',
-              });
+              })
+              .select()
+              .single();
 
             if (bookingError) {
               console.error('Failed to create booking:', bookingError);
             } else {
-              console.log(`Booking created for order ${order_id}`);
+              console.log(`✅ Booking created for order ${order_id}:`, booking);
+              
+              // Also create purchase record if tickets table exists
+              try {
+                const { error: purchaseError } = await supabase
+                  .from('purchases')
+                  .insert({
+                    user_id: transaction.user_id,
+                    ticket_id: null, // No ticket_id for direct bookings
+                    amount: transaction.gross_amount,
+                    payment_method: payment_type,
+                    status: 'paid',
+                  });
+                
+                if (purchaseError) {
+                  console.error('Failed to create purchase:', purchaseError);
+                } else {
+                  console.log(`✅ Purchase record created for order ${order_id}`);
+                }
+              } catch (purchaseErr) {
+                console.error('Purchase creation error:', purchaseErr);
+              }
             }
+          } else {
+            console.error('Missing destination_id or user_id:', {
+              destinationId,
+              userId: transaction.user_id,
+              transaction
+            });
           }
         }
       }

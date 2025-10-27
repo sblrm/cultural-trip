@@ -125,16 +125,17 @@ const CheckoutPage = () => {
         },
       ];
 
-      // Prepare metadata
+      // Prepare metadata - include destination_id for booking creation
       const metadata: PaymentMetadata = {
         userId: user.id,
         bookingType: 'ticket',
+        tripDataId: destination.id, // Store destination ID for auto-booking
       };
 
       // Create Midtrans transaction
       toast.loading('Memproses pembayaran...', { id: 'payment' });
       
-      const { token } = await createTransaction({
+      const { token, orderId: createdOrderId } = await createTransaction({
         orderId,
         grossAmount: totalPrice,
         customerDetails,
@@ -150,34 +151,22 @@ const CheckoutPage = () => {
           console.log('Payment success:', result);
           toast.success('Pembayaran berhasil!');
           
-          try {
-            // Create ticket in database
-            await createTicket({
-              userId: user.id,
-              destinationId: destination.id,
-              quantity: quantity,
-              totalPrice: totalPrice,
-              visitDate: formData.date,
-              bookingName: formData.fullName,
-              bookingEmail: formData.email,
-              bookingPhone: formData.phone,
-            });
-
-            toast.success('Tiket telah dikirim ke email Anda.');
-            navigate('/profile/bookings');
-          } catch (dbError: any) {
-            console.error('Error creating ticket:', dbError);
-            toast.error('Pembayaran berhasil, tetapi gagal membuat tiket. Silakan hubungi support.');
-          }
+          // Redirect to payment finish page with order_id
+          navigate(`/payment/finish?order_id=${result.order_id || createdOrderId}&transaction_status=settlement&status_code=200`);
         },
         onPending: (result) => {
           console.log('Payment pending:', result);
           toast.info('Pembayaran pending. Silakan selesaikan pembayaran Anda.');
-          navigate('/profile/bookings');
+          
+          // Redirect to payment pending page
+          navigate(`/payment/pending?order_id=${result.order_id || createdOrderId}&transaction_status=pending&status_code=201`);
         },
         onError: (result) => {
           console.error('Payment error:', result);
           toast.error('Pembayaran gagal. Silakan coba lagi.');
+          
+          // Redirect to payment error page
+          navigate(`/payment/error?order_id=${result.order_id || createdOrderId}&transaction_status=failed&status_code=400`);
         },
         onClose: () => {
           console.log('Payment popup closed');
