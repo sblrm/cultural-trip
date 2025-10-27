@@ -23,6 +23,7 @@ import MyBooking from "./pages/profile/MyBooking";
 import PurchaseList from "./pages/profile/PurchaseList";
 import Refund from "./pages/profile/Refund";
 import CheckoutPage from "./pages/CheckoutPage";
+import PaymentFinishPage from "./pages/PaymentFinishPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,9 @@ const App = () => (
                     <Route path="refund" element={<Refund />} />
                   </Route>
                   <Route path="checkout/:id" element={<CheckoutPage />} />
+                  <Route path="payment/finish" element={<PaymentFinishPage />} />
+                  <Route path="payment/error" element={<PaymentFinishPage />} />
+                  <Route path="payment/pending" element={<PaymentFinishPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { Calendar, Clock, MapPin, User, Mail, Phone, CreditCard, ArrowRight } from "lucide-react";
+import { Calendar, Clock, MapPin, User, Mail, Phone, CreditCard, ArrowRight, Loader2 } from "lucide-react";
 import { useDestinations } from "@/contexts/DestinationsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -12,6 +12,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  createTransaction,
+  showSnapPayment,
+  generateOrderId,
+  loadMidtransScript,
+  type CustomerDetails,
+  type TransactionItem,
+  type PaymentMetadata,
+} from "@/services/paymentService";
 
 const CheckoutPage = () => {
   const { id } = useParams();
@@ -26,12 +35,9 @@ const CheckoutPage = () => {
     email: "",
     phone: "",
     date: "",
-    cardNumber: "",
-    cardName: "",
-    cardExpiry: "",
-    cardCvv: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingScript, setIsLoadingScript] = useState(true);
 
   const destination = getDestinationById(Number(id));
 
@@ -44,6 +50,20 @@ const CheckoutPage = () => {
       }));
     }
   }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    // Load Midtrans Snap script on component mount
+    loadMidtransScript()
+      .then(() => {
+        setIsLoadingScript(false);
+        console.log('Midtrans Snap ready');
+      })
+      .catch((error) => {
+        console.error('Failed to load Midtrans:', error);
+        toast.error('Gagal memuat sistem pembayaran');
+        setIsLoadingScript(false);
+      });
+  }, []);
 
   if (!destination) {
     return (
@@ -76,12 +96,6 @@ const CheckoutPage = () => {
       return;
     }
     
-    if (!formData.cardNumber || !formData.cardName || !formData.cardExpiry || !formData.cardCvv) {
-      toast.error("Mohon isi semua data pembayaran");
-      setIsSubmitting(false);
-      return;
-    }
-    
     try {
       // Check if user is logged in
       if (!user?.id) {
@@ -90,37 +104,89 @@ const CheckoutPage = () => {
         return;
       }
 
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      try {
-        await createTicket({
-          userId: user.id,
-          destinationId: destination.id,
-          quantity: quantity,
-          totalPrice: totalPrice,
-          visitDate: formData.date,
-          bookingName: formData.fullName,
-          bookingEmail: formData.email,
-          bookingPhone: formData.phone
-        });
+      // Generate unique order ID
+      const orderId = generateOrderId('TICKET');
 
-        toast.success("Pembayaran berhasil! Tiket telah dikirim ke email Anda.");
-        navigate("/profile");
-      } catch (dbError: any) {
-        console.error('Error creating ticket:', dbError);
-        if (dbError.code === '42P01') {
-          toast.error("Database error: Tabel 'tickets' tidak ditemukan. Silakan hubungi administrator.");
-        } else if (dbError.code === '23503') {
-          toast.error("Database error: Referensi tidak valid. Silakan coba lagi.");
-        } else {
-          toast.error(`Terjadi kesalahan: ${dbError.message || 'Unknown error'}`);
-        }
-        throw dbError;
-      }
+      // Prepare customer details
+      const customerDetails: CustomerDetails = {
+        firstName: formData.fullName.split(' ')[0],
+        lastName: formData.fullName.split(' ').slice(1).join(' ') || '',
+        email: formData.email,
+        phone: formData.phone,
+      };
+
+      // Prepare item details
+      const itemDetails: TransactionItem[] = [
+        {
+          id: `DEST-${destination.id}`,
+          name: `Tiket ${destination.name}`,
+          price: destination.price,
+          quantity: quantity,
+        },
+      ];
+
+      // Prepare metadata
+      const metadata: PaymentMetadata = {
+        userId: user.id,
+        bookingType: 'ticket',
+      };
+
+      // Create Midtrans transaction
+      toast.loading('Memproses pembayaran...', { id: 'payment' });
       
+      const { token } = await createTransaction({
+        orderId,
+        grossAmount: totalPrice,
+        customerDetails,
+        itemDetails,
+        metadata,
+      });
+
+      toast.success('Mengarahkan ke halaman pembayaran...', { id: 'payment' });
+
+      // Show Midtrans Snap payment popup
+      await showSnapPayment(token, {
+        onSuccess: async (result) => {
+          console.log('Payment success:', result);
+          toast.success('Pembayaran berhasil!');
+          
+          try {
+            // Create ticket in database
+            await createTicket({
+              userId: user.id,
+              destinationId: destination.id,
+              quantity: quantity,
+              totalPrice: totalPrice,
+              visitDate: formData.date,
+              bookingName: formData.fullName,
+              bookingEmail: formData.email,
+              bookingPhone: formData.phone,
+            });
+
+            toast.success('Tiket telah dikirim ke email Anda.');
+            navigate('/profile/bookings');
+          } catch (dbError: any) {
+            console.error('Error creating ticket:', dbError);
+            toast.error('Pembayaran berhasil, tetapi gagal membuat tiket. Silakan hubungi support.');
+          }
+        },
+        onPending: (result) => {
+          console.log('Payment pending:', result);
+          toast.info('Pembayaran pending. Silakan selesaikan pembayaran Anda.');
+          navigate('/profile/bookings');
+        },
+        onError: (result) => {
+          console.error('Payment error:', result);
+          toast.error('Pembayaran gagal. Silakan coba lagi.');
+        },
+        onClose: () => {
+          console.log('Payment popup closed');
+          toast.info('Pembayaran dibatalkan');
+        },
+      });
+
     } catch (error) {
-      console.error('Error processing ticket:', error);
+      console.error('Error processing payment:', error);
       if (error instanceof Error) {
         toast.error(`Kesalahan: ${error.message}`);
       } else {
@@ -215,78 +281,54 @@ const CheckoutPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <CreditCard className="mr-2 h-5 w-5" />
-                  Informasi Pembayaran
+                  Metode Pembayaran
                 </CardTitle>
                 <CardDescription>
-                  Masukkan informasi kartu untuk pembayaran
+                  Pembayaran aman melalui Midtrans
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cardNumber">Nomor Kartu</Label>
-                  <Input
-                    id="cardNumber"
-                    name="cardNumber"
-                    placeholder="1234 5678 9012 3456"
-                    value={formData.cardNumber}
-                    onChange={handleInputChange}
-                    autoComplete="off"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="cardName">Nama pada Kartu</Label>
-                  <Input
-                    id="cardName"
-                    name="cardName"
-                    placeholder="NAMA LENGKAP"
-                    value={formData.cardName}
-                    onChange={handleInputChange}
-                    autoComplete="off"
-                    required
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="cardExpiry">Tanggal Kadaluarsa</Label>
-                    <Input
-                      id="cardExpiry"
-                      name="cardExpiry"
-                      placeholder="MM/YY"
-                      value={formData.cardExpiry}
-                      onChange={handleInputChange}
-                      autoComplete="off"
-                      required
+              <CardContent>
+                <div className="bg-muted p-4 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-medium">Midtrans Payment Gateway</span>
+                    <img 
+                      src="https://midtrans.com/assets/images/midtrans-logo.svg" 
+                      alt="Midtrans" 
+                      className="h-6"
                     />
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="cardCvv">CVV</Label>
-                    <Input
-                      id="cardCvv"
-                      name="cardCvv"
-                      placeholder="123"
-                      value={formData.cardCvv}
-                      onChange={handleInputChange}
-                      autoComplete="off"
-                      required
-                    />
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Metode pembayaran yang tersedia:
+                  </p>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <span className="bg-background px-2 py-1 rounded">💳 Kartu Kredit</span>
+                    <span className="bg-background px-2 py-1 rounded">🏦 Transfer Bank</span>
+                    <span className="bg-background px-2 py-1 rounded">🏪 Indomaret/Alfamart</span>
+                    <span className="bg-background px-2 py-1 rounded">📱 GoPay</span>
+                    <span className="bg-background px-2 py-1 rounded">📱 ShopeePay</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? (
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isSubmitting || isLoadingScript}
+            >
+              {isLoadingScript ? (
                 <span className="flex items-center">
-                  <span className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Memuat sistem pembayaran...
+                </span>
+              ) : isSubmitting ? (
+                <span className="flex items-center">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Memproses Pembayaran...
                 </span>
               ) : (
                 <>
-                  Bayar Sekarang <ArrowRight className="ml-2 h-4 w-4" />
+                  Lanjutkan ke Pembayaran <ArrowRight className="ml-2 h-4 w-4" />
                 </>
               )}
             </Button>
