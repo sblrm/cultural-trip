@@ -129,7 +129,7 @@ const PurchaseList = () => {
                       alt={name}
                       className="w-full h-full object-cover rounded-l-lg"
                       onError={(e) => {
-                        e.currentTarget.src = {b.destinations?.image};
+                        e.currentTarget.src = 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image';
                       }}
                     />
                   </div>
