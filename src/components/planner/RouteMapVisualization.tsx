@@ -14,6 +14,49 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+/**
+ * Decode Google Polyline Algorithm
+ * Used by OpenRouteService for compact geometry representation
+ */
+function decodePolyline(encoded: string): [number, number][] {
+  const poly: [number, number][] = [];
+  let index = 0;
+  const len = encoded.length;
+  let lat = 0;
+  let lng = 0;
+
+  while (index < len) {
+    let b;
+    let shift = 0;
+    let result = 0;
+
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+
+    const dlat = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1));
+    lat += dlat;
+
+    shift = 0;
+    result = 0;
+
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+
+    const dlng = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1));
+    lng += dlng;
+
+    poly.push([lat / 1e5, lng / 1e5]);
+  }
+
+  return poly;
+}
+
 interface RouteMapVisualizationProps {
   route: TravelRoute;
   userLocation: { latitude: number; longitude: number } | null;
@@ -199,34 +242,42 @@ const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationPro
               console.log('✅ ORS Response data:', data);
               
               // Check different possible response formats
-              let routeCoords = null;
+              let routeCoords: [number, number][] | null = null;
               
-              // Format 1: GeoJSON with features (v1 API)
-              if (data.features && data.features[0]?.geometry?.coordinates) {
-                routeCoords = data.features[0].geometry.coordinates;
-                console.log('📍 Using features format');
+              // Format 1: Encoded polyline (ORS v2 default)
+              if (data.routes && data.routes[0]?.geometry && typeof data.routes[0].geometry === 'string') {
+                const encodedPolyline = data.routes[0].geometry;
+                console.log('📍 Using encoded polyline format, decoding...');
+                routeCoords = decodePolyline(encodedPolyline);
+                console.log(`🛣️ Decoded ${routeCoords.length} coordinates from polyline`);
               }
-              // Format 2: routes array with geometry (v2 API)
+              // Format 2: GeoJSON with features (v1 API or geojson format)
+              else if (data.features && data.features[0]?.geometry?.coordinates) {
+                routeCoords = data.features[0].geometry.coordinates.map(
+                  (coord: [number, number]) => [coord[1], coord[0]] // Convert [lng,lat] to [lat,lng]
+                );
+                console.log('📍 Using GeoJSON features format');
+              }
+              // Format 3: routes array with coordinate array
               else if (data.routes && data.routes[0]?.geometry?.coordinates) {
-                routeCoords = data.routes[0].geometry.coordinates;
-                console.log('📍 Using routes format');
+                routeCoords = data.routes[0].geometry.coordinates.map(
+                  (coord: [number, number]) => [coord[1], coord[0]] // Convert [lng,lat] to [lat,lng]
+                );
+                console.log('📍 Using routes coordinates format');
               }
-              // Format 3: Direct geometry
+              // Format 4: Direct geometry with coordinates
               else if (data.geometry?.coordinates) {
-                routeCoords = data.geometry.coordinates;
+                routeCoords = data.geometry.coordinates.map(
+                  (coord: [number, number]) => [coord[1], coord[0]] // Convert [lng,lat] to [lat,lng]
+                );
                 console.log('📍 Using direct geometry format');
               }
               
               if (routeCoords && routeCoords.length > 0) {
                 console.log(`🛣️ Got ${routeCoords.length} route coordinates`);
                 
-                // Convert from [lng, lat] to [lat, lng] for Leaflet
-                const leafletCoords: [number, number][] = routeCoords.map(
-                  (coord: [number, number]) => [coord[1], coord[0]]
-                );
-                
                 // Draw the actual road route
-                const polyline = L.polyline(leafletCoords, {
+                const polyline = L.polyline(routeCoords, {
                   color: '#3b82f6',
                   weight: 4,
                   opacity: 0.9,
