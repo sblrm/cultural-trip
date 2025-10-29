@@ -105,13 +105,26 @@ export const getRouteData = async (
   startLng: number,
   endLat: number,
   endLng: number,
-  mode: OptimizationMode
+  mode: OptimizationMode,
+  transportMode?: TransportMode
 ): Promise<{ data: RouteData; isRealTime: boolean }> => {
   const start: ORSCoordinate = { lat: startLat, lng: startLng };
   const end: ORSCoordinate = { lat: endLat, lng: endLng };
 
+  // For flight, ship, and train, always use direct distance calculation
+  // These modes don't follow roads
+  if (transportMode === 'flight' || transportMode === 'ship' || transportMode === 'train') {
+    const distance = calculateDistance(startLat, startLng, endLat, endLng);
+    const duration = calculateTravelDuration(distance, mode, transportMode);
+    
+    return {
+      data: { distance, duration },
+      isRealTime: false // Direct calculation, not from ORS
+    };
+  }
+
   try {
-    // Try to use real-time API based on optimization mode
+    // Try to use real-time API based on optimization mode (for road transport)
     let routeData: RouteData;
 
     if (mode === 'fastest') {
@@ -137,7 +150,7 @@ export const getRouteData = async (
 
     // Fallback to Haversine calculation
     const distance = calculateDistance(startLat, startLng, endLat, endLng);
-    const duration = calculateTravelDuration(distance, mode);
+    const duration = calculateTravelDuration(distance, mode, transportMode);
 
     return {
       data: { distance, duration },
@@ -196,12 +209,39 @@ export const getTravelCostBreakdown = (
   });
 };
 
-// Enhanced duration calculation dengan realistic speeds
+// Enhanced duration calculation dengan realistic speeds per transport mode
 export const calculateTravelDuration = (
   distance: number,
-  mode: 'fastest' | 'cheapest' | 'balanced' = 'balanced'
+  optimizationMode: 'fastest' | 'cheapest' | 'balanced' = 'balanced',
+  transportMode?: TransportMode
 ): number => {
-  // Average speed based on mode (km/h)
+  // If transportMode is provided, use transport-specific speeds
+  if (transportMode) {
+    // Average speed based on transport mode (km/h)
+    const transportSpeeds: Record<TransportMode, number> = {
+      car: 60,           // Average car speed with traffic
+      motorcycle: 50,    // Motorcycle average speed
+      bus: 45,           // Bus with stops
+      train: 80,         // Train average speed (including stops)
+      flight: 700,       // Average flight speed (including taxi time)
+      ship: 40           // Ferry/ship average speed
+    };
+    
+    // Traffic/delay buffers per transport mode
+    const delayBuffers: Record<TransportMode, number> = {
+      car: 1.20,         // 20% buffer for traffic
+      motorcycle: 1.15,  // 15% buffer (can navigate traffic better)
+      bus: 1.30,         // 30% buffer (stops + traffic)
+      train: 1.10,       // 10% buffer (station delays)
+      flight: 1.50,      // 50% buffer (check-in, boarding, taxi, landing)
+      ship: 1.15         // 15% buffer (boarding, port delays)
+    };
+    
+    const baseTime = (distance / transportSpeeds[transportMode]) * 60; // minutes
+    return Math.round(baseTime * delayBuffers[transportMode]);
+  }
+  
+  // Fallback to optimization mode for road transport
   const averageSpeed = {
     fastest: 60,    // Highway/toll roads
     cheapest: 35,   // Non-toll, city roads
@@ -215,8 +255,8 @@ export const calculateTravelDuration = (
     balanced: 1.20
   };
   
-  const baseTime = (distance / averageSpeed[mode]) * 60; // minutes
-  return Math.round(baseTime * trafficBuffer[mode]);
+  const baseTime = (distance / averageSpeed[optimizationMode]) * 60; // minutes
+  return Math.round(baseTime * trafficBuffer[optimizationMode]);
 };
 
 // Calculate heuristic for A* (estimated cost to visit all remaining destinations)
@@ -362,7 +402,8 @@ export const findOptimalRoute = async (
         fromLng,
         nextDest.coordinates.latitude,
         nextDest.coordinates.longitude,
-        mode
+        mode,
+        transportMode // Pass transport mode for correct duration calculation
       );
 
       if (routeResult.isRealTime) {
