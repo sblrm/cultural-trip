@@ -130,10 +130,19 @@ export async function deleteDestination(id: number) {
  * Uses 'destination-images' bucket (create if not exists)
  */
 export async function uploadDestinationImage(file: File): Promise<string> {
+  // Verify user is authenticated
+  const { data: { session }, error: authError } = await supabase.auth.getSession();
+  
+  if (authError || !session) {
+    throw new Error('Anda harus login untuk upload gambar. Silakan login terlebih dahulu.');
+  }
+
   const bucketName = 'destination-images';
   const fileExt = file.name.split('.').pop();
   const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
   const filePath = `${fileName}`; // No subfolder, directly in bucket
+
+  console.log('Uploading image:', { fileName, fileSize: file.size, fileType: file.type });
 
   // Try to upload to bucket
   const { error: uploadError } = await supabase.storage
@@ -144,12 +153,27 @@ export async function uploadDestinationImage(file: File): Promise<string> {
     });
 
   if (uploadError) {
-    // If bucket not found, provide helpful error message
+    console.error('Upload error:', uploadError);
+    
+    // Provide helpful error messages
     if (uploadError.message.includes('Bucket not found')) {
       throw new Error(
         'Storage bucket belum dibuat. Silakan buat bucket "destination-images" di Supabase Dashboard → Storage dengan setting Public bucket.'
       );
     }
+    
+    if (uploadError.message.includes('No API key found') || uploadError.message.includes('apikey')) {
+      throw new Error(
+        'Authentication error. Silakan logout dan login kembali, lalu coba upload lagi.'
+      );
+    }
+    
+    if (uploadError.message.includes('row-level security') || uploadError.message.includes('policy')) {
+      throw new Error(
+        'Storage policies belum configured. Silakan run migration: supabase/migrations/add_storage_policies.sql di Supabase SQL Editor.'
+      );
+    }
+    
     throw uploadError;
   }
 
@@ -158,6 +182,7 @@ export async function uploadDestinationImage(file: File): Promise<string> {
     .from(bucketName)
     .getPublicUrl(filePath);
 
+  console.log('Upload successful:', data.publicUrl);
   return data.publicUrl;
 }
 

@@ -4,31 +4,62 @@
 -- Run this migration after creating the bucket
 -- This allows authenticated users to upload images
 
--- 1. Allow public to view/download images (SELECT)
+-- Drop existing policies if any (for re-running migration)
+DROP POLICY IF EXISTS "Public can view destination images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can upload destination images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can update destination images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can delete destination images" ON storage.objects;
+
+-- 1. Allow anyone to view/download images (SELECT)
+-- This is necessary for public access to destination images
 CREATE POLICY "Public can view destination images"
 ON storage.objects FOR SELECT
+TO public
 USING (bucket_id = 'destination-images');
 
 -- 2. Allow authenticated users to upload images (INSERT)
+-- More permissive: checks if user is authenticated OR has valid session
 CREATE POLICY "Authenticated users can upload destination images"
 ON storage.objects FOR INSERT
-TO authenticated
+TO public
 WITH CHECK (
   bucket_id = 'destination-images'
+  AND (
+    auth.role() = 'authenticated'
+    OR auth.role() = 'service_role'
+  )
 );
 
 -- 3. Allow authenticated users to update their uploads (UPDATE)
 CREATE POLICY "Authenticated users can update destination images"
 ON storage.objects FOR UPDATE
-TO authenticated
-USING (bucket_id = 'destination-images')
-WITH CHECK (bucket_id = 'destination-images');
+TO public
+USING (
+  bucket_id = 'destination-images'
+  AND (
+    auth.role() = 'authenticated'
+    OR auth.role() = 'service_role'
+  )
+)
+WITH CHECK (
+  bucket_id = 'destination-images'
+  AND (
+    auth.role() = 'authenticated'
+    OR auth.role() = 'service_role'
+  )
+);
 
 -- 4. Allow authenticated users to delete their uploads (DELETE)
 CREATE POLICY "Authenticated users can delete destination images"
 ON storage.objects FOR DELETE
-TO authenticated
-USING (bucket_id = 'destination-images');
+TO public
+USING (
+  bucket_id = 'destination-images'
+  AND (
+    auth.role() = 'authenticated'
+    OR auth.role() = 'service_role'
+  )
+);
 
 -- =====================================================
 -- OPTIONAL: Admin-only upload (stricter security)
