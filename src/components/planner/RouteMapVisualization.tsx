@@ -1,9 +1,9 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Navigation, Target } from 'lucide-react';
+import { MapPin, Navigation, Target, Loader2, Wifi, WifiOff } from 'lucide-react';
 import type { Route as TravelRoute } from '@/services/routePlanner';
 
 // Fix for default markers
@@ -22,6 +22,8 @@ interface RouteMapVisualizationProps {
 const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const [isLoadingRoutes, setIsLoadingRoutes] = useState(false);
+  const [routeDataSource, setRouteDataSource] = useState<'real' | 'fallback'>('real');
 
   useEffect(() => {
     if (!mapRef.current || !route || !userLocation) return;
@@ -158,13 +160,104 @@ const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationPro
       markers.push(marker);
     });
 
-    // Draw route polyline
-    const polyline = L.polyline(coordinates, {
-      color: '#3b82f6',
-      weight: 4,
-      opacity: 0.8,
-      dashArray: '10, 5',
-    }).addTo(map);
+    // Draw actual road routes between points
+    const drawRealRoutes = async () => {
+      setIsLoadingRoutes(true);
+      let hasRealRoutes = false;
+      
+      try {
+        for (let i = 0; i < coordinates.length - 1; i++) {
+          const start = coordinates[i];
+          const end = coordinates[i + 1];
+          
+          // Try to get real route from OpenRouteService
+          try {
+            const response = await fetch('/api/openroute', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                endpoint: 'directions',
+                coordinates: [
+                  [start[1], start[0]], // ORS uses [lng, lat]
+                  [end[1], end[0]]
+                ],
+                profile: 'driving-car'
+              })
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              
+              // ORS returns routes array, not features
+              if (data.routes && data.routes[0] && data.routes[0].geometry) {
+                const routeCoords = data.routes[0].geometry.coordinates;
+                
+                // Convert from [lng, lat] to [lat, lng] for Leaflet
+                const leafletCoords: [number, number][] = routeCoords.map(
+                  (coord: [number, number]) => [coord[1], coord[0]]
+                );
+                
+                // Draw the actual road route
+                L.polyline(leafletCoords, {
+                  color: '#3b82f6',
+                  weight: 4,
+                  opacity: 0.9,
+                  lineCap: 'round',
+                  lineJoin: 'round',
+                }).addTo(map);
+                
+                hasRealRoutes = true;
+              } else {
+                // Fallback to straight line
+                L.polyline([start, end], {
+                  color: '#3b82f6',
+                  weight: 4,
+                  opacity: 0.6,
+                  dashArray: '8, 4',
+                }).addTo(map);
+              }
+            } else {
+              // Fallback to straight line
+              L.polyline([start, end], {
+                color: '#94a3b8',
+                weight: 3,
+                opacity: 0.7,
+                dashArray: '8, 4',
+              }).addTo(map);
+            }
+          } catch (routeError) {
+            console.warn('Route API failed, using straight line:', routeError);
+            // Fallback to straight line with different styling
+            L.polyline([start, end], {
+              color: '#94a3b8',
+              weight: 3,
+              opacity: 0.7,
+              dashArray: '8, 4',
+            }).addTo(map);
+          }
+        }
+        
+        setRouteDataSource(hasRealRoutes ? 'real' : 'fallback');
+      } catch (error) {
+        console.error('Error drawing routes:', error);
+        setRouteDataSource('fallback');
+        
+        // Ultimate fallback - draw straight lines
+        for (let i = 0; i < coordinates.length - 1; i++) {
+          L.polyline([coordinates[i], coordinates[i + 1]], {
+            color: '#94a3b8',
+            weight: 3,
+            opacity: 0.5,
+            dashArray: '10, 5',
+          }).addTo(map);
+        }
+      } finally {
+        setIsLoadingRoutes(false);
+      }
+    };
+
+    // Start drawing routes
+    drawRealRoutes();
 
     // Add distance labels on segments
     for (let i = 1; i < coordinates.length; i++) {
@@ -233,9 +326,35 @@ const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationPro
         <CardTitle className="flex items-center gap-2">
           <Navigation className="h-5 w-5" />
           Visualisasi Rute Perjalanan
-          <Badge variant="secondary" className="ml-auto">
-            {route.nodes.length} destinasi
-          </Badge>
+          
+          <div className="ml-auto flex items-center gap-2">
+            {isLoadingRoutes && (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading routes...
+              </div>
+            )}
+            
+            {!isLoadingRoutes && (
+              <div className="flex items-center gap-1">
+                {routeDataSource === 'real' ? (
+                  <Badge variant="default" className="flex items-center gap-1">
+                    <Wifi className="h-3 w-3" />
+                    Real Roads
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    <WifiOff className="h-3 w-3" />
+                    Estimasi
+                  </Badge>
+                )}
+              </div>
+            )}
+            
+            <Badge variant="outline">
+              {route.nodes.length} destinasi
+            </Badge>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
