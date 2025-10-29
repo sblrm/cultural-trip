@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Star, Calendar } from "lucide-react";
+import { MapPin, Star, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { useDestinations } from "@/contexts/DestinationsContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,12 +15,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const ITEMS_PER_PAGE = 9; // 3x3 grid
+
 const DestinationsPage = () => {
   const { destinations, loading } = useDestinations();
   const [filteredDestinations, setFilteredDestinations] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [provinceFilter, setProvinceFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (destinations.length > 0) {
@@ -49,8 +52,20 @@ const DestinationsPage = () => {
       }
       
       setFilteredDestinations(filtered);
+      setCurrentPage(1); // Reset to page 1 when filters change
     }
   }, [destinations, searchTerm, provinceFilter, typeFilter]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredDestinations.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentDestinations = filteredDestinations.slice(startIndex, endIndex);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const provinces = destinations.length > 0
     ? ["all", ...new Set(destinations.map(dest => dest.location.province))].sort()
@@ -150,8 +165,20 @@ const DestinationsPage = () => {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredDestinations.map((destination) => (
+            <>
+              {/* Results Info */}
+              <div className="mb-6 flex justify-between items-center">
+                <p className="text-muted-foreground">
+                  Menampilkan <span className="font-semibold text-foreground">{startIndex + 1}-{Math.min(endIndex, filteredDestinations.length)}</span> dari <span className="font-semibold text-foreground">{filteredDestinations.length}</span> destinasi
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Halaman {currentPage} dari {totalPages}
+                </p>
+              </div>
+
+              {/* Destinations Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {currentDestinations.map((destination) => (
                 <div key={destination.id} className="relative">
                   <Link to={`/destinations/${destination.id}`}>
                     <Card className="overflow-hidden h-full transition-all hover:shadow-lg">
@@ -206,7 +233,65 @@ const DestinationsPage = () => {
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-8 border-t">
+                  {/* Previous Button */}
+                  <Button
+                    variant="outline"
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="w-full sm:w-auto"
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-2" />
+                    Sebelumnya
+                  </Button>
+
+                  {/* Page Numbers */}
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                      // Show first page, last page, current page, and pages around current
+                      if (
+                        page === 1 ||
+                        page === totalPages ||
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      ) {
+                        return (
+                          <Button
+                            key={page}
+                            variant={currentPage === page ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => goToPage(page)}
+                            className="w-10 h-10"
+                          >
+                            {page}
+                          </Button>
+                        );
+                      } else if (
+                        page === currentPage - 2 ||
+                        page === currentPage + 2
+                      ) {
+                        return <span key={page} className="px-2 text-muted-foreground">...</span>;
+                      }
+                      return null;
+                    })}
+                  </div>
+
+                  {/* Next Button */}
+                  <Button
+                    variant="outline"
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="w-full sm:w-auto"
+                  >
+                    Selanjutnya
+                    <ChevronRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
