@@ -19,21 +19,21 @@ const TransportModeSelector = ({ selectedMode, onModeChange }: TransportModeSele
     {
       value: 'car',
       label: 'Mobil',
-      icon: <Car className="w-8 h-8" />,
+      icon: <Car className="w-6 h-6" />,
       description: 'Nyaman untuk keluarga',
       features: ['BBM', 'Tol', 'Parkir']
     },
     {
       value: 'motorcycle',
       label: 'Motor',
-      icon: <Bike className="w-8 h-8" />,
+      icon: <Bike className="w-6 h-6" />,
       description: 'Hemat dan lincah',
       features: ['BBM Hemat', 'Parkir Murah', 'Tol 50% Off']
     },
     {
       value: 'public_transport',
       label: 'Transportasi Umum',
-      icon: <Bus className="w-8 h-8" />,
+      icon: <Bus className="w-6 h-6" />,
       description: 'Ramah lingkungan',
       features: ['Bus', 'Kereta', 'Pesawat']
     }
@@ -42,7 +42,7 @@ const TransportModeSelector = ({ selectedMode, onModeChange }: TransportModeSele
   return (
     <div className="space-y-3">
       <Label className="text-base font-semibold">Mode Transportasi</Label>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {transportModes.map((mode) => (
           <Card
             key={mode.value}
@@ -53,11 +53,11 @@ const TransportModeSelector = ({ selectedMode, onModeChange }: TransportModeSele
             }`}
             onClick={() => onModeChange(mode.value)}
           >
-            <CardContent className="p-4">
-              <div className="flex flex-col items-center text-center space-y-3">
+            <CardContent className="p-3">
+              <div className="flex flex-col items-center text-center space-y-2">
                 {/* Icon */}
                 <div
-                  className={`p-3 rounded-full transition-colors ${
+                  className={`p-2.5 rounded-full transition-colors ${
                     selectedMode === mode.value
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted text-muted-foreground'
@@ -67,17 +67,17 @@ const TransportModeSelector = ({ selectedMode, onModeChange }: TransportModeSele
                 </div>
 
                 {/* Label */}
-                <div className="space-y-1">
-                  <h3 className="font-semibold text-base">{mode.label}</h3>
-                  <p className="text-xs text-muted-foreground">{mode.description}</p>
+                <div className="space-y-0.5">
+                  <h3 className="font-semibold text-sm">{mode.label}</h3>
+                  <p className="text-xs text-muted-foreground leading-tight">{mode.description}</p>
                 </div>
 
                 {/* Features */}
-                <div className="flex flex-wrap justify-center gap-1.5">
+                <div className="flex flex-wrap justify-center gap-1">
                   {mode.features.map((feature, idx) => (
                     <span
                       key={idx}
-                      className={`text-xs px-2 py-0.5 rounded-full ${
+                      className={`text-xs px-1.5 py-0.5 rounded-full ${
                         selectedMode === mode.value
                           ? 'bg-primary/20 text-primary font-medium'
                           : 'bg-muted text-muted-foreground'
@@ -90,10 +90,10 @@ const TransportModeSelector = ({ selectedMode, onModeChange }: TransportModeSele
 
                 {/* Checkmark for selected */}
                 {selectedMode === mode.value && (
-                  <div className="w-full pt-2 border-t border-primary/20">
-                    <div className="flex items-center justify-center gap-1 text-primary text-sm font-medium">
+                  <div className="w-full pt-1.5 border-t border-primary/20">
+                    <div className="flex items-center justify-center gap-1 text-primary text-xs font-medium">
                       <svg
-                        className="w-4 h-4"
+                        className="w-3.5 h-3.5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -116,8 +116,8 @@ const TransportModeSelector = ({ selectedMode, onModeChange }: TransportModeSele
       </div>
 
       {/* Info text based on selection */}
-      <div className="bg-muted/50 rounded-lg p-3">
-        <p className="text-sm text-muted-foreground">
+      <div className="bg-muted/50 rounded-lg p-2.5">
+        <p className="text-xs text-muted-foreground leading-relaxed">
           {selectedMode === 'car' && (
             <>
               💰 <strong>Biaya termasuk:</strong> BBM (≈12 km/L), tol untuk rute cepat, parkir di setiap destinasi

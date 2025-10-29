@@ -204,9 +204,9 @@ const PlannerPage = () => {
       {/* Main Content */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Left Column - Route Planner Settings */}
-            <div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Route Planner Settings (Now Wider) */}
+            <div className="lg:col-span-1">
               <PlannerSettingsCard
                 userLocation={userLocation}
                 locateUser={locateUser}
@@ -231,8 +231,9 @@ const PlannerPage = () => {
               />
             </div>
             
-            {/* Middle - Planned Route */}
-            <div className="lg:col-span-2">
+            {/* Right Column - Planned Route & Chat (Now 2 columns) */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Planned Route */}
               {plannedRoute ? (
                 <PlannedRouteCard route={plannedRoute} />
               ) : (
@@ -242,10 +243,8 @@ const PlannerPage = () => {
                   handlePlanRoute={handlePlanRoute} 
                 />
               )}
-            </div>
-
-            {/* Right - Chat Sidebar */}
-            <div className="lg:col-span-1">
+              
+              {/* Chat Sidebar (Below Route) */}
               <ChatSidebar route={plannedRoute} />
             </div>
           </div>
