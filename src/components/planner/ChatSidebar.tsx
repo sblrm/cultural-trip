@@ -93,11 +93,11 @@ export default function ChatSidebar({ route }: { route: Route | null }) {
     <>
       {/* Floating Chat Button - Bottom Right */}
       {!isOpen && (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-6 right-6 z-40">
           <Button
             onClick={() => setIsOpen(true)}
             size="lg"
-            className="h-14 w-14 rounded-full shadow-2xl hover:scale-110 transition-transform bg-gradient-to-r from-primary to-primary/80"
+            className="h-14 w-14 rounded-full shadow-2xl hover:scale-110 transition-transform bg-gradient-to-r from-primary to-primary/80 animate-pulse"
           >
             <MessageCircle className="h-6 w-6" />
           </Button>
@@ -108,17 +108,17 @@ export default function ChatSidebar({ route }: { route: Route | null }) {
         </div>
       )}
 
-      {/* Chat Window - Floating */}
+      {/* Chat Window - Responsive: Full screen mobile, Floating desktop */}
       {isOpen && (
-        <div className={`fixed z-50 shadow-2xl transition-all ${
-          isMinimized 
-            ? 'bottom-6 right-6 w-80' 
-            : 'bottom-6 right-6 w-96 h-[600px]'
-        }`}>
-          <Card className={`flex flex-col border-2 ${isMinimized ? 'h-auto' : 'h-full'}`}>
+        <div className={`fixed z-50 shadow-2xl transition-all
+          ${isMinimized 
+            ? 'bottom-6 right-6 w-80 md:w-80' 
+            : 'inset-0 md:inset-auto md:bottom-6 md:right-6 md:w-96 md:h-[600px]'
+          }`}>
+          <Card className={`flex flex-col border-2 h-full ${isMinimized ? 'md:h-auto' : ''} rounded-none md:rounded-lg`}>
             <CardContent className="p-0 h-full flex flex-col">
               {/* Header */}
-              <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground p-4 flex items-center gap-3 rounded-t-lg">
+              <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-4 py-3 flex items-center gap-3 rounded-t-none md:rounded-t-lg">
                 <div className="relative">
                   <Avatar className="h-10 w-10 border-2 border-white">
                     <AvatarImage src="/images/tavo-avatar.png" alt="Tavo" />
@@ -139,7 +139,7 @@ export default function ChatSidebar({ route }: { route: Route | null }) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-primary-foreground hover:bg-white/20"
+                    className="h-8 w-8 text-primary-foreground hover:bg-white/20 hidden md:flex"
                     onClick={() => setIsMinimized(!isMinimized)}
                   >
                     <Minimize2 className="h-4 w-4" />
@@ -150,7 +150,7 @@ export default function ChatSidebar({ route }: { route: Route | null }) {
                     className="h-8 w-8 text-primary-foreground hover:bg-white/20"
                     onClick={() => setIsOpen(false)}
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5" />
                   </Button>
                 </div>
               </div>
@@ -184,7 +184,7 @@ export default function ChatSidebar({ route }: { route: Route | null }) {
                         </Avatar>
 
                         {/* Message Bubble */}
-                        <div className={`flex flex-col gap-1 max-w-[80%] ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
+                        <div className={`flex flex-col gap-1 max-w-[85%] md:max-w-[80%] ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
                           <div 
                             className={`rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
                               m.role === 'user' 
@@ -223,7 +223,7 @@ export default function ChatSidebar({ route }: { route: Route | null }) {
                   </div>
 
                   {/* Input Area */}
-                  <div className="border-t bg-card p-3">
+                  <div className="border-t bg-card p-3 md:p-3">
                     <div className="flex gap-2">
                       <Input
                         placeholder="Ketik pesan..."
@@ -236,15 +236,15 @@ export default function ChatSidebar({ route }: { route: Route | null }) {
                           }
                         }}
                         disabled={sending}
-                        className="flex-1 rounded-full border-2 focus-visible:ring-primary"
+                        className="flex-1 rounded-full border-2 focus-visible:ring-primary min-h-[44px]"
                       />
                       <Button 
                         onClick={handleSend} 
                         disabled={sending || !input.trim()}
                         size="icon"
-                        className="rounded-full h-10 w-10 shrink-0"
+                        className="rounded-full h-11 w-11 md:h-10 md:w-10 shrink-0"
                       >
-                        <Send className="h-4 w-4" />
+                        <Send className="h-5 w-5 md:h-4 md:w-4" />
                       </Button>
                     </div>
                     <p className="text-xs text-muted-foreground text-center mt-2">
