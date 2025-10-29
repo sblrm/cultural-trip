@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   createDestination, 
   updateDestination,
@@ -68,12 +69,14 @@ const DESTINATION_TYPES = [
 export default function DestinationForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const isEditMode = !!id;
 
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
-  const [checkingAccess, setCheckingAccess] = useState(true);
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
+  const [isAdminUser, setIsAdminUser] = useState(false);
 
   const {
     register,
@@ -93,9 +96,41 @@ export default function DestinationForm() {
 
   const imageUrl = watch('image');
 
+  // Check admin status with proper loading handling
   useEffect(() => {
-    checkAdminAccess();
-  }, []);
+    const checkAdminStatus = async () => {
+      // Wait for auth to finish loading
+      if (authLoading) {
+        return;
+      }
+
+      // Not authenticated - redirect to login
+      if (!isAuthenticated || !user) {
+        toast.error('Silakan login terlebih dahulu');
+        navigate('/login');
+        return;
+      }
+
+      // Check if user is admin
+      try {
+        const adminStatus = await isAdmin();
+        setIsAdminUser(adminStatus);
+        
+        if (!adminStatus) {
+          toast.error('Akses ditolak. Halaman ini hanya untuk admin.');
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        toast.error('Gagal memverifikasi akses admin');
+        navigate('/');
+      } finally {
+        setIsCheckingAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [isAuthenticated, user, authLoading, navigate]);
 
   useEffect(() => {
     if (imageUrl) {
@@ -103,27 +138,12 @@ export default function DestinationForm() {
     }
   }, [imageUrl]);
 
+  // Load destination data for edit mode
   useEffect(() => {
-    if (isEditMode) {
+    if (!isCheckingAdmin && isAdminUser && isEditMode) {
       loadDestination();
     }
-  }, [id]);
-
-  const checkAdminAccess = async () => {
-    try {
-      const hasAccess = await isAdmin();
-      if (!hasAccess) {
-        toast.error('Akses ditolak. Anda tidak memiliki hak admin.');
-        navigate('/');
-        return;
-      }
-    } catch (error) {
-      toast.error('Gagal memverifikasi akses admin');
-      navigate('/');
-    } finally {
-      setCheckingAccess(false);
-    }
-  };
+  }, [id, isCheckingAdmin, isAdminUser, isEditMode]);
 
   const loadDestination = async () => {
     try {
@@ -224,12 +244,24 @@ export default function DestinationForm() {
     }
   };
 
-  if (checkingAccess) {
+  // Show loading while checking auth and admin status
+  if (authLoading || isCheckingAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto"></div>
+          <div>
+            <p className="text-lg font-medium">Memverifikasi Akses</p>
+            <p className="text-sm text-muted-foreground mt-1">Mohon tunggu...</p>
+          </div>
+        </div>
       </div>
     );
+  }
+
+  // Don't render if not admin (will redirect)
+  if (!isAdminUser) {
+    return null;
   }
 
   return (

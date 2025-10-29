@@ -56,11 +56,14 @@ import {
 } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
+  // Admin check state
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
+  const [isAdminUser, setIsAdminUser] = useState(false);
+  
   const [loading, setLoading] = useState(true);
-  const [adminAccess, setAdminAccess] = useState(false);
   const [destinations, setDestinations] = useState<any[]>([]);
   const [filteredDestinations, setFilteredDestinations] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalDestinations: 0, totalReviews: 0, totalBookings: 0 });
@@ -80,9 +83,49 @@ export default function AdminDashboard() {
   const [totalPages, setTotalPages] = useState(1);
   const [paginatedDestinations, setPaginatedDestinations] = useState<any[]>([]);
 
+  // Check admin status with proper loading handling
   useEffect(() => {
-    checkAdminAccess();
-  }, [isAuthenticated, user]);
+    const checkAdminStatus = async () => {
+      // Wait for auth to finish loading
+      if (authLoading) {
+        return;
+      }
+
+      // Not authenticated - redirect to login
+      if (!isAuthenticated || !user) {
+        toast.error('Silakan login terlebih dahulu');
+        navigate('/login');
+        return;
+      }
+
+      // Check if user is admin
+      try {
+        const adminStatus = await isAdmin();
+        setIsAdminUser(adminStatus);
+        
+        if (!adminStatus) {
+          toast.error('Akses ditolak. Halaman ini hanya untuk admin.');
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        toast.error('Gagal memverifikasi akses admin');
+        navigate('/');
+      } finally {
+        setIsCheckingAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [isAuthenticated, user, authLoading, navigate]);
+
+  // Load destinations after admin check passes
+  useEffect(() => {
+    if (!isCheckingAdmin && isAdminUser) {
+      loadDestinations();
+      loadStats();
+    }
+  }, [isCheckingAdmin, isAdminUser]);
 
   // Filter & Search effect
   useEffect(() => {
@@ -187,38 +230,16 @@ export default function AdminDashboard() {
     return [...new Set(types)].sort();
   };
 
-  const checkAdminAccess = async () => {
-    if (!isAuthenticated || !user) {
-      navigate('/login');
-      return;
-    }
-
-    try {
-      const hasAccess = await isAdmin();
-      if (!hasAccess) {
-        toast.error('Akses ditolak. Anda tidak memiliki hak admin.');
-        navigate('/');
-        return;
-      }
-
-      setAdminAccess(true);
-      await Promise.all([loadDestinations(), loadStats()]);
-    } catch (error) {
-      console.error('Error checking admin access:', error);
-      toast.error('Gagal memverifikasi akses admin');
-      navigate('/');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const loadDestinations = async () => {
     try {
+      setLoading(true);
       const data = await getAllDestinationsAdmin();
       setDestinations(data);
     } catch (error) {
       console.error('Error loading destinations:', error);
       toast.error('Gagal memuat data destinasi');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -260,7 +281,28 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!adminAccess) {
+  // Show loading while checking auth and admin status
+  if (authLoading || isCheckingAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Shield className="h-8 w-8 text-primary" />
+            </div>
+          </div>
+          <div>
+            <p className="text-lg font-medium">Memverifikasi Akses Admin</p>
+            <p className="text-sm text-muted-foreground mt-1">Mohon tunggu...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not admin (will redirect)
+  if (!isAdminUser) {
     return null;
   }
 
