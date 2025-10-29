@@ -63,7 +63,7 @@ const TransportModeSelector = ({ selectedMode, onModeChange }: TransportModeSele
   return (
     <div className="space-y-4">
       <Label className="text-base font-semibold">Mode Transportasi</Label>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {transportModes.map((mode) => (
           <Card
             key={mode.value}
