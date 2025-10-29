@@ -238,7 +238,8 @@ const PlannerPage = () => {
               {plannedRoute && (
                 <RouteMapVisualization 
                   route={plannedRoute} 
-                  userLocation={userLocation} 
+                  userLocation={userLocation}
+                  transportMode={transportMode}
                 />
               )}
               

@@ -204,51 +204,121 @@ const RouteMapVisualization = ({ route, userLocation, transportMode }: RouteMapV
       markers.push(marker);
     });
 
-    // Helper functions for different transport modes
-    
-    // Draw flight path with parabolic arc
-    const drawFlightPath = (start: [number, number], end: [number, number]): boolean => {
+    // Draw actual routes based on transport mode
+    const drawRealRoutes = async () => {
+      console.log('🗺️ Starting to draw routes for', coordinates.length - 1, 'segments');
+      console.log('🚗 Transport mode:', transportMode);
+      setIsLoadingRoutes(true);
+      let hasRealRoutes = false;
+      
+      try {
+        for (let i = 0; i < coordinates.length - 1; i++) {
+          const start = coordinates[i];
+          const end = coordinates[i + 1];
+          
+          console.log(`📍 Drawing route ${i + 1}: [${start}] → [${end}]`);
+          
+          // Determine routing method based on transport mode
+          if (transportMode === 'flight') {
+            // FLIGHT: Straight line with arc effect
+            console.log('✈️ Drawing flight path (great circle arc)');
+            drawFlightPath(start, end, map);
+            hasRealRoutes = true;
+          } else if (transportMode === 'ship') {
+            // SHIP: Try sea route API, fallback to coastal path
+            console.log('🚢 Drawing ship route');
+            const shipRouteDrawn = await drawShipRoute(start, end, map);
+            if (shipRouteDrawn) {
+              hasRealRoutes = true;
+            }
+          } else if (transportMode === 'train') {
+            // TRAIN: Railway routing
+            console.log('🚆 Drawing train route');
+            const trainRouteDrawn = await drawTrainRoute(start, end, map);
+            if (trainRouteDrawn) {
+              hasRealRoutes = true;
+            }
+          } else {
+            // CAR, MOTORCYCLE, BUS: Road routing via OpenRouteService
+            console.log('🚗 Drawing road route');
+            const roadRouteDrawn = await drawRoadRoute(start, end, map, transportMode);
+            if (roadRouteDrawn) {
+              hasRealRoutes = true;
+            }
+          }
+        }
+        
+        console.log('🏁 Finished drawing routes. Has real routes:', hasRealRoutes);
+        setRouteDataSource(hasRealRoutes ? 'real' : 'fallback');
+      } catch (error) {
+        console.error('💥 Fatal error drawing routes:', error);
+        setRouteDataSource('fallback');
+        
+        // Ultimate fallback - draw straight lines
+        for (let i = 0; i < coordinates.length - 1; i++) {
+          L.polyline([coordinates[i], coordinates[i + 1]], {
+            color: '#94a3b8',
+            weight: 3,
+            opacity: 0.5,
+            dashArray: '10, 5',
+          }).addTo(map);
+        }
+      } finally {
+        setIsLoadingRoutes(false);
+      }
+    };
+
+    // Helper function: Draw flight path (great circle with arc)
+    const drawFlightPath = (start: [number, number], end: [number, number], map: L.Map) => {
+      // Create arc points for curved flight path
       const arcPoints: [number, number][] = [];
       const numPoints = 50;
       
       for (let i = 0; i <= numPoints; i++) {
         const t = i / numPoints;
+        
+        // Linear interpolation
         const lat = start[0] + (end[0] - start[0]) * t;
         const lng = start[1] + (end[1] - start[1]) * t;
         
-        // Parabolic arc for realistic flight path
+        // Add arc height (parabolic curve)
         const distance = Math.sqrt(
           Math.pow(end[0] - start[0], 2) + Math.pow(end[1] - start[1], 2)
         );
-        const arcHeight = distance * 0.2;
-        const heightOffset = 4 * arcHeight * t * (1 - t);
+        const arcHeight = distance * 0.3; // 30% of distance as arc height
+        const heightOffset = 4 * arcHeight * t * (1 - t); // Parabolic curve
         
         arcPoints.push([lat + heightOffset, lng]);
       }
       
+      // Draw animated flight path
       L.polyline(arcPoints, {
         color: '#ef4444', // Red for flight
         weight: 3,
         opacity: 0.8,
         dashArray: '5, 10',
+        className: 'flight-path-animated',
       }).addTo(map);
       
       // Add plane icon at midpoint
       const midIndex = Math.floor(arcPoints.length / 2);
-      const planeIcon = L.divIcon({
-        html: '<div style="font-size: 20px; transform: rotate(45deg);">✈️</div>',
-        className: 'plane-marker',
-        iconSize: [20, 20],
-        iconAnchor: [10, 10],
-      });
-      L.marker(arcPoints[midIndex], { icon: planeIcon }).addTo(map);
+      const midPoint = arcPoints[midIndex];
       
-      console.log('✈️ Flight path drawn');
-      return true;
+      const planeIcon = L.divIcon({
+        html: '<div style="font-size: 24px; transform: rotate(45deg);">✈️</div>',
+        className: 'plane-icon',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      });
+      
+      L.marker(midPoint, { icon: planeIcon }).addTo(map);
     };
-    
-    // Draw ship route with wave effect
-    const drawShipRoute = (start: [number, number], end: [number, number]): boolean => {
+
+    // Helper function: Draw ship route
+    const drawShipRoute = async (start: [number, number], end: [number, number], map: L.Map): Promise<boolean> => {
+      // For ship routes, use straight line with wave effect
+      // In production, you could integrate with maritime routing API
+      
       const points: [number, number][] = [];
       const numPoints = 30;
       
@@ -258,7 +328,7 @@ const RouteMapVisualization = ({ route, userLocation, transportMode }: RouteMapV
         const lng = start[1] + (end[1] - start[1]) * t;
         
         // Add wave effect
-        const waveOffset = Math.sin(t * Math.PI * 4) * 0.03;
+        const waveOffset = Math.sin(t * Math.PI * 4) * 0.05;
         points.push([lat + waveOffset, lng]);
       }
       
@@ -273,27 +343,33 @@ const RouteMapVisualization = ({ route, userLocation, transportMode }: RouteMapV
       const midIndex = Math.floor(points.length / 2);
       const shipIcon = L.divIcon({
         html: '<div style="font-size: 20px;">🚢</div>',
-        className: 'ship-marker',
+        className: 'ship-icon',
         iconSize: [20, 20],
         iconAnchor: [10, 10],
       });
+      
       L.marker(points[midIndex], { icon: shipIcon }).addTo(map);
       
-      console.log('🚢 Ship route drawn');
       return true;
     };
-    
-    // Draw train route (railway)
-    const drawTrainRoute = async (start: [number, number], end: [number, number]): Promise<boolean> => {
+
+    // Helper function: Draw train route
+    const drawTrainRoute = async (start: [number, number], end: [number, number], map: L.Map): Promise<boolean> => {
+      // Try to get railway routing (in production, integrate with Overpass API for railways)
+      // For now, use simplified rail path
+      
       try {
-        // Try to get road route as railway approximation
+        // Attempt to get road route and adapt it for railway
         const response = await fetch('/api/openroute', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             endpoint: 'directions',
-            coordinates: [[start[1], start[0]], [end[1], end[0]]],
-            profile: 'driving-car'
+            coordinates: [
+              [start[1], start[0]],
+              [end[1], end[0]]
+            ],
+            profile: 'driving-car' // Use road as approximation
           })
         });
 
@@ -303,10 +379,12 @@ const RouteMapVisualization = ({ route, userLocation, transportMode }: RouteMapV
           if (data.routes && data.routes[0]?.geometry && typeof data.routes[0].geometry === 'string') {
             const routeCoords = decodePolyline(data.routes[0].geometry);
             
+            // Draw railway-style line
             L.polyline(routeCoords, {
               color: '#8b5cf6', // Purple for train
               weight: 4,
               opacity: 0.9,
+              lineCap: 'square',
               dashArray: '10, 5',
             }).addTo(map);
             
@@ -314,73 +392,108 @@ const RouteMapVisualization = ({ route, userLocation, transportMode }: RouteMapV
             const midIndex = Math.floor(routeCoords.length / 2);
             const trainIcon = L.divIcon({
               html: '<div style="font-size: 20px;">🚆</div>',
-              className: 'train-marker',
+              className: 'train-icon',
               iconSize: [20, 20],
               iconAnchor: [10, 10],
             });
+            
             L.marker(routeCoords[midIndex], { icon: trainIcon }).addTo(map);
             
-            console.log('🚆 Train route drawn');
             return true;
           }
         }
+        
+        // Fallback to straight railway line
+        L.polyline([start, end], {
+          color: '#8b5cf6',
+          weight: 4,
+          opacity: 0.7,
+          dashArray: '10, 5',
+        }).addTo(map);
+        
+        return true;
       } catch (error) {
         console.error('Train route error:', error);
+        return false;
       }
-      
-      // Fallback to dashed line
-      L.polyline([start, end], {
-        color: '#8b5cf6',
-        weight: 4,
-        opacity: 0.7,
-        dashArray: '10, 5',
-      }).addTo(map);
-      
-      return false;
     };
-    
-    // Draw road route (car, motorcycle, bus)
+
+    // Helper function: Draw road route (car, motorcycle, bus)
     const drawRoadRoute = async (
       start: [number, number], 
       end: [number, number], 
+      map: L.Map,
       mode: 'car' | 'motorcycle' | 'bus'
     ): Promise<boolean> => {
       try {
+        console.log(`📤 Sending request to OpenRouteService for ${mode} route`);
+        
         // Determine ORS profile based on mode
         let orsProfile = 'driving-car';
-        if (mode === 'motorcycle') orsProfile = 'cycling-regular'; // Approximate for motorcycle
-        if (mode === 'bus') orsProfile = 'driving-hgv'; // Heavy goods vehicle for buses
-        
-        console.log(`📤 Requesting ${mode} route with profile: ${orsProfile}`);
+        if (mode === 'motorcycle') {
+          orsProfile = 'cycling-regular'; // Approximate for motorcycle
+        } else if (mode === 'bus') {
+          orsProfile = 'driving-hgv'; // Heavy goods vehicle profile for buses
+        }
         
         const response = await fetch('/api/openroute', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             endpoint: 'directions',
-            coordinates: [[start[1], start[0]], [end[1], end[0]]],
+            coordinates: [
+              [start[1], start[0]],
+              [end[1], end[0]]
+            ],
             profile: orsProfile
           })
         });
 
+        console.log('📥 Response status:', response.status);
+
         if (response.ok) {
           const data = await response.json();
-          
-          let routeCoords: [number, number][] | null = null;
-          
-          // Decode polyline (ORS v2 default format)
+          console.log('Response data structure:', {
+            hasFeatures: !!data.features,
+            hasRoutes: !!data.routes,
+            routesLength: data.routes?.length,
+            firstRoute: data.routes?.[0] ? {
+              hasGeometry: !!data.routes[0].geometry,
+              geometryType: typeof data.routes[0].geometry
+            } : null
+          });
+
+          let routeCoords: [number, number][] = [];
+
+          // Handle ORS v2 response (encoded polyline)
           if (data.routes && data.routes[0]?.geometry && typeof data.routes[0].geometry === 'string') {
-            routeCoords = decodePolyline(data.routes[0].geometry);
-            console.log(`🛣️ Decoded ${routeCoords.length} coordinates for ${mode}`);
+            console.log('Using encoded polyline format, decoding...');
+            const encodedPolyline = data.routes[0].geometry;
+            routeCoords = decodePolyline(encodedPolyline);
+            console.log(`Decoded ${routeCoords.length} coordinates from polyline`);
           }
-          // GeoJSON format fallback
+          // Handle GeoJSON format
           else if (data.features && data.features[0]?.geometry?.coordinates) {
-            routeCoords = data.features[0].geometry.coordinates.map(
-              (coord: [number, number]) => [coord[1], coord[0]]
+            routeCoords = data.features[0].geometry.coordinates.map((coord: [number, number]) => 
+              [coord[1], coord[0]]
             );
           }
-          
+          // Handle direct routes array
+          else if (data.routes && data.routes[0]?.geometry?.coordinates) {
+            routeCoords = data.routes[0].geometry.coordinates.map((coord: [number, number]) => 
+              [coord[1], coord[0]]
+            );
+          }
+          // Handle direct geometry
+          else if (data.geometry?.coordinates) {
+            routeCoords = data.geometry.coordinates.map((coord: [number, number]) => 
+              [coord[1], coord[0]]
+            );
+          }
+
           if (routeCoords && routeCoords.length > 0) {
+            console.log(`✅ Drawing ${mode} route with ${routeCoords.length} points`);
+            
             // Different colors for different modes
             let color = '#3b82f6'; // Blue for car
             if (mode === 'motorcycle') color = '#f59e0b'; // Orange
@@ -394,57 +507,135 @@ const RouteMapVisualization = ({ route, userLocation, transportMode }: RouteMapV
               lineJoin: 'round',
             }).addTo(map);
             
-            console.log(`✅ ${mode} route drawn with ${routeCoords.length} points`);
+            console.log('✅ Real road route drawn successfully');
             return true;
+          } else {
+            console.log('⚠️ No coordinates in response, trying fallback');
           }
+        } else {
+          console.log('❌ OpenRouteService request failed');
         }
       } catch (error) {
-        console.error(`Road route error for ${mode}:`, error);
+        console.error('❌ Error getting route from OpenRouteService:', error);
       }
-      
+
+      // Fallback to dashed line
+      console.log('Using fallback dashed line');
+      L.polyline([start, end], {
+        color: '#94a3b8',
+        weight: 3,
+        opacity: 0.5,
+        dashArray: '10, 5',
+      }).addTo(map);
+
       return false;
     };
-
-    // Draw actual routes between points
-    const drawRealRoutes = async () => {
-      console.log('🗺️ Starting to draw routes for', coordinates.length - 1, 'segments');
-      console.log('🚗 Transport mode:', transportMode);
-      setIsLoadingRoutes(true);
-      let hasRealRoutes = false;
-      
-      try {
-        for (let i = 0; i < coordinates.length - 1; i++) {
-          const start = coordinates[i];
-          const end = coordinates[i + 1];
           
           console.log(`📍 Drawing route ${i + 1}: [${start}] → [${end}]`);
           
-          let routeDrawn = false;
-          
-          // Determine routing method based on transport mode
-          if (transportMode === 'flight') {
-            routeDrawn = drawFlightPath(start, end);
-            if (routeDrawn) hasRealRoutes = true;
-          } else if (transportMode === 'ship') {
-            routeDrawn = drawShipRoute(start, end);
-            if (routeDrawn) hasRealRoutes = true;
-          } else if (transportMode === 'train') {
-            routeDrawn = await drawTrainRoute(start, end);
-            if (routeDrawn) hasRealRoutes = true;
-          } else {
-            // car, motorcycle, bus - use OpenRouteService
-            routeDrawn = await drawRoadRoute(start, end, transportMode);
-            if (routeDrawn) hasRealRoutes = true;
-          }
-          
-          // Ultimate fallback if nothing worked
-          if (!routeDrawn) {
-            console.log('⚠️ Using straight line fallback');
+          // Try to get real route from OpenRouteService
+          try {
+            const requestBody = {
+              endpoint: 'directions',
+              coordinates: [
+                [start[1], start[0]], // ORS uses [lng, lat]
+                [end[1], end[0]]
+              ],
+              profile: 'driving-car'
+            };
+            
+            console.log('📤 Sending request to ORS:', requestBody);
+            
+            const response = await fetch('/api/openroute', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(requestBody)
+            });
+
+            console.log('📥 ORS Response status:', response.status);
+
+            if (response.ok) {
+              const data = await response.json();
+              console.log('✅ ORS Response data:', data);
+              
+              // Check different possible response formats
+              let routeCoords: [number, number][] | null = null;
+              
+              // Format 1: Encoded polyline (ORS v2 default)
+              if (data.routes && data.routes[0]?.geometry && typeof data.routes[0].geometry === 'string') {
+                const encodedPolyline = data.routes[0].geometry;
+                console.log('📍 Using encoded polyline format, decoding...');
+                routeCoords = decodePolyline(encodedPolyline);
+                console.log(`🛣️ Decoded ${routeCoords.length} coordinates from polyline`);
+              }
+              // Format 2: GeoJSON with features (v1 API or geojson format)
+              else if (data.features && data.features[0]?.geometry?.coordinates) {
+                routeCoords = data.features[0].geometry.coordinates.map(
+                  (coord: [number, number]) => [coord[1], coord[0]] // Convert [lng,lat] to [lat,lng]
+                );
+                console.log('📍 Using GeoJSON features format');
+              }
+              // Format 3: routes array with coordinate array
+              else if (data.routes && data.routes[0]?.geometry?.coordinates) {
+                routeCoords = data.routes[0].geometry.coordinates.map(
+                  (coord: [number, number]) => [coord[1], coord[0]] // Convert [lng,lat] to [lat,lng]
+                );
+                console.log('📍 Using routes coordinates format');
+              }
+              // Format 4: Direct geometry with coordinates
+              else if (data.geometry?.coordinates) {
+                routeCoords = data.geometry.coordinates.map(
+                  (coord: [number, number]) => [coord[1], coord[0]] // Convert [lng,lat] to [lat,lng]
+                );
+                console.log('📍 Using direct geometry format');
+              }
+              
+              if (routeCoords && routeCoords.length > 0) {
+                console.log(`🛣️ Got ${routeCoords.length} route coordinates`);
+                
+                // Draw the actual road route
+                const polyline = L.polyline(routeCoords, {
+                  color: '#3b82f6',
+                  weight: 4,
+                  opacity: 0.9,
+                  lineCap: 'round',
+                  lineJoin: 'round',
+                }).addTo(map);
+                
+                console.log('✅ Real road route drawn successfully', polyline);
+                hasRealRoutes = true;
+              } else {
+                console.warn('⚠️ No valid route coordinates found in response, using fallback');
+                console.log('Response structure:', JSON.stringify(data, null, 2));
+                
+                // Fallback to straight line
+                L.polyline([start, end], {
+                  color: '#3b82f6',
+                  weight: 4,
+                  opacity: 0.6,
+                  dashArray: '8, 4',
+                }).addTo(map);
+              }
+            } else {
+              const errorData = await response.json().catch(() => ({}));
+              console.error('❌ ORS API failed:', response.status, errorData);
+              
+              // Fallback to straight line
+              L.polyline([start, end], {
+                color: '#94a3b8',
+                weight: 3,
+                opacity: 0.7,
+                dashArray: '8, 4',
+              }).addTo(map);
+            }
+          } catch (routeError) {
+            console.error('❌ Route API error:', routeError);
+            // Fallback to straight line with different styling
             L.polyline([start, end], {
               color: '#94a3b8',
               weight: 3,
-              opacity: 0.5,
-              dashArray: '10, 5',
+              opacity: 0.7,
+              dashArray: '8, 4',
             }).addTo(map);
           }
         }
@@ -454,6 +645,16 @@ const RouteMapVisualization = ({ route, userLocation, transportMode }: RouteMapV
       } catch (error) {
         console.error('💥 Fatal error drawing routes:', error);
         setRouteDataSource('fallback');
+        
+        // Ultimate fallback - draw straight lines
+        for (let i = 0; i < coordinates.length - 1; i++) {
+          L.polyline([coordinates[i], coordinates[i + 1]], {
+            color: '#94a3b8',
+            weight: 3,
+            opacity: 0.5,
+            dashArray: '10, 5',
+          }).addTo(map);
+        }
       } finally {
         setIsLoadingRoutes(false);
       }
@@ -509,7 +710,7 @@ const RouteMapVisualization = ({ route, userLocation, transportMode }: RouteMapV
         mapInstanceRef.current = null;
       }
     };
-  }, [route, userLocation, transportMode]);
+  }, [route, userLocation]);
 
   if (!route || !userLocation) {
     return (
@@ -558,16 +759,6 @@ const RouteMapVisualization = ({ route, userLocation, transportMode }: RouteMapV
             <Badge variant="outline">
               {route.nodes.length} destinasi
             </Badge>
-            
-            {/* Transport Mode Badge */}
-            <Badge variant="secondary" className="flex items-center gap-1">
-              {transportMode === 'car' && '🚗 Mobil'}
-              {transportMode === 'motorcycle' && '🏍️ Motor'}
-              {transportMode === 'bus' && '🚌 Bus'}
-              {transportMode === 'train' && '🚆 Kereta'}
-              {transportMode === 'flight' && '✈️ Pesawat'}
-              {transportMode === 'ship' && '🚢 Kapal Laut'}
-            </Badge>
           </div>
         </CardTitle>
       </CardHeader>
@@ -591,20 +782,8 @@ const RouteMapVisualization = ({ route, userLocation, transportMode }: RouteMapV
                 <span>Destinasi Wisata</span>
               </div>
               <div className="flex items-center gap-2">
-                {transportMode === 'car' && <div className="w-6 h-1 bg-blue-500"></div>}
-                {transportMode === 'motorcycle' && <div className="w-6 h-1 bg-orange-500"></div>}
-                {transportMode === 'bus' && <div className="w-6 h-1 bg-green-500"></div>}
-                {transportMode === 'train' && <div className="w-6 h-1 bg-purple-500" style={{ borderStyle: 'dashed' }}></div>}
-                {transportMode === 'flight' && <div className="w-6 h-1 bg-red-500" style={{ borderStyle: 'dashed' }}></div>}
-                {transportMode === 'ship' && <div className="w-6 h-1 bg-cyan-500" style={{ borderStyle: 'dashed' }}></div>}
-                <span>Rute {
-                  transportMode === 'car' ? 'Mobil' :
-                  transportMode === 'motorcycle' ? 'Motor' :
-                  transportMode === 'bus' ? 'Bus' :
-                  transportMode === 'train' ? 'Kereta' :
-                  transportMode === 'flight' ? 'Pesawat' :
-                  'Kapal Laut'
-                }</span>
+                <div className="w-6 h-1 bg-blue-500" style={{ borderStyle: 'dashed' }}></div>
+                <span>Rute Perjalanan</span>
               </div>
             </div>
             <div className="flex items-center gap-1 text-muted-foreground">

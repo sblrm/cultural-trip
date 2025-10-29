@@ -151,3 +151,28 @@
 header {
   z-index: 50 !important;
 }
+
+/* Flight path animation */
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.flight-path-animated path {
+  animation: dash 1s linear infinite;
+}
+
+/* Transport mode markers */
+.plane-marker,
+.ship-marker,
+.train-marker {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transition: transform 0.2s;
+}
+
+.plane-marker:hover,
+.ship-marker:hover,
+.train-marker:hover {
+  transform: scale(1.2);
+}
