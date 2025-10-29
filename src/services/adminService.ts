@@ -127,24 +127,35 @@ export async function deleteDestination(id: number) {
 
 /**
  * Upload image to Supabase Storage
+ * Uses 'destination-images' bucket (create if not exists)
  */
 export async function uploadDestinationImage(file: File): Promise<string> {
+  const bucketName = 'destination-images';
   const fileExt = file.name.split('.').pop();
   const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-  const filePath = `culture-uploads/${fileName}`;
+  const filePath = `${fileName}`; // No subfolder, directly in bucket
 
+  // Try to upload to bucket
   const { error: uploadError } = await supabase.storage
-    .from('public')
+    .from(bucketName)
     .upload(filePath, file, {
       cacheControl: '3600',
       upsert: false
     });
 
-  if (uploadError) throw uploadError;
+  if (uploadError) {
+    // If bucket not found, provide helpful error message
+    if (uploadError.message.includes('Bucket not found')) {
+      throw new Error(
+        'Storage bucket belum dibuat. Silakan buat bucket "destination-images" di Supabase Dashboard → Storage dengan setting Public bucket.'
+      );
+    }
+    throw uploadError;
+  }
 
   // Get public URL
   const { data } = supabase.storage
-    .from('public')
+    .from(bucketName)
     .getPublicUrl(filePath);
 
   return data.publicUrl;

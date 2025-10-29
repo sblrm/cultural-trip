@@ -32,7 +32,22 @@ Klik **RUN** ✅
 
 ---
 
-### Step 3: Verifikasi (30 detik)
+### Step 3: Setup Storage Bucket (2 menit)
+
+**Buka Supabase Dashboard → Storage:**
+
+1. Click **"New bucket"**
+2. Name: `destination-images`
+3. **✅ Centang "Public bucket"** (penting!)
+4. Click **"Create bucket"**
+
+**Policies akan otomatis terbuat** ✅
+
+> 📖 Detail guide: [`docs/SUPABASE_STORAGE_SETUP.md`](./SUPABASE_STORAGE_SETUP.md)
+
+---
+
+### Step 4: Verifikasi (30 detik)
 
 ```sql
 -- Cek apakah role berhasil diupdate
@@ -46,7 +61,7 @@ Harusnya muncul: `role: admin` ✅
 
 ---
 
-### Step 4: Login & Access (1 menit)
+### Step 5: Login & Access (1 menit)
 
 1. Buka aplikasi TravoMate
 2. Login dengan akun admin
@@ -60,10 +75,11 @@ Harusnya muncul: `role: admin` ✅
 
 - [ ] Migration berhasil dijalankan
 - [ ] User role = 'admin'
+- [ ] Storage bucket `destination-images` created & public
 - [ ] Bisa akses `/admin`
 - [ ] Bisa klik "Tambah Destinasi"
 - [ ] Form muncul dengan lengkap
-- [ ] Test upload gambar (< 5MB)
+- [ ] Test upload gambar (< 5MB) ✅
 - [ ] Test submit form
 - [ ] Destinasi baru muncul di tabel
 - [ ] Test edit destinasi
@@ -175,10 +191,18 @@ WHERE email = 'your-email@example.com';
 UPDATE profiles SET role = 'admin' WHERE id = '{user_id}';
 ```
 
-**Problem:** Upload gambar error
-- Check file size < 5MB
-- Check format (JPG/PNG)
-- Verify Supabase Storage bucket `public` exists
+**Problem:** Upload gambar error "Bucket not found"
+**Solution:**
+1. Buka Supabase Dashboard → Storage
+2. Create bucket: `destination-images`
+3. ✅ **Centang "Public bucket"** (critical!)
+4. Refresh admin page, try upload lagi
+5. Lihat guide lengkap: [`SUPABASE_STORAGE_SETUP.md`](./SUPABASE_STORAGE_SETUP.md)
+
+**Problem:** Upload gambar error "Permission denied"
+- Check bucket is **Public**
+- Verify policies di Storage → Policies
+- Pastikan authenticated users bisa INSERT
 
 **Problem:** Form validation error
 - Red text di bawah field menjelaskan error
@@ -190,8 +214,10 @@ UPDATE profiles SET role = 'admin' WHERE id = '{user_id}';
 
 Untuk dokumentasi lengkap, lihat:
 - **Admin Guide**: `docs/ADMIN_DASHBOARD.md`
+- **Storage Setup**: `docs/SUPABASE_STORAGE_SETUP.md` ⭐ NEW!
 - **Add Destinations**: `docs/ADD_DESTINATIONS.md`
-- **Quick Reference**: `docs/ADD_DESTINATIONS_QUICK.md`
+- **Search/Filter/Pagination**: `docs/ADMIN_SEARCH_FILTER_PAGINATION.md`
+- **Testing Guide**: `docs/ADMIN_TESTING_GUIDE.md`
 
 ---
 
