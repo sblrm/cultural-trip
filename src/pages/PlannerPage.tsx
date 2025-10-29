@@ -7,6 +7,7 @@ import { findOptimalRoute, Route as TravelRoute, OptimizationMode } from "@/serv
 import { type TransportMode } from "@/services/dynamicPricing";
 import PlannerSettingsCard from "@/components/planner/PlannerSettingsCard";
 import PlannedRouteCard from "@/components/planner/PlannedRouteCard";
+import RouteMapVisualization from "@/components/planner/RouteMapVisualization";
 import ChatSidebar from "@/components/planner/ChatSidebar";
 import EmptyRouteState from "@/components/planner/EmptyRouteState";
 import { saveTripData, logPrediction } from "@/services/mlDataCollection";
@@ -232,8 +233,16 @@ const PlannerPage = () => {
             </div>
             
             {/* Right Column - Planned Route (Now 2 columns) */}
-            <div className="lg:col-span-2">
-              {/* Planned Route */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Route Map Visualization */}
+              {plannedRoute && (
+                <RouteMapVisualization 
+                  route={plannedRoute} 
+                  userLocation={userLocation} 
+                />
+              )}
+              
+              {/* Planned Route Details */}
               {plannedRoute ? (
                 <PlannedRouteCard route={plannedRoute} />
               ) : (
