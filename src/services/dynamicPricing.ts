@@ -2,7 +2,7 @@
  * Dynamic Pricing Algorithm
  * 
  * Calculates travel costs with real-time factors:
- * - Transport mode (car, motorcycle, public transport)
+ * - Transport mode (car, motorcycle, bus, train, flight, ship)
  * - Time of day (peak hours, rush hour)
  * - Day of week (weekend surcharge)
  * - Traffic conditions (congestion multiplier)
@@ -10,7 +10,7 @@
  * - Seasonal demand (holiday periods)
  */
 
-export type TransportMode = 'car' | 'motorcycle' | 'public_transport';
+export type TransportMode = 'car' | 'motorcycle' | 'bus' | 'train' | 'flight' | 'ship';
 
 export interface PricingFactors {
   baseCost: number;
@@ -21,7 +21,7 @@ export interface PricingFactors {
   trafficLevel: 'low' | 'medium' | 'high' | 'severe';
   distance: number; // kilometers
   mode: 'fastest' | 'cheapest' | 'balanced';
-  transportMode?: TransportMode; // NEW: Transport mode selection
+  transportMode?: TransportMode; // Transport mode selection
 }
 
 export interface PricingBreakdown {
@@ -190,10 +190,13 @@ export const estimateTrafficLevel = (
  * Different rates for different transport modes
  */
 export const calculateParkingCost = (transportMode: TransportMode = 'car'): number => {
-  const parkingRates = {
+  const parkingRates: Record<TransportMode, number> = {
     car: 5000,         // Rp 5,000 for car parking
     motorcycle: 2000,  // Rp 2,000 for motorcycle parking
-    public_transport: 0 // No parking needed for public transport
+    bus: 0,            // No parking needed
+    train: 0,          // No parking needed
+    flight: 0,         // No parking needed
+    ship: 0            // No parking needed
   };
   
   return parkingRates[transportMode];
@@ -206,57 +209,101 @@ export const getFuelConsumption = (transportMode: TransportMode): number => {
   const consumptionRates = {
     car: 12,           // 12 km/liter (average sedan)
     motorcycle: 35,    // 35 km/liter (average motorcycle)
-    public_transport: 0 // No personal fuel cost
+    bus: 0,            // No personal fuel cost
+    train: 0,          // No personal fuel cost
+    flight: 0,         // No personal fuel cost
+    ship: 0            // No personal fuel cost
   };
   
   return consumptionRates[transportMode];
 };
 
 /**
- * Calculate public transport ticket cost
- * Based on distance and mode (bus, train, flight)
+ * Calculate public transport ticket cost by specific mode
+ * Realistic Indonesian pricing for bus, train, flight, and ship
  */
 export const calculatePublicTransportCost = (
   distance: number,
-  mode: 'fastest' | 'cheapest' | 'balanced'
+  transportMode: 'bus' | 'train' | 'flight' | 'ship',
+  optimizationMode: 'fastest' | 'cheapest' | 'balanced'
 ): number => {
-  // Determine transport type based on distance and optimization
-  if (distance < 50) {
-    // Short distance: Bus or city transport
-    const baseFare = 5000; // Base bus fare
-    const perKm = 500; // Rp 500 per km
-    return Math.round(baseFare + (distance * perKm));
-  } else if (distance < 200) {
-    // Medium distance: Intercity bus or economy train
-    if (mode === 'fastest') {
-      // Fast train (e.g., KA Eksekutif)
-      const baseFare = 50000;
-      const perKm = 800;
-      return Math.round(baseFare + (distance * perKm));
-    } else {
-      // Economy bus/train
-      const baseFare = 25000;
-      const perKm = 400;
-      return Math.round(baseFare + (distance * perKm));
-    }
-  } else {
-    // Long distance: Train or budget airline
-    if (mode === 'fastest' && distance > 400) {
-      // Domestic flight (budget airline)
-      const baseFare = 300000;
-      const perKm = 500;
-      return Math.round(baseFare + (distance * perKm));
-    } else if (mode === 'fastest') {
-      // Express train
-      const baseFare = 150000;
-      const perKm = 600;
-      return Math.round(baseFare + (distance * perKm));
-    } else {
-      // Economy train/bus
-      const baseFare = 75000;
-      const perKm = 300;
-      return Math.round(baseFare + (distance * perKm));
-    }
+  switch (transportMode) {
+    case 'bus':
+      // Bus transport: cheapest land option
+      if (distance < 50) {
+        // City bus (TransJakarta, Damri, etc.)
+        const baseFare = 3500;
+        const perKm = 300;
+        return Math.round(baseFare + (distance * perKm));
+      } else if (distance < 200) {
+        // Intercity bus (AKAP - Antar Kota Antar Provinsi)
+        const baseFare = optimizationMode === 'fastest' ? 50000 : 35000; // Executive vs Economy
+        const perKm = optimizationMode === 'fastest' ? 600 : 400;
+        return Math.round(baseFare + (distance * perKm));
+      } else {
+        // Long distance bus
+        const baseFare = optimizationMode === 'fastest' ? 100000 : 70000;
+        const perKm = optimizationMode === 'fastest' ? 500 : 350;
+        return Math.round(baseFare + (distance * perKm));
+      }
+    
+    case 'train':
+      // Train transport: comfortable and reliable
+      if (distance < 100) {
+        // Commuter line (KRL Jabodetabek, etc.)
+        return 5000; // Flat fare for commuter
+      } else if (distance < 300) {
+        // Medium distance train (KA Ekonomi/Bisnis)
+        const baseFare = optimizationMode === 'fastest' ? 100000 : 50000; // Bisnis vs Ekonomi
+        const perKm = optimizationMode === 'fastest' ? 700 : 400;
+        return Math.round(baseFare + (distance * perKm));
+      } else {
+        // Long distance train (KA Eksekutif/Bisnis)
+        const baseFare = optimizationMode === 'fastest' ? 200000 : 100000;
+        const perKm = optimizationMode === 'fastest' ? 600 : 350;
+        return Math.round(baseFare + (distance * perKm));
+      }
+    
+    case 'flight':
+      // Flight: fastest but most expensive
+      if (distance < 400) {
+        // Short haul (e.g., Jakarta-Surabaya)
+        const baseFare = optimizationMode === 'cheapest' ? 400000 : 600000; // LCC vs Full service
+        const perKm = optimizationMode === 'cheapest' ? 300 : 500;
+        return Math.round(baseFare + (distance * perKm));
+      } else if (distance < 1500) {
+        // Medium haul (e.g., Jakarta-Makassar)
+        const baseFare = optimizationMode === 'cheapest' ? 700000 : 1000000;
+        const perKm = optimizationMode === 'cheapest' ? 250 : 400;
+        return Math.round(baseFare + (distance * perKm));
+      } else {
+        // Long haul (e.g., Jakarta-Papua)
+        const baseFare = optimizationMode === 'cheapest' ? 1500000 : 2500000;
+        const perKm = optimizationMode === 'cheapest' ? 200 : 350;
+        return Math.round(baseFare + (distance * perKm));
+      }
+    
+    case 'ship':
+      // Ship transport: unique for archipelago routes
+      if (distance < 200) {
+        // Ferry/speed boat (e.g., Jakarta-Kepulauan Seribu)
+        const baseFare = optimizationMode === 'fastest' ? 150000 : 75000; // Fast boat vs regular ferry
+        const perKm = optimizationMode === 'fastest' ? 500 : 250;
+        return Math.round(baseFare + (distance * perKm));
+      } else if (distance < 1000) {
+        // Medium distance ferry (e.g., Surabaya-Bali, Bakauheni-Merak)
+        const baseFare = optimizationMode === 'fastest' ? 300000 : 150000;
+        const perKm = optimizationMode === 'fastest' ? 300 : 150;
+        return Math.round(baseFare + (distance * perKm));
+      } else {
+        // Long distance ship (e.g., PELNI routes to Eastern Indonesia)
+        const baseFare = optimizationMode === 'fastest' ? 800000 : 400000; // Express vs Economy class
+        const perKm = optimizationMode === 'fastest' ? 200 : 100;
+        return Math.round(baseFare + (distance * perKm));
+      }
+    
+    default:
+      return 0;
   }
 };
 
@@ -272,8 +319,9 @@ export const calculateTollCost = (
     return 0; // Avoid tolls for cheapest mode
   }
   
-  if (transportMode === 'public_transport') {
-    return 0; // Toll included in ticket price
+  // Public transport modes don't have toll costs (included in ticket)
+  if (['bus', 'train', 'flight', 'ship'].includes(transportMode)) {
+    return 0;
   }
   
   // Indonesian toll road rates (average)
@@ -323,10 +371,14 @@ export const calculateDynamicPrice = (
   let trafficSurcharge = 0;
   
   // Transport mode specific calculations
-  if (transportMode === 'public_transport') {
+  if (['bus', 'train', 'flight', 'ship'].includes(transportMode)) {
     // === PUBLIC TRANSPORT ===
     // Calculate ticket cost (includes all transport fees)
-    ticketCost = calculatePublicTransportCost(distance, mode);
+    ticketCost = calculatePublicTransportCost(
+      distance, 
+      transportMode as 'bus' | 'train' | 'flight' | 'ship',
+      mode
+    );
     
     // No fuel, toll, or parking costs for public transport
     fuelCost = 0;
@@ -411,15 +463,18 @@ export const calculateDynamicPrice = (
   const breakdown: string[] = [];
   
   // Transport mode indicator
-  const modeLabels = {
+  const modeLabels: Record<TransportMode, string> = {
     car: '🚗 Mobil',
     motorcycle: '🏍️ Motor',
-    public_transport: '🚌 Transportasi Umum'
+    bus: '🚌 Bus',
+    train: '� Kereta',
+    flight: '✈️ Pesawat',
+    ship: '🚢 Kapal Laut'
   };
   breakdown.push(`Mode: ${modeLabels[transportMode]}`);
   breakdown.push(`Base cost: Rp ${baseCost.toLocaleString('id-ID')}`);
   
-  if (transportMode === 'public_transport') {
+  if (['bus', 'train', 'flight', 'ship'].includes(transportMode)) {
     breakdown.push(`Ticket cost (${distance.toFixed(1)} km, ${mode} mode): Rp ${ticketCost.toLocaleString('id-ID')}`);
   } else {
     const consumption = getFuelConsumption(transportMode);

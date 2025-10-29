@@ -1,4 +1,4 @@
-import { Car, Bike, Bus } from "lucide-react";
+import { Car, Bike, Bus, Train, Plane, Ship } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import type { TransportMode } from "@/services/dynamicPricing";
@@ -28,21 +28,42 @@ const TransportModeSelector = ({ selectedMode, onModeChange }: TransportModeSele
       label: 'Motor',
       icon: <Bike className="w-6 h-6" />,
       description: 'Hemat dan lincah',
-      features: ['BBM Hemat', 'Parkir Murah', 'Tol 50% Off']
+      features: ['BBM Hemat', 'Parkir Murah', 'Tol 50%']
     },
     {
-      value: 'public_transport',
-      label: 'Transportasi Umum',
+      value: 'bus',
+      label: 'Bus',
       icon: <Bus className="w-6 h-6" />,
-      description: 'Ramah lingkungan',
-      features: ['Bus', 'Kereta', 'Pesawat']
+      description: 'Ekonomis untuk jarak jauh',
+      features: ['City Bus', 'AKAP', 'Terhemat']
+    },
+    {
+      value: 'train',
+      label: 'Kereta',
+      icon: <Train className="w-6 h-6" />,
+      description: 'Nyaman dan cepat',
+      features: ['KRL', 'Ekonomi', 'Eksekutif']
+    },
+    {
+      value: 'flight',
+      label: 'Pesawat',
+      icon: <Plane className="w-6 h-6" />,
+      description: 'Tercepat untuk jarak jauh',
+      features: ['LCC', 'Full Service', '> 400km']
+    },
+    {
+      value: 'ship',
+      label: 'Kapal Laut',
+      icon: <Ship className="w-6 h-6" />,
+      description: 'Untuk rute kepulauan',
+      features: ['Ferry', 'PELNI', 'Speed Boat']
     }
   ];
 
   return (
     <div className="space-y-3">
       <Label className="text-base font-semibold">Mode Transportasi</Label>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {transportModes.map((mode) => (
           <Card
             key={mode.value}
@@ -128,9 +149,24 @@ const TransportModeSelector = ({ selectedMode, onModeChange }: TransportModeSele
               💰 <strong>Biaya termasuk:</strong> BBM hemat (≈35 km/L), tol diskon 50%, parkir motor lebih murah
             </>
           )}
-          {selectedMode === 'public_transport' && (
+          {selectedMode === 'bus' && (
             <>
-              💰 <strong>Biaya termasuk:</strong> Tiket bus/kereta/pesawat sesuai jarak. Lebih hemat untuk jarak jauh!
+              💰 <strong>Biaya termasuk:</strong> Tiket bus (City: Rp 3.5k+, AKAP: Rp 35k+). Ekonomis untuk jarak menengah!
+            </>
+          )}
+          {selectedMode === 'train' && (
+            <>
+              💰 <strong>Biaya termasuk:</strong> Tiket kereta (KRL: Rp 5k, Ekonomi: Rp 50k+, Eksekutif: Rp 100k+)
+            </>
+          )}
+          {selectedMode === 'flight' && (
+            <>
+              💰 <strong>Biaya termasuk:</strong> Tiket pesawat (LCC: Rp 400k+, Full service: Rp 600k+). Tercepat untuk {'>'} 400km!
+            </>
+          )}
+          {selectedMode === 'ship' && (
+            <>
+              💰 <strong>Biaya termasuk:</strong> Tiket kapal (Ferry: Rp 75k+, PELNI: Rp 150k+). Ideal untuk rute kepulauan!
             </>
           )}
         </p>
