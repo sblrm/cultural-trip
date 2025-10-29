@@ -1,0 +1,3 @@
+name,city,province,type,latitude,longitude,hours_open,hours_close,duration,description,image,price,transportation
+Museum Nasional Indonesia,Jakarta Pusat,DKI Jakarta,Museum & Warisan Sejarah,-6.1760,106.8227,08:00,16:00,90,"Museum Nasional Indonesia atau Museum Gajah adalah museum arkeologi, sejarah, etnologi, dan geografi yang terletak di Jakarta.",/culture-uploads/museum-nasional.jpg,10000,TransJakarta|Kereta|Taksi
+Desa Wisata Penglipuran,Bangli,Bali,Kehidupan Adat & Arsitektur,-8.4095,115.3660,08:00,17:00,120,"Desa Wisata Penglipuran merupakan salah satu desa terindah di dunia menurut CNN.",/culture-uploads/desa-penglipuran.jpg,30000,Rental Mobil|Motor|Tour Guide

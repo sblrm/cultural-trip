@@ -12,7 +12,8 @@
     "test:connection": "node --import tsx --no-warnings src/test-connection.ts",
     "test:destinations": "node --import tsx --no-warnings src/test-destinations.ts",
     "setup:verify": "powershell -ExecutionPolicy Bypass -File ./scripts/verify-supabase.ps1",
-    "setup:check": "node scripts/check-setup.js"
+    "setup:check": "node scripts/check-setup.js",
+    "import:destinations": "node scripts/import-destinations.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -51,6 +52,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
+    "csv-parse": "^6.1.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
     "express": "^5.1.0",

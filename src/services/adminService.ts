@@ -1,0 +1,168 @@
+/**
+ * Admin Service
+ * Handles admin-only operations for managing destinations
+ */
+
+import { supabase } from '@/lib/supabase';
+import type { Database } from '@/types/supabase';
+
+type DestinationInsert = Database['public']['Tables']['destinations']['Insert'];
+type DestinationUpdate = Database['public']['Tables']['destinations']['Update'];
+
+export interface CreateDestinationInput {
+  name: string;
+  city: string;
+  province: string;
+  type: string;
+  latitude: number;
+  longitude: number;
+  hours: {
+    open: string;
+    close: string;
+  };
+  duration: number;
+  description: string;
+  image: string;
+  price: number;
+  transportation: string[];
+}
+
+/**
+ * Check if current user is admin
+ */
+export async function isAdmin(): Promise<boolean> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (error) throw error;
+    
+    return data?.role === 'admin' || data?.role === 'superadmin';
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    return false;
+  }
+}
+
+/**
+ * Get all destinations for admin management
+ */
+export async function getAllDestinationsAdmin() {
+  const { data, error } = await supabase
+    .from('destinations')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Create a new destination (admin only)
+ */
+export async function createDestination(input: CreateDestinationInput) {
+  const destinationData: DestinationInsert = {
+    name: input.name,
+    city: input.city,
+    province: input.province,
+    type: input.type,
+    latitude: input.latitude,
+    longitude: input.longitude,
+    hours: input.hours,
+    duration: input.duration,
+    description: input.description,
+    image: input.image,
+    price: input.price,
+    rating: 0, // Always start with 0, will be calculated from reviews
+    transportation: input.transportation,
+  };
+
+  const { data, error } = await supabase
+    .from('destinations')
+    .insert([destinationData])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Update an existing destination (admin only)
+ */
+export async function updateDestination(id: number, input: Partial<CreateDestinationInput>) {
+  const updateData: DestinationUpdate = {
+    ...input,
+  };
+
+  const { data, error } = await supabase
+    .from('destinations')
+    .update(updateData)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Delete a destination (admin only)
+ */
+export async function deleteDestination(id: number) {
+  const { error } = await supabase
+    .from('destinations')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+  return true;
+}
+
+/**
+ * Upload image to Supabase Storage
+ */
+export async function uploadDestinationImage(file: File): Promise<string> {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+  const filePath = `culture-uploads/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('public')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if (uploadError) throw uploadError;
+
+  // Get public URL
+  const { data } = supabase.storage
+    .from('public')
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
+}
+
+/**
+ * Get admin statistics
+ */
+export async function getAdminStats() {
+  const [destinationsCount, reviewsCount, bookingsCount] = await Promise.all([
+    supabase.from('destinations').select('id', { count: 'exact', head: true }),
+    supabase.from('reviews').select('id', { count: 'exact', head: true }),
+    supabase.from('bookings').select('id', { count: 'exact', head: true }),
+  ]);
+
+  return {
+    totalDestinations: destinationsCount.count || 0,
+    totalReviews: reviewsCount.count || 0,
+    totalBookings: bookingsCount.count || 0,
+  };
+}

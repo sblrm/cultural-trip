@@ -185,6 +185,47 @@ graph TB
 
 ---
 
+## 📝 Managing Destinations Data
+
+TravoMate provides **4 efficient methods** to add and manage cultural heritage destinations without modifying the codebase:
+
+### Quick Start
+```bash
+# Import destinations from JSON
+npm run import:destinations scripts/destinations-template.json
+
+# Import from CSV (can edit in Excel)
+npm run import:destinations scripts/destinations-template.csv
+```
+
+### Available Methods
+
+| Method | Best For | Documentation |
+|--------|----------|---------------|
+| 🖥️ **Supabase Dashboard** | Adding 1-5 destinations | [Quick Guide](docs/ADD_DESTINATIONS_QUICK.md) |
+| 📦 **JSON/CSV Import** | Bulk import (5-50 items) | [Full Guide](docs/ADD_DESTINATIONS.md) |
+| 💾 **SQL Scripts** | Large migrations (>50) | `scripts/add-destinations-from-csv.sql` |
+| 🎨 **Admin Dashboard** | Non-technical users | [Admin Guide](docs/ADMIN_DASHBOARD.md) ✨ **NEW** |
+
+### Admin Dashboard Features
+- ✅ **Full CRUD** - Create, Read, Update, Delete destinasi
+- ✅ **Image Upload** - Upload gambar langsung ke Supabase Storage
+- ✅ **Form Validation** - Real-time validation dengan Zod schema
+- ✅ **Statistics** - Dashboard dengan metrics (total destinasi, reviews, bookings)
+- ✅ **Role-Based Access** - Secure admin-only access dengan RLS policies
+- ✅ **Production-Ready** - Security & UX optimized
+
+**Access:** `/admin` (admin role required)
+
+### Template Files
+- `scripts/destinations-template.json` - JSON format
+- `scripts/destinations-template.csv` - CSV format (Excel compatible)
+- `scripts/add-destinations-from-csv.sql` - SQL template
+
+**📚 Full Documentation:** See [docs/ADD_DESTINATIONS.md](docs/ADD_DESTINATIONS.md) for complete guide with examples and troubleshooting.
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! This project follows industry best practices:

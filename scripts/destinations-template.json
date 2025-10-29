@@ -1,0 +1,36 @@
+[
+  {
+    "name": "Museum Nasional Indonesia",
+    "city": "Jakarta Pusat",
+    "province": "DKI Jakarta",
+    "type": "Museum & Warisan Sejarah",
+    "latitude": -6.1760,
+    "longitude": 106.8227,
+    "hours": {
+      "open": "08:00",
+      "close": "16:00"
+    },
+    "duration": 90,
+    "description": "Museum Nasional Indonesia atau Museum Gajah adalah museum arkeologi, sejarah, etnologi, dan geografi yang terletak di Jakarta. Museum ini menyimpan koleksi prasejarah lengkap seperti arca, prasasti, dan benda purbakala dari seluruh Indonesia.",
+    "image": "/culture-uploads/museum-nasional.jpg",
+    "price": 10000,
+    "transportation": ["TransJakarta", "Kereta", "Taksi", "Ojek Online"]
+  },
+  {
+    "name": "Desa Wisata Penglipuran",
+    "city": "Bangli",
+    "province": "Bali",
+    "type": "Kehidupan Adat & Arsitektur",
+    "latitude": -8.4095,
+    "longitude": 115.3660,
+    "hours": {
+      "open": "08:00",
+      "close": "17:00"
+    },
+    "duration": 120,
+    "description": "Desa Wisata Penglipuran merupakan salah satu desa terindah di dunia menurut CNN. Desa ini memiliki tata ruang tradisional Bali yang masih terjaga dengan baik, jalan setapak yang bersih, dan arsitektur rumah tradisional yang seragam.",
+    "image": "/culture-uploads/desa-penglipuran.jpg",
+    "price": 30000,
+    "transportation": ["Rental Mobil", "Motor", "Tour Guide"]
+  }
+]

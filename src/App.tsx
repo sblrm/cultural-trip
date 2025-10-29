@@ -25,6 +25,8 @@ import PurchaseList from "./pages/profile/PurchaseList";
 import Refund from "./pages/profile/Refund";
 import CheckoutPage from "./pages/CheckoutPage";
 import PaymentFinishPage from "./pages/PaymentFinishPage";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import DestinationForm from "./pages/admin/DestinationForm";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +64,12 @@ const App = () => (
                   <Route path="payment/finish" element={<PaymentFinishPage />} />
                   <Route path="payment/error" element={<PaymentFinishPage />} />
                   <Route path="payment/pending" element={<PaymentFinishPage />} />
+                  
+                  {/* Admin Routes */}
+                  <Route path="admin" element={<AdminDashboard />} />
+                  <Route path="admin/destinations/new" element={<DestinationForm />} />
+                  <Route path="admin/destinations/edit/:id" element={<DestinationForm />} />
+                  
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
