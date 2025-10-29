@@ -24,15 +24,70 @@ Admin Dashboard membutuhkan Storage Bucket untuk menyimpan gambar destinasi yang
    - **Allowed MIME types**: `image/jpeg,image/png,image/jpg,image/webp` - optional
 3. Click **"Create bucket"**
 
-### Step 3: Set Policies (Otomatis untuk Public Bucket)
+### Step 3: Setup Policies (REQUIRED!)
 
-Jika bucket sudah public, policies otomatis terbuat. Tapi untuk memastikan, verify policies:
+**Bucket public saja tidak cukup!** Kita perlu policies untuk allow upload.
 
-**Expected Policies:**
-- ✅ **SELECT (read)**: `true` for everyone
-- ✅ **INSERT (upload)**: `authenticated` users only
-- ✅ **UPDATE**: `authenticated` users only
-- ✅ **DELETE**: `authenticated` users only
+#### Option A: Via SQL Editor (Recommended - 2 menit)
+
+1. Navigate ke **SQL Editor** di Supabase Dashboard
+2. Click **"New query"**
+3. Copy-paste isi file: **`supabase/migrations/add_storage_policies.sql`**
+4. Click **"Run"** ✅
+
+#### Option B: Via Storage UI (Manual - 5 menit)
+
+1. Navigate ke **Storage** → Click bucket `destination-images`
+2. Click tab **"Policies"**
+3. Click **"New policy"** 4 kali untuk buat:
+
+**Policy 1: Public Read**
+- Name: `Public can view destination images`
+- Target: `SELECT`
+- Check: `bucket_id = 'destination-images'`
+
+**Policy 2: Authenticated Upload**  
+- Name: `Authenticated users can upload`
+- Target: `INSERT`
+- Role: `authenticated`
+- Check: `bucket_id = 'destination-images'`
+
+**Policy 3: Authenticated Update**
+- Name: `Authenticated users can update`
+- Target: `UPDATE`  
+- Role: `authenticated`
+- Check: `bucket_id = 'destination-images'`
+
+**Policy 4: Authenticated Delete**
+- Name: `Authenticated users can delete`
+- Target: `DELETE`
+- Role: `authenticated`
+- Check: `bucket_id = 'destination-images'`
+
+### Step 4: Verify Setup
+
+### Step 4: Verify Setup
+
+Run this SQL query untuk check policies:
+
+```sql
+-- Should return 4 policies
+SELECT policyname, cmd, roles
+FROM pg_policies
+WHERE schemaname = 'storage'
+  AND tablename = 'objects'
+  AND policyname LIKE '%destination%';
+```
+
+**Expected Output:**
+```
+policyname                                          | cmd    | roles
+----------------------------------------------------|--------|----------------
+Public can view destination images                  | SELECT | {public}
+Authenticated users can upload destination images   | INSERT | {authenticated}
+Authenticated users can update destination images   | UPDATE | {authenticated}
+Authenticated users can delete destination images   | DELETE | {authenticated}
+```
 
 ---
 
@@ -188,10 +243,11 @@ destination-images/ (bucket)
 
 - [ ] Bucket `destination-images` created
 - [ ] Bucket set as **Public**
-- [ ] Policies allow:
+- [ ] **4 Policies created** (this is critical!):
   - [ ] Public read (SELECT)
-  - [ ] Authenticated upload (INSERT)
-  - [ ] Authenticated update/delete
+  - [ ] Authenticated upload (INSERT) ⚠️ Most important!
+  - [ ] Authenticated update (UPDATE)
+  - [ ] Authenticated delete (DELETE)
 - [ ] File size limit set (optional)
 - [ ] MIME types restricted (optional)
 - [ ] Test upload berhasil
@@ -222,6 +278,35 @@ WHERE schemaname = 'storage'
 1. Pastikan bucket name **exactly** `destination-images`
 2. Check typo atau case sensitivity
 3. Refresh Supabase Dashboard page
+
+### Error: "new row violates row-level security policy"
+
+**This is the most common error!**
+
+**Root Cause:** Bucket dibuat tanpa policies, atau policies tidak properly configured.
+
+**Solution:**
+1. **Run migration SQL**: `supabase/migrations/add_storage_policies.sql`
+2. **Atau buat policies manual** di Storage → bucket → Policies tab
+3. **Verify policies created**:
+   ```sql
+   SELECT policyname, cmd 
+   FROM pg_policies 
+   WHERE schemaname = 'storage' 
+     AND tablename = 'objects'
+     AND policyname LIKE '%destination%';
+   ```
+4. Should return 4 policies (SELECT, INSERT, UPDATE, DELETE)
+5. If missing INSERT policy → **user cannot upload!**
+
+**Quick Fix SQL:**
+```sql
+-- Run this if INSERT policy missing
+CREATE POLICY "Authenticated users can upload destination images"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'destination-images');
+```
 
 ### Error: "Permission denied"
 

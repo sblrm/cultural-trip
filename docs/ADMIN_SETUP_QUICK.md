@@ -32,7 +32,7 @@ Klik **RUN** ✅
 
 ---
 
-### Step 3: Setup Storage Bucket (2 menit)
+### Step 3: Setup Storage Bucket (3 menit) ⚠️ CRITICAL!
 
 **Buka Supabase Dashboard → Storage:**
 
@@ -41,7 +41,20 @@ Klik **RUN** ✅
 3. **✅ Centang "Public bucket"** (penting!)
 4. Click **"Create bucket"**
 
-**Policies akan otomatis terbuat** ✅
+**THEN run policies SQL (bucket public saja tidak cukup!):**
+
+1. Navigate ke **SQL Editor**
+2. Copy-paste isi file: **`supabase/migrations/add_storage_policies.sql`**
+3. Click **"Run"** ✅
+4. Verify: Should create 4 policies
+
+**Verify policies created:**
+```sql
+-- Should return 4 rows
+SELECT policyname FROM pg_policies 
+WHERE schemaname = 'storage' AND tablename = 'objects'
+AND policyname LIKE '%destination%';
+```
 
 > 📖 Detail guide: [`docs/SUPABASE_STORAGE_SETUP.md`](./SUPABASE_STORAGE_SETUP.md)
 
@@ -196,8 +209,22 @@ UPDATE profiles SET role = 'admin' WHERE id = '{user_id}';
 1. Buka Supabase Dashboard → Storage
 2. Create bucket: `destination-images`
 3. ✅ **Centang "Public bucket"** (critical!)
-4. Refresh admin page, try upload lagi
-5. Lihat guide lengkap: [`SUPABASE_STORAGE_SETUP.md`](./SUPABASE_STORAGE_SETUP.md)
+4. **Run policies SQL**: `supabase/migrations/add_storage_policies.sql`
+5. Refresh admin page, try upload lagi
+6. Lihat guide lengkap: [`SUPABASE_STORAGE_SETUP.md`](./SUPABASE_STORAGE_SETUP.md)
+
+**Problem:** Upload error "new row violates row-level security policy" ⚠️
+**This is the most common error!**
+
+**Solution:**
+1. **MUST run policies SQL**: `supabase/migrations/add_storage_policies.sql`
+2. Bucket public saja **TIDAK CUKUP**, need policies!
+3. Verify with SQL:
+   ```sql
+   SELECT policyname FROM pg_policies 
+   WHERE schemaname = 'storage' AND policyname LIKE '%destination%';
+   ```
+4. Should return **4 policies**. If not, run migration!
 
 **Problem:** Upload gambar error "Permission denied"
 - Check bucket is **Public**
