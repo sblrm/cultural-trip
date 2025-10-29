@@ -231,8 +231,8 @@ const PlannerPage = () => {
               />
             </div>
             
-            {/* Right Column - Planned Route & Chat (Now 2 columns) */}
-            <div className="lg:col-span-2 space-y-8">
+            {/* Right Column - Planned Route (Now 2 columns) */}
+            <div className="lg:col-span-2">
               {/* Planned Route */}
               {plannedRoute ? (
                 <PlannedRouteCard route={plannedRoute} />
@@ -243,13 +243,13 @@ const PlannerPage = () => {
                   handlePlanRoute={handlePlanRoute} 
                 />
               )}
-              
-              {/* Chat Sidebar (Below Route) */}
-              <ChatSidebar route={plannedRoute} />
             </div>
           </div>
         </div>
       </section>
+      
+      {/* Floating Chat Button */}
+      <ChatSidebar route={plannedRoute} />
     </div>
   );
 };
