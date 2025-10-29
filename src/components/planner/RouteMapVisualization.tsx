@@ -198,9 +198,26 @@ const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationPro
               const data = await response.json();
               console.log('✅ ORS Response data:', data);
               
-              // ORS returns routes array, not features
-              if (data.routes && data.routes[0] && data.routes[0].geometry) {
-                const routeCoords = data.routes[0].geometry.coordinates;
+              // Check different possible response formats
+              let routeCoords = null;
+              
+              // Format 1: GeoJSON with features (v1 API)
+              if (data.features && data.features[0]?.geometry?.coordinates) {
+                routeCoords = data.features[0].geometry.coordinates;
+                console.log('📍 Using features format');
+              }
+              // Format 2: routes array with geometry (v2 API)
+              else if (data.routes && data.routes[0]?.geometry?.coordinates) {
+                routeCoords = data.routes[0].geometry.coordinates;
+                console.log('📍 Using routes format');
+              }
+              // Format 3: Direct geometry
+              else if (data.geometry?.coordinates) {
+                routeCoords = data.geometry.coordinates;
+                console.log('📍 Using direct geometry format');
+              }
+              
+              if (routeCoords && routeCoords.length > 0) {
                 console.log(`🛣️ Got ${routeCoords.length} route coordinates`);
                 
                 // Convert from [lng, lat] to [lat, lng] for Leaflet
@@ -220,7 +237,9 @@ const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationPro
                 console.log('✅ Real road route drawn successfully', polyline);
                 hasRealRoutes = true;
               } else {
-                console.warn('⚠️ No routes in response, using fallback');
+                console.warn('⚠️ No valid route coordinates found in response, using fallback');
+                console.log('Response structure:', JSON.stringify(data, null, 2));
+                
                 // Fallback to straight line
                 L.polyline([start, end], {
                   color: '#3b82f6',

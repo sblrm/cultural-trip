@@ -71,6 +71,8 @@ export default async function handler(
           coordinates,
           instructions: false,
           geometry: true,
+          // Request GeoJSON format instead of encoded polyline
+          format: 'geojson',
         };
         break;
 
