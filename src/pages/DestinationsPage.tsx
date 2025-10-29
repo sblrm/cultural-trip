@@ -161,8 +161,13 @@ const DestinationsPage = () => {
                       />
                       <div className="absolute top-2 right-2 bg-black/70 text-white py-1 px-2 rounded-full text-sm flex items-center">
                         <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
-                        {destination.rating}
+                        {destination.rating > 0 ? destination.rating.toFixed(1) : 'N/A'}
                       </div>
+                      {destination.reviewCount > 0 && (
+                        <div className="absolute top-2 left-2 bg-black/70 text-white py-1 px-2 rounded-full text-xs">
+                          {destination.reviewCount} review
+                        </div>
+                      )}
                     </div>
                     <CardContent className="p-4">
                       <h3 className="font-bold text-lg mb-2">{destination.name}</h3>

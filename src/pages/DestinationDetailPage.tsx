@@ -212,7 +212,11 @@ const DestinationDetailPage = () => {
               </div>
               <div className="flex items-center">
                 <Star className="h-5 w-5 mr-1 fill-yellow-400 text-yellow-400" />
-                <span>{destination.rating}</span>
+                <span>
+                  {destination.rating > 0 
+                    ? `${destination.rating.toFixed(1)} (${destination.reviewCount} review)` 
+                    : 'Belum ada rating'}
+                </span>
               </div>
             </div>
             <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-3 inline-block">

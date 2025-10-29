@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { Database } from "@/types/supabase";
+import { getDestinationRatings } from "@/services/reviews";
 
 type DestinationRow = Database['public']['Tables']['destinations']['Row'];
 export interface Destination {
@@ -24,7 +25,8 @@ export interface Destination {
   description: string;
   image: string;
   price: number;
-  rating: number;
+  rating: number; // Real average rating from reviews
+  reviewCount: number; // Number of reviews
   transportation: string[];
 }
 
@@ -61,26 +63,34 @@ export const DestinationsProvider = ({ children }: { children: ReactNode }) => {
         
         if (error) throw error;
 
-        const formattedData = data.map((dest: DestinationRow) => ({
-          id: dest.id,
-          name: dest.name,
-          location: {
-            city: dest.city,
-            province: dest.province
-          },
-          type: dest.type,
-          coordinates: {
-            latitude: dest.latitude,
-            longitude: dest.longitude
-          },
-          hours: dest.hours,
-          duration: dest.duration,
-          description: dest.description,
-          image: dest.image,
-          price: dest.price,
-          rating: dest.rating,
-          transportation: dest.transportation
-        }));
+        // Fetch real ratings from reviews
+        const destinationIds = data.map(dest => dest.id);
+        const ratingsMap = await getDestinationRatings(destinationIds);
+
+        const formattedData = data.map((dest: DestinationRow) => {
+          const rating = ratingsMap.get(dest.id);
+          return {
+            id: dest.id,
+            name: dest.name,
+            location: {
+              city: dest.city,
+              province: dest.province
+            },
+            type: dest.type,
+            coordinates: {
+              latitude: dest.latitude,
+              longitude: dest.longitude
+            },
+            hours: dest.hours,
+            duration: dest.duration,
+            description: dest.description,
+            image: dest.image,
+            price: dest.price,
+            rating: rating?.average_rating || 0, // Use real rating or 0 if no reviews
+            reviewCount: rating?.review_count || 0,
+            transportation: dest.transportation
+          };
+        });
 
         setDestinations(formattedData);
         setLoading(false);
