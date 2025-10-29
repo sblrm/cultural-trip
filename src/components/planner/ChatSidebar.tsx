@@ -19,7 +19,7 @@ function summarizeRoute(route: Route | null): string {
 
 export default function ChatSidebar({ route }: { route: Route | null }) {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Hai! Saya asisten wisata budaya. Tanyakan apa saja tentang rute ini: makanan lokal, alternatif destinasi, estimasi biaya, atau tips transportasi.' }
+    { role: 'assistant', content: 'Hai! Aku Tavo, asisten perjalananmu! Tanyakan apa saja tentang rute ini: makanan lokal, alternatif destinasi, estimasi biaya, atau tips transportasi.' }
   ]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -54,7 +54,7 @@ export default function ChatSidebar({ route }: { route: Route | null }) {
   return (
     <Card className="h-[75vh] max-h-[75vh] flex flex-col sticky top-4">
       <CardContent className="p-0 h-full flex flex-col">
-        <div className="border-b p-4 font-semibold">Asisten AI</div>
+        <div className="border-b p-4 font-semibold">Tavo</div>
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.map((m, idx) => (
             <div key={idx} className={m.role === 'user' ? 'text-right' : ''}>
