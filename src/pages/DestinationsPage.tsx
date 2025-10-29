@@ -6,6 +6,7 @@ import { useDestinations } from "@/contexts/DestinationsContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import WishlistButton from "@/components/wishlist/WishlistButton";
 import {
   Select,
   SelectContent,
@@ -151,49 +152,59 @@ const DestinationsPage = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredDestinations.map((destination) => (
-                <Link key={destination.id} to={`/destinations/${destination.id}`}>
-                  <Card className="overflow-hidden h-full transition-all hover:shadow-lg">
-                    <div className="relative h-64 overflow-hidden">
-                      <img
-                        src={destination.image || getDestinationImage(destination.id)}
-                        alt={destination.name}
-                        className="w-full h-full object-cover transition-transform hover:scale-105"
-                      />
-                      <div className="absolute top-2 right-2 bg-black/70 text-white py-1 px-2 rounded-full text-sm flex items-center">
-                        <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
-                        {destination.rating > 0 ? destination.rating.toFixed(1) : 'N/A'}
-                      </div>
-                      {destination.reviewCount > 0 && (
-                        <div className="absolute top-2 left-2 bg-black/70 text-white py-1 px-2 rounded-full text-xs">
-                          {destination.reviewCount} review
+                <div key={destination.id} className="relative">
+                  <Link to={`/destinations/${destination.id}`}>
+                    <Card className="overflow-hidden h-full transition-all hover:shadow-lg">
+                      <div className="relative h-64 overflow-hidden">
+                        <img
+                          src={destination.image || getDestinationImage(destination.id)}
+                          alt={destination.name}
+                          className="w-full h-full object-cover transition-transform hover:scale-105"
+                        />
+                        <div className="absolute top-2 right-2 bg-black/70 text-white py-1 px-2 rounded-full text-sm flex items-center">
+                          <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
+                          {destination.rating > 0 ? destination.rating.toFixed(1) : 'N/A'}
                         </div>
-                      )}
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-bold text-lg mb-2">{destination.name}</h3>
-                      <div className="flex items-center text-muted-foreground mb-2">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        <span className="text-sm">
-                          {destination.location.city}, {destination.location.province}
-                        </span>
+                        {destination.reviewCount > 0 && (
+                          <div className="absolute top-2 left-2 bg-black/70 text-white py-1 px-2 rounded-full text-xs">
+                            {destination.reviewCount} review
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center text-muted-foreground mb-2">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        <span className="text-sm">
-                          {destination.hours.open} - {destination.hours.close}
-                        </span>
-                      </div>
-                      <div className="mt-4 flex justify-between items-center">
-                        <div className="font-semibold text-primary">
-                          Rp {destination.price.toLocaleString('id-ID')}
+                      <CardContent className="p-4">
+                        <h3 className="font-bold text-lg mb-2">{destination.name}</h3>
+                        <div className="flex items-center text-muted-foreground mb-2">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          <span className="text-sm">
+                            {destination.location.city}, {destination.location.province}
+                          </span>
                         </div>
-                        <Button size="sm" variant="outline">
-                          Detail
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                        <div className="flex items-center text-muted-foreground mb-2">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          <span className="text-sm">
+                            {destination.hours.open} - {destination.hours.close}
+                          </span>
+                        </div>
+                        <div className="mt-4 flex justify-between items-center">
+                          <div className="font-semibold text-primary">
+                            Rp {destination.price.toLocaleString('id-ID')}
+                          </div>
+                          <Button size="sm" variant="outline">
+                            Detail
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                  {/* Wishlist Button Overlay */}
+                  <div className="absolute top-3 right-3 z-10" onClick={(e) => e.preventDefault()}>
+                    <WishlistButton
+                      destinationId={destination.id}
+                      variant="icon"
+                      size="default"
+                    />
+                  </div>
+                </div>
               ))}
             </div>
           )}

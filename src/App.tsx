@@ -27,6 +27,10 @@ import CheckoutPage from "./pages/CheckoutPage";
 import PaymentFinishPage from "./pages/PaymentFinishPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import DestinationForm from "./pages/admin/DestinationForm";
+import WishlistsPage from "./pages/WishlistsPage";
+import WishlistDetailPage from "./pages/WishlistDetailPage";
+import WishlistFormPage from "./pages/WishlistFormPage";
+import SharedWishlistPage from "./pages/SharedWishlistPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -69,6 +73,13 @@ const App = () => (
                   <Route path="admin" element={<AdminDashboard />} />
                   <Route path="admin/destinations/new" element={<DestinationForm />} />
                   <Route path="admin/destinations/edit/:id" element={<DestinationForm />} />
+                  
+                  {/* Wishlist Routes */}
+                  <Route path="wishlist" element={<WishlistsPage />} />
+                  <Route path="wishlist/new" element={<WishlistFormPage />} />
+                  <Route path="wishlist/edit/:id" element={<WishlistFormPage />} />
+                  <Route path="wishlist/shared/:token" element={<SharedWishlistPage />} />
+                  <Route path="wishlist/:id" element={<WishlistDetailPage />} />
                   
                   <Route path="*" element={<NotFound />} />
                 </Route>

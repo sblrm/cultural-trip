@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, User, LogOut, Shield, Home, Calendar, MapIcon } from "lucide-react";
+import { Menu, X, User, LogOut, Shield, Home, Calendar, MapIcon, Heart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdmin } from "@/services/adminService";
 import { Button } from "@/components/ui/button";
@@ -103,6 +103,11 @@ const Header = () => {
                       <User size={16} className="mr-2" /> Profil Saya
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/wishlist" className="cursor-pointer">
+                      <Heart size={16} className="mr-2" /> Wishlist Saya
+                    </Link>
+                  </DropdownMenuItem>
                   {userIsAdmin && (
                     <DropdownMenuItem asChild>
                       <Link to="/admin" className="cursor-pointer">
@@ -174,6 +179,24 @@ const Header = () => {
                     <User size={18} />
                     <span>Profil Saya</span>
                   </Link>
+                  <Link
+                    to="/wishlist"
+                    className="flex items-center space-x-2 p-2 hover:bg-muted rounded-md"
+                    onClick={toggleMenu}
+                  >
+                    <Heart size={18} />
+                    <span>Wishlist Saya</span>
+                  </Link>
+                  {userIsAdmin && (
+                    <Link
+                      to="/admin"
+                      className="flex items-center space-x-2 p-2 hover:bg-muted rounded-md"
+                      onClick={toggleMenu}
+                    >
+                      <Shield size={18} />
+                      <span>Admin Dashboard</span>
+                    </Link>
+                  )}
                   <button
                     onClick={() => {
                       handleLogout();

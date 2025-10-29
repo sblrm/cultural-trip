@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { ReviewList } from "@/components/reviews/ReviewList";
+import WishlistButton from "@/components/wishlist/WishlistButton";
 import type { ReviewWithProfile, DestinationRating } from "@/types/review";
 import {
   getDestinationReviews,
@@ -544,6 +545,14 @@ const DestinationDetailPage = () => {
                         <>Lanjut ke Pembayaran <ArrowRight className="ml-2 h-4 w-4" /></>
                       )}
                     </Button>
+
+                    {/* Wishlist Button */}
+                    <WishlistButton
+                      destinationId={destination.id}
+                      variant="default"
+                      size="lg"
+                      className="w-full"
+                    />
 
                     {/* Info */}
                     <div className="text-xs text-muted-foreground space-y-1">
