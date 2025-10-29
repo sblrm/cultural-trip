@@ -162,6 +162,7 @@ const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationPro
 
     // Draw actual road routes between points
     const drawRealRoutes = async () => {
+      console.log('🗺️ Starting to draw routes for', coordinates.length - 1, 'segments');
       setIsLoadingRoutes(true);
       let hasRealRoutes = false;
       
@@ -170,27 +171,37 @@ const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationPro
           const start = coordinates[i];
           const end = coordinates[i + 1];
           
+          console.log(`📍 Drawing route ${i + 1}: [${start}] → [${end}]`);
+          
           // Try to get real route from OpenRouteService
           try {
+            const requestBody = {
+              endpoint: 'directions',
+              coordinates: [
+                [start[1], start[0]], // ORS uses [lng, lat]
+                [end[1], end[0]]
+              ],
+              profile: 'driving-car'
+            };
+            
+            console.log('📤 Sending request to ORS:', requestBody);
+            
             const response = await fetch('/api/openroute', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                endpoint: 'directions',
-                coordinates: [
-                  [start[1], start[0]], // ORS uses [lng, lat]
-                  [end[1], end[0]]
-                ],
-                profile: 'driving-car'
-              })
+              body: JSON.stringify(requestBody)
             });
+
+            console.log('📥 ORS Response status:', response.status);
 
             if (response.ok) {
               const data = await response.json();
+              console.log('✅ ORS Response data:', data);
               
               // ORS returns routes array, not features
               if (data.routes && data.routes[0] && data.routes[0].geometry) {
                 const routeCoords = data.routes[0].geometry.coordinates;
+                console.log(`🛣️ Got ${routeCoords.length} route coordinates`);
                 
                 // Convert from [lng, lat] to [lat, lng] for Leaflet
                 const leafletCoords: [number, number][] = routeCoords.map(
@@ -198,7 +209,7 @@ const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationPro
                 );
                 
                 // Draw the actual road route
-                L.polyline(leafletCoords, {
+                const polyline = L.polyline(leafletCoords, {
                   color: '#3b82f6',
                   weight: 4,
                   opacity: 0.9,
@@ -206,8 +217,10 @@ const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationPro
                   lineJoin: 'round',
                 }).addTo(map);
                 
+                console.log('✅ Real road route drawn successfully', polyline);
                 hasRealRoutes = true;
               } else {
+                console.warn('⚠️ No routes in response, using fallback');
                 // Fallback to straight line
                 L.polyline([start, end], {
                   color: '#3b82f6',
@@ -217,6 +230,9 @@ const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationPro
                 }).addTo(map);
               }
             } else {
+              const errorData = await response.json().catch(() => ({}));
+              console.error('❌ ORS API failed:', response.status, errorData);
+              
               // Fallback to straight line
               L.polyline([start, end], {
                 color: '#94a3b8',
@@ -226,7 +242,7 @@ const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationPro
               }).addTo(map);
             }
           } catch (routeError) {
-            console.warn('Route API failed, using straight line:', routeError);
+            console.error('❌ Route API error:', routeError);
             // Fallback to straight line with different styling
             L.polyline([start, end], {
               color: '#94a3b8',
@@ -237,9 +253,10 @@ const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationPro
           }
         }
         
+        console.log('🏁 Finished drawing routes. Has real routes:', hasRealRoutes);
         setRouteDataSource(hasRealRoutes ? 'real' : 'fallback');
       } catch (error) {
-        console.error('Error drawing routes:', error);
+        console.error('💥 Fatal error drawing routes:', error);
         setRouteDataSource('fallback');
         
         // Ultimate fallback - draw straight lines
@@ -257,6 +274,7 @@ const RouteMapVisualization = ({ route, userLocation }: RouteMapVisualizationPro
     };
 
     // Start drawing routes
+    console.log('🚀 Calling drawRealRoutes()');
     drawRealRoutes();
 
     // Add distance labels on segments
