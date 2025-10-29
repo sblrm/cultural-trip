@@ -13,7 +13,9 @@ import {
   calculateDynamicPrice,
   estimateTrafficLevel,
   getCurrentFuelPrice,
-  type PricingBreakdown
+  getFuelConsumption,
+  type PricingBreakdown,
+  type TransportMode
 } from './dynamicPricing';
 
 export interface RouteNode {
@@ -148,20 +150,23 @@ export const getRouteData = async (
 export const calculateTravelCost = (
   distance: number,
   mode: 'fastest' | 'cheapest' | 'balanced' = 'balanced',
-  departureTime?: Date
+  departureTime?: Date,
+  transportMode: TransportMode = 'car'
 ): number => {
   const now = departureTime || new Date();
   const trafficLevel = estimateTrafficLevel(now);
+  const fuelConsumption = getFuelConsumption(transportMode);
 
   const pricing = calculateDynamicPrice({
     baseCost: 50000,
     fuelPrice: getCurrentFuelPrice(),
-    fuelConsumption: 12,
+    fuelConsumption,
     timeOfDay: now,
     dayOfWeek: now.getDay(),
     trafficLevel,
     distance,
-    mode
+    mode,
+    transportMode
   });
 
   return pricing.totalCost;
@@ -171,20 +176,23 @@ export const calculateTravelCost = (
 export const getTravelCostBreakdown = (
   distance: number,
   mode: 'fastest' | 'cheapest' | 'balanced' = 'balanced',
-  departureTime?: Date
+  departureTime?: Date,
+  transportMode: TransportMode = 'car'
 ): PricingBreakdown => {
   const now = departureTime || new Date();
   const trafficLevel = estimateTrafficLevel(now);
+  const fuelConsumption = getFuelConsumption(transportMode);
 
   return calculateDynamicPrice({
     baseCost: 50000,
     fuelPrice: getCurrentFuelPrice(),
-    fuelConsumption: 12,
+    fuelConsumption,
     timeOfDay: now,
     dayOfWeek: now.getDay(),
     trafficLevel,
     distance,
-    mode
+    mode,
+    transportMode
   });
 };
 
@@ -279,7 +287,8 @@ export const findOptimalRoute = async (
   destinations: Destination[],
   maxDestinations: number = 3,
   mode: OptimizationMode = 'balanced',
-  departureTime?: Date
+  departureTime?: Date,
+  transportMode: TransportMode = 'car'
 ): Promise<Route> => {
   if (destinations.length === 0) {
     throw new Error("No destinations provided");
@@ -363,8 +372,8 @@ export const findOptimalRoute = async (
       const distance = routeResult.data.distance;
       const duration = routeResult.data.duration;
       
-      // Calculate cost with dynamic pricing
-      const costBreakdown = getTravelCostBreakdown(distance, mode, now);
+      // Calculate cost with dynamic pricing and transport mode
+      const costBreakdown = getTravelCostBreakdown(distance, mode, now, transportMode);
       const cost = costBreakdown.totalCost;
       
       const edgeCost = calculateGScore(distance, mode);

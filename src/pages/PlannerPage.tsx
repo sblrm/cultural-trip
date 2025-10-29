@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useDestinations } from "@/contexts/DestinationsContext";
 import { useMap } from "@/contexts/MapContext";
 import { findOptimalRoute, Route as TravelRoute, OptimizationMode } from "@/services/routePlanner";
+import { type TransportMode } from "@/services/dynamicPricing";
 import PlannerSettingsCard from "@/components/planner/PlannerSettingsCard";
 import PlannedRouteCard from "@/components/planner/PlannedRouteCard";
 import ChatSidebar from "@/components/planner/ChatSidebar";
@@ -18,6 +19,7 @@ const PlannerPage = () => {
   const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);
   const [maxDestinations, setMaxDestinations] = useState<number>(3);
   const [optimizationMode, setOptimizationMode] = useState<OptimizationMode>('balanced');
+  const [transportMode, setTransportMode] = useState<TransportMode>('car');
   const [plannedRoute, setPlannedRoute] = useState<TravelRoute | null>(null);
   const [isPlanning, setIsPlanning] = useState<boolean>(false);
   const [currentPosition, setCurrentPosition] = useState<[number, number] | null>(null);
@@ -85,7 +87,8 @@ const PlannerPage = () => {
         filteredDestinations,
         maxDestinations,
         optimizationMode,
-        departureTime
+        departureTime,
+        transportMode
       );
       
       const endTime = performance.now();
@@ -216,6 +219,8 @@ const PlannerPage = () => {
                 setMaxDestinations={setMaxDestinations}
                 optimizationMode={optimizationMode}
                 setOptimizationMode={setOptimizationMode}
+                transportMode={transportMode}
+                setTransportMode={setTransportMode}
                 handlePlanRoute={handlePlanRoute}
                 isPlanning={isPlanning}
                 isTracking={isTracking}

@@ -16,6 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { OptimizationMode } from "@/services/routePlanner";
+import { type TransportMode } from "@/services/dynamicPricing";
+import TransportModeSelector from "./TransportModeSelector";
 
 interface PlannerSettingsCardProps {
   userLocation: { latitude: number; longitude: number } | null;
@@ -29,6 +31,8 @@ interface PlannerSettingsCardProps {
   setMaxDestinations: (value: number) => void;
   optimizationMode: OptimizationMode;
   setOptimizationMode: (mode: OptimizationMode) => void;
+  transportMode: TransportMode;
+  setTransportMode: (mode: TransportMode) => void;
   handlePlanRoute: () => void;
   isPlanning: boolean;
   isTracking: boolean;
@@ -50,6 +54,8 @@ const PlannerSettingsCard = ({
   setMaxDestinations,
   optimizationMode,
   setOptimizationMode,
+  transportMode,
+  setTransportMode,
   handlePlanRoute,
   isPlanning,
   isTracking,
@@ -264,8 +270,16 @@ const PlannerSettingsCard = ({
             </p>
           </div>
         </div>
+
+        {/* Transport Mode Selector - NEW */}
+        <div>
+          <TransportModeSelector
+            selectedMode={transportMode}
+            onModeChange={setTransportMode}
+          />
+        </div>
         
-        {/* Plan Button */}
+        {/* Plan Route Button */}
         <Button
           className="w-full mt-4"
           onClick={handlePlanRoute}
