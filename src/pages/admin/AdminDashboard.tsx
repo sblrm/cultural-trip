@@ -28,6 +28,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 import { 
   Plus, 
@@ -38,7 +46,13 @@ import {
   MapPin, 
   Star,
   Loader2,
-  Shield
+  Shield,
+  Search,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -48,13 +62,130 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [adminAccess, setAdminAccess] = useState(false);
   const [destinations, setDestinations] = useState<any[]>([]);
+  const [filteredDestinations, setFilteredDestinations] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalDestinations: 0, totalReviews: 0, totalBookings: 0 });
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Search & Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterProvince, setFilterProvince] = useState('all');
+  const [filterType, setFilterType] = useState('all');
+  const [sortBy, setSortBy] = useState<'name' | 'price' | 'created_at'>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [paginatedDestinations, setPaginatedDestinations] = useState<any[]>([]);
+
   useEffect(() => {
     checkAdminAccess();
   }, [isAuthenticated, user]);
+
+  // Filter & Search effect
+  useEffect(() => {
+    if (destinations.length > 0) {
+      applyFiltersAndSort();
+    }
+  }, [destinations, searchTerm, filterProvince, filterType, sortBy, sortOrder]);
+
+  // Pagination effect
+  useEffect(() => {
+    if (filteredDestinations.length > 0) {
+      applyPagination();
+    } else {
+      setPaginatedDestinations([]);
+      setTotalPages(1);
+    }
+  }, [filteredDestinations, currentPage, itemsPerPage]);
+
+  const applyFiltersAndSort = () => {
+    let filtered = [...destinations];
+
+    // Search filter
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(dest =>
+        dest.name.toLowerCase().includes(search) ||
+        dest.city.toLowerCase().includes(search) ||
+        dest.province.toLowerCase().includes(search) ||
+        dest.type.toLowerCase().includes(search)
+      );
+    }
+
+    // Province filter
+    if (filterProvince !== 'all') {
+      filtered = filtered.filter(dest => dest.province === filterProvince);
+    }
+
+    // Type filter
+    if (filterType !== 'all') {
+      filtered = filtered.filter(dest => dest.type === filterType);
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      let compareA = a[sortBy];
+      let compareB = b[sortBy];
+
+      // Handle string comparison
+      if (typeof compareA === 'string') {
+        compareA = compareA.toLowerCase();
+        compareB = compareB.toLowerCase();
+      }
+
+      if (sortOrder === 'asc') {
+        return compareA > compareB ? 1 : -1;
+      } else {
+        return compareA < compareB ? 1 : -1;
+      }
+    });
+
+    setFilteredDestinations(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  const applyPagination = () => {
+    const totalPages = Math.ceil(filteredDestinations.length / itemsPerPage);
+    setTotalPages(totalPages);
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginated = filteredDestinations.slice(startIndex, endIndex);
+
+    setPaginatedDestinations(paginated);
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handleItemsPerPageChange = (value: string) => {
+    setItemsPerPage(Number(value));
+    setCurrentPage(1);
+  };
+
+  const resetFilters = () => {
+    setSearchTerm('');
+    setFilterProvince('all');
+    setFilterType('all');
+    setSortBy('created_at');
+    setSortOrder('desc');
+  };
+
+  const getUniqueProvinces = () => {
+    const provinces = destinations.map(dest => dest.province);
+    return [...new Set(provinces)].sort();
+  };
+
+  const getUniqueTypes = () => {
+    const types = destinations.map(dest => dest.type);
+    return [...new Set(types)].sort();
+  };
 
   const checkAdminAccess = async () => {
     if (!isAuthenticated || !user) {
@@ -194,7 +325,107 @@ export default function AdminDashboard() {
             Kelola semua destinasi budaya yang tersedia di platform
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {/* Search & Filter Bar */}
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Cari destinasi, kota, provinsi, atau tipe..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Province Filter */}
+            <Select value={filterProvince} onValueChange={setFilterProvince}>
+              <SelectTrigger className="w-full md:w-[200px]">
+                <SelectValue placeholder="Semua Provinsi" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Provinsi</SelectItem>
+                {getUniqueProvinces().map((province) => (
+                  <SelectItem key={province} value={province}>
+                    {province}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Type Filter */}
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-full md:w-[200px]">
+                <SelectValue placeholder="Semua Tipe" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Tipe</SelectItem>
+                {getUniqueTypes().map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Sort By */}
+            <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+              <SelectTrigger className="w-full md:w-[150px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="created_at">Terbaru</SelectItem>
+                <SelectItem value="name">Nama</SelectItem>
+                <SelectItem value="price">Harga</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Sort Order */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+            >
+              {sortOrder === 'asc' ? '↑' : '↓'}
+            </Button>
+
+            {/* Reset Filters */}
+            <Button variant="ghost" onClick={resetFilters}>
+              <Filter className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
+          </div>
+
+          {/* Results Info */}
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div>
+              Menampilkan {paginatedDestinations.length > 0 ? ((currentPage - 1) * itemsPerPage) + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredDestinations.length)} dari {filteredDestinations.length} destinasi
+              {searchTerm || filterProvince !== 'all' || filterType !== 'all' ? (
+                <span className="ml-2 text-primary">(terfilter dari {destinations.length} total)</span>
+              ) : null}
+            </div>
+            
+            {/* Items per page */}
+            <div className="flex items-center gap-2">
+              <span>Per halaman:</span>
+              <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
+                <SelectTrigger className="w-[80px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Table */}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -209,14 +440,17 @@ export default function AdminDashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {destinations.length === 0 ? (
+                {paginatedDestinations.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      Belum ada destinasi. Klik "Tambah Destinasi" untuk memulai.
+                      {destinations.length === 0 
+                        ? 'Belum ada destinasi. Klik "Tambah Destinasi" untuk memulai.'
+                        : 'Tidak ada destinasi yang sesuai dengan filter.'
+                      }
                     </TableCell>
                   </TableRow>
                 ) : (
-                  destinations.map((dest) => (
+                  paginatedDestinations.map((dest) => (
                     <TableRow key={dest.id}>
                       <TableCell className="font-medium">{dest.id}</TableCell>
                       <TableCell>
@@ -279,6 +513,89 @@ export default function AdminDashboard() {
               </TableBody>
             </Table>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Halaman {currentPage} dari {totalPages}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                {/* First Page */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(1)}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+
+                {/* Previous Page */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
+                {/* Page Numbers */}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(page => {
+                      // Show first page, last page, current page, and pages around current
+                      if (page === 1 || page === totalPages) return true;
+                      if (Math.abs(page - currentPage) <= 1) return true;
+                      return false;
+                    })
+                    .map((page, index, array) => {
+                      // Add ellipsis if there's a gap
+                      const prevPage = array[index - 1];
+                      const showEllipsis = prevPage && page - prevPage > 1;
+                      
+                      return (
+                        <div key={page} className="flex items-center">
+                          {showEllipsis && (
+                            <span className="px-2 text-muted-foreground">...</span>
+                          )}
+                          <Button
+                            variant={currentPage === page ? 'default' : 'outline'}
+                            size="icon"
+                            onClick={() => handlePageChange(page)}
+                            className="w-9"
+                          >
+                            {page}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                </div>
+
+                {/* Next Page */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+
+                {/* Last Page */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={currentPage === totalPages}
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

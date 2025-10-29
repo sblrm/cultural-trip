@@ -43,13 +43,25 @@
 - **Real-time Chat Support** for trip planning assistance
 - **Budget and Time Optimization** for efficient travel planning
 
-### � **Transparent Pricing System**
+### 💰 **Transparent Pricing System**
 - **Clear Pricing Display** (Rp 25.000 - Rp 50.000 range)
 - **Operating Hours Information** (06:00 - 17:00 typical)
 - **Detailed Cost Breakdown** for trip planning
 - **Budget-friendly Options** for various traveler types
 
-### � **Modern User Experience**
+### 🛡️ **Admin Dashboard** (NEW!)
+- **Full CRUD Operations** for managing cultural destinations
+- **Image Upload** with Supabase Storage integration
+- **Real-time Search** across name, city, province, and type
+- **Smart Filters** (Province, Type, Sort by name/price/date)
+- **Pagination System** with configurable items per page (5-100)
+- **Role-based Access Control** with RLS policies
+- **Form Validation** with Zod schema
+- **Statistics Dashboard** showing total destinations, reviews, bookings
+- **Responsive Design** optimized for mobile and desktop
+- See [ADMIN_DASHBOARD.md](./docs/ADMIN_DASHBOARD.md) for full documentation
+
+### 🌐 **Modern User Experience**
 - **Bilingual Support** (Indonesian interface)
 - **Responsive Design** optimized for all devices  
 - **Intuitive Navigation** with clean, modern UI

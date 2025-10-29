@@ -9,6 +9,9 @@ Admin Dashboard adalah panel kontrol untuk mengelola destinasi budaya di TravoMa
 - ✅ Statistics dashboard
 - ✅ Role-based access control
 - ✅ Production-ready security
+- ✅ **Search, Filter & Pagination** (NEW!)
+
+> **Note:** Untuk dokumentasi lengkap Search, Filter & Pagination, lihat [ADMIN_SEARCH_FILTER_PAGINATION.md](./ADMIN_SEARCH_FILTER_PAGINATION.md)
 
 ---
 
@@ -54,7 +57,20 @@ Login dengan akun admin, klik dropdown user di header → **Admin Dashboard**
   - Total Destinasi
   - Total Review
   - Total Booking
-- 📋 Tabel Destinasi dengan:
+- � **Search & Filter Bar**:
+  - Real-time search (nama, kota, provinsi, tipe)
+  - Filter by Province (dropdown dengan semua provinsi)
+  - Filter by Type (dropdown dengan semua tipe)
+  - Sort by (name/price/created date)
+  - Sort order toggle (ascending/descending)
+  - Reset filters button
+  - Results counter (menampilkan X dari Y destinasi)
+- 📄 **Pagination Controls**:
+  - Items per page selector (5, 10, 25, 50, 100)
+  - Smart page navigation (First, Prev, Page Numbers, Next, Last)
+  - Auto-ellipsis untuk page counts > 7
+  - Page info display (Halaman X dari Y)
+- �📋 Tabel Destinasi dengan:
   - Thumbnail gambar
   - Info lokasi & tipe
   - Harga
@@ -62,10 +78,19 @@ Login dengan akun admin, klik dropdown user di header → **Admin Dashboard**
   - Action buttons (View, Edit, Delete)
 - ➕ Button "Tambah Destinasi"
 
+**Data Management:**
+- Search bekerja real-time tanpa API calls (client-side)
+- Filters dapat dikombinasikan (cumulative filtering)
+- Pagination otomatis menyesuaikan dengan filter results
+- Reset page ke 1 saat filter berubah
+- Responsive design untuk mobile
+
 **Actions:**
 - View: Lihat detail destinasi di public page
 - Edit: Edit destinasi yang ada
 - Delete: Hapus destinasi (dengan konfirmasi)
+
+> **Dokumentasi Lengkap**: Lihat [ADMIN_SEARCH_FILTER_PAGINATION.md](./ADMIN_SEARCH_FILTER_PAGINATION.md) untuk technical details, algorithms, dan configuration options
 
 ---
 
@@ -273,6 +298,20 @@ Admin routes automatically:
    - Pisahkan dengan koma
    - Contoh: "Bus, Kereta, Taksi, Ojek Online"
 
+6. **Menggunakan Search & Filter**
+   - Gunakan search untuk cari destinasi spesifik dengan cepat
+   - Kombinasikan filter untuk narrow down results (Province + Type)
+   - Gunakan sort untuk prioritas (harga terendah/tertinggi, terbaru/terlama)
+   - Reset filters saat ingin kembali ke full view
+   - Adjust items per page sesuai kebutuhan (5 untuk mobile, 25-50 untuk desktop)
+
+7. **Managing Large Datasets**
+   - Gunakan pagination untuk navigate data besar
+   - Set items per page 50-100 untuk bulk review
+   - Gunakan sort by "created_at desc" untuk lihat entry terbaru
+   - Filter by province saat ingin review destinasi per wilayah
+   - Gunakan search untuk instant lookup saat ada report dari user
+
 ### Security:
 
 1. **Jangan share kredensial admin**
@@ -293,6 +332,22 @@ Admin routes automatically:
 - [ ] Analytics dashboard
 - [ ] Export data (Excel/PDF)
 - [ ] Advanced search & filters
+- [ ] Column sorting (click table headers)
+- [ ] Bulk actions (multi-select for batch edit/delete)
+- [ ] Debounced search (optimize typing performance)
+- [ ] URL state preservation (save filters in URL params)
+- [ ] Saved filter presets
+- [ ] Export filtered results
+- [ ] Advanced filters (price range, date range, rating)
+
+**Recently Added:**
+- ✅ Real-time search (multi-field)
+- ✅ Province & Type filters
+- ✅ Sort by name/price/date with order toggle
+- ✅ Smart pagination with ellipsis
+- ✅ Configurable items per page (5-100)
+- ✅ Results counter
+- ✅ Reset filters button
 
 ---
 
@@ -317,6 +372,41 @@ Admin routes automatically:
 3. Clear form dan isi ulang
 
 ### Destinasi tidak muncul di dashboard
+**Solution:**
+1. Check RLS policies enabled
+2. Verify destinasi exists di Supabase
+3. Refresh browser
+4. Check console untuk errors
+
+### Search tidak menemukan hasil
+**Solution:**
+1. Coba search term yang lebih spesifik atau lebih general
+2. Check filter Province/Type tidak terlalu restrictive
+3. Reset filters dengan button "Reset"
+4. Verify data destinasi mengandung keyword yang dicari
+
+### Pagination tidak muncul
+**Solution:**
+1. Pastikan total destinasi > items per page
+2. Check filtered results bukan 0
+3. Refresh page jika stuck
+4. Increase items per page untuk lihat semua data
+
+### Filter tidak bekerja
+**Solution:**
+1. Check console untuk JavaScript errors
+2. Verify filtered data bukan kosong (coba reset filters)
+3. Refresh page untuk reset state
+4. Check kombinasi filters masuk akal (contoh: jangan filter "Jawa Barat" + "Candi" jika tidak ada)
+
+---
+
+## 📚 Additional Documentation
+
+- **Search, Filter & Pagination**: [ADMIN_SEARCH_FILTER_PAGINATION.md](./ADMIN_SEARCH_FILTER_PAGINATION.md)
+- **Setup Guide**: [ADMIN_SETUP_QUICK.md](./ADMIN_SETUP_QUICK.md)
+- **Adding Destinations**: [ADD_DESTINATIONS.md](./ADD_DESTINATIONS.md)
+- **Database Schema**: [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
 **Solution:**
 1. Check RLS policies: `SELECT * FROM destinations` should work
 2. Refresh page (F5)
