@@ -200,7 +200,16 @@ const DestinationsPage = () => {
                         )}
                       </div>
                       <CardContent className="p-4">
-                        <h3 className="font-bold text-lg mb-2">{destination.name}</h3>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <h3 className="font-bold text-lg flex-1">{destination.name}</h3>
+                          <div onClick={(e) => e.preventDefault()}>
+                            <WishlistButton
+                              destinationId={destination.id}
+                              variant="icon"
+                              size="sm"
+                            />
+                          </div>
+                        </div>
                         <div className="flex items-center text-muted-foreground mb-2">
                           <MapPin className="h-4 w-4 mr-1" />
                           <span className="text-sm">
@@ -224,14 +233,6 @@ const DestinationsPage = () => {
                       </CardContent>
                     </Card>
                   </Link>
-                  {/* Wishlist Button Overlay */}
-                  <div className="absolute top-3 right-3 z-10" onClick={(e) => e.preventDefault()}>
-                    <WishlistButton
-                      destinationId={destination.id}
-                      variant="icon"
-                      size="default"
-                    />
-                  </div>
                 </div>
               ))}
               </div>
