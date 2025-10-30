@@ -12,7 +12,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import ShareTripModal from "@/components/social/ShareTripModal";
 import { Route as TravelRoute } from "@/services/routePlanner";
+import type { TripPlan } from "@/services/socialSharing";
 
 interface PlannedRouteCardProps {
   route: TravelRoute;
@@ -21,16 +23,28 @@ interface PlannedRouteCardProps {
 const PlannedRouteCard = ({ route }: PlannedRouteCardProps) => {
   const { t } = useTranslation();
   
+  // Prepare trip plan data for sharing
+  const tripPlan: TripPlan = {
+    destinations: route.nodes.map(node => node.destination),
+    totalDistance: route.totalDistance,
+    totalDuration: route.totalDuration,
+    totalCost: route.totalCost,
+    startDate: new Date().toISOString(),
+  };
+  
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>{t('planner.routeResult')}</span>
-          <div className="flex items-center gap-2 text-sm font-normal">
-            <Database className="h-4 w-4" />
-            <span className="text-muted-foreground">
-              {route.dataSource === 'ors' ? t('planner.realRoads') : t('planner.estimate')}
-            </span>
+          <div className="flex items-center gap-3">
+            <ShareTripModal tripPlan={tripPlan} />
+            <div className="flex items-center gap-2 text-sm font-normal">
+              <Database className="h-4 w-4" />
+              <span className="text-muted-foreground">
+                {route.dataSource === 'ors' ? t('planner.realRoads') : t('planner.estimate')}
+              </span>
+            </div>
           </div>
         </CardTitle>
       </CardHeader>

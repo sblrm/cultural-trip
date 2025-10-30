@@ -20,6 +20,8 @@ import { toast } from "sonner";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { ReviewList } from "@/components/reviews/ReviewList";
 import WishlistButton from "@/components/wishlist/WishlistButton";
+import BeenHerePhoto from "@/components/social/BeenHerePhoto";
+import ShareButton from "@/components/social/ShareButton";
 import type { ReviewWithProfile, DestinationRating } from "@/types/review";
 import {
   getDestinationReviews,
@@ -552,6 +554,28 @@ const DestinationDetailPage = () => {
                       size="lg"
                       className="w-full"
                     />
+
+                    {/* Been Here Photo */}
+                    <BeenHerePhoto
+                      destinationId={destination.id}
+                      destinationName={destination.name}
+                      onUploadSuccess={loadReviews}
+                    />
+
+                    {/* Share Button */}
+                    <div className="w-full">
+                      <ShareButton
+                        data={{
+                          title: `${destination.name} - TravoMate`,
+                          description: `Kunjungi ${destination.name} di ${destination.location.city}, ${destination.location.province}. ${destination.description}`,
+                          url: window.location.href,
+                          image: destination.image,
+                        }}
+                        variant="outline"
+                        size="lg"
+                        showLabel={true}
+                      />
+                    </div>
 
                     {/* Info */}
                     <div className="text-xs text-muted-foreground space-y-1">
