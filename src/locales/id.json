@@ -88,6 +88,8 @@
     "about": "Tentang",
     "location": "Lokasi",
     "coordinates": "Koordinat",
+    "type": "Jenis Budaya",
+    "notFound": "Destinasi tidak ditemukan",
     "facilities": "Fasilitas",
     "parking": "Tempat Parkir",
     "toilet": "Toilet",
@@ -106,6 +108,8 @@
     "duration": "Durasi Kunjungan",
     "hour": "menit",
     "hours_plural": "jam",
+    "minutes": "menit",
+    "hoursLabel": "jam",
     "price": "Harga Tiket",
     "transportation": "Akses Transportasi",
     "bus": "Bus",
@@ -142,6 +146,9 @@
     "totalDistance": "Total Jarak",
     "totalDuration": "Total Waktu",
     "totalCost": "Total Biaya",
+    "distance": "Jarak",
+    "duration": "Durasi",
+    "cost": "Biaya",
     "routeVisualization": "Visualisasi Rute Perjalanan",
     "startPoint": "Titik Awal",
     "yourLocation": "Lokasi Anda",
@@ -150,6 +157,11 @@
     "realRoads": "Jalan Real",
     "estimate": "Estimasi",
     "dataSource": "Sumber Data"
+  },
+  "itinerary": {
+    "title": "Rencana Wisata Budaya",
+    "totalDestinations": "Total Destinasi",
+    "plannedWith": "Direncanakan dengan"
   },
   "auth": {
     "login": {

@@ -77,7 +77,7 @@ const PlannedRouteCard = ({ route }: PlannedRouteCardProps) => {
               <Clock className="h-5 w-5 text-primary mb-2" />
               <div className="text-sm text-muted-foreground">{t('planner.totalDuration')}</div>
               <div className="font-bold text-lg">
-                {Math.floor(Math.round(route.totalDuration) / 60)} {t('destinationDetail.hour')} {Math.round(route.totalDuration) % 60} {t('destinationDetail.duration')}
+                {Math.floor(Math.round(route.totalDuration) / 60)} {t('destinationDetail.hoursLabel')} {Math.round(route.totalDuration) % 60} {t('destinationDetail.minutes')}
               </div>
             </div>
             
@@ -136,16 +136,16 @@ const PlannedRouteCard = ({ route }: PlannedRouteCardProps) => {
                             
                             <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                               <div>
-                                <span className="text-muted-foreground">Jarak: </span>
+                                <span className="text-muted-foreground">{t('planner.distance')}: </span>
                                 {Math.round(node.distance * 10) / 10} km
                               </div>
                               <div>
-                                <span className="text-muted-foreground">Waktu Tempuh: </span>
-                                {Math.floor(Math.round(node.duration) / 60) > 0 ? `${Math.floor(Math.round(node.duration) / 60)} jam ` : ""}
-                                {Math.round(node.duration) % 60} menit
+                                <span className="text-muted-foreground">{t('planner.duration')}: </span>
+                                {Math.floor(Math.round(node.duration) / 60) > 0 ? `${Math.floor(Math.round(node.duration) / 60)} ${t('destinationDetail.hoursLabel')} ` : ""}
+                                {Math.round(node.duration) % 60} {t('destinationDetail.minutes')}
                               </div>
                               <div>
-                                <span className="text-muted-foreground">Biaya: </span>
+                                <span className="text-muted-foreground">{t('planner.cost')}: </span>
                                 Rp {Math.round(node.cost).toLocaleString('id-ID')}
                               </div>
                             </div>

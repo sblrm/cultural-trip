@@ -89,6 +89,8 @@
     "details": "Details",
     "location": "Location",
     "coordinates": "Coordinates",
+    "type": "Cultural Type",
+    "notFound": "Destination not found",
     "facilities": "Facilities",
     "parking": "Parking Area",
     "toilet": "Restrooms",
@@ -107,6 +109,8 @@
     "duration": "Visit Duration",
     "hour": "minutes",
     "hours_plural": "hours",
+    "minutes": "minutes",
+    "hoursLabel": "hours",
     "price": "Ticket Price",
     "transportation": "Transportation Access",
     "bus": "Bus",
@@ -143,6 +147,9 @@
     "totalDistance": "Total Distance",
     "totalDuration": "Total Duration",
     "totalCost": "Total Cost",
+    "distance": "Distance",
+    "duration": "Duration",
+    "cost": "Cost",
     "routeVisualization": "Route Visualization",
     "startPoint": "Start Point",
     "yourLocation": "Your Location",
@@ -151,6 +158,11 @@
     "realRoads": "Real Roads",
     "estimate": "Estimate",
     "dataSource": "Data Source"
+  },
+  "itinerary": {
+    "title": "Cultural Trip Plan",
+    "totalDestinations": "Total Destinations",
+    "plannedWith": "Planned with"
   },
   "auth": {
     "login": {

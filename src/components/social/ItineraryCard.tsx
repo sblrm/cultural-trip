@@ -1,5 +1,6 @@
 import { MapPin, Calendar, DollarSign, Clock, Navigation } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 import type { TripPlan } from "@/services/socialSharing";
 
 interface ItineraryCardProps {
@@ -9,6 +10,7 @@ interface ItineraryCardProps {
 
 const ItineraryCard = ({ tripPlan, cardId = "itinerary-card" }: ItineraryCardProps) => {
   const { destinations, totalDistance, totalDuration, totalCost, startDate } = tripPlan;
+  const { t } = useTranslation();
 
   return (
     <div id={cardId} className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 p-8 max-w-2xl mx-auto">
@@ -17,7 +19,7 @@ const ItineraryCard = ({ tripPlan, cardId = "itinerary-card" }: ItineraryCardPro
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-2xl font-bold mb-2">
-                🗺️ Rencana Wisata Budaya
+                🗺️ {t('itinerary.title')}
               </h2>
               {startDate && (
                 <div className="flex items-center text-white/90 text-sm">
@@ -32,7 +34,7 @@ const ItineraryCard = ({ tripPlan, cardId = "itinerary-card" }: ItineraryCardPro
               )}
             </div>
             <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2">
-              <div className="text-xs text-white/80">Total Destinasi</div>
+              <div className="text-xs text-white/80">{t('itinerary.totalDestinations')}</div>
               <div className="text-2xl font-bold">{destinations.length}</div>
             </div>
           </div>
@@ -86,21 +88,23 @@ const ItineraryCard = ({ tripPlan, cardId = "itinerary-card" }: ItineraryCardPro
               <div className="flex items-center justify-center mb-1">
                 <Navigation className="h-4 w-4 text-primary" />
               </div>
-              <div className="text-xs text-muted-foreground">Jarak</div>
+              <div className="text-xs text-muted-foreground">{t('planner.distance')}</div>
               <div className="font-bold text-sm text-foreground">{totalDistance.toFixed(1)} km</div>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center mb-1">
                 <Clock className="h-4 w-4 text-primary" />
               </div>
-              <div className="text-xs text-muted-foreground">Durasi</div>
-              <div className="font-bold text-sm text-foreground">{Math.round(totalDuration)} min</div>
+              <div className="text-xs text-muted-foreground">{t('planner.duration')}</div>
+              <div className="font-bold text-sm text-foreground">
+                {Math.floor(totalDuration / 60)} {t('destinationDetail.hoursLabel')} {Math.round(totalDuration % 60)} {t('destinationDetail.minutes')}
+              </div>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center mb-1">
                 <DollarSign className="h-4 w-4 text-primary" />
               </div>
-              <div className="text-xs text-muted-foreground">Biaya</div>
+              <div className="text-xs text-muted-foreground">{t('planner.cost')}</div>
               <div className="font-bold text-sm text-foreground">Rp {(totalCost / 1000).toFixed(0)}k</div>
             </div>
           </div>
@@ -108,7 +112,7 @@ const ItineraryCard = ({ tripPlan, cardId = "itinerary-card" }: ItineraryCardPro
           {/* Footer */}
           <div className="pt-4 border-t border-border text-center">
             <p className="text-xs text-muted-foreground">
-              Direncanakan dengan
+              {t('itinerary.plannedWith')}
             </p>
             <p className="text-sm font-bold text-primary">
               TravoMate 🇮🇩

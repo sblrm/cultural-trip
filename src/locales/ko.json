@@ -89,6 +89,8 @@
     "details": "상세정보",
     "location": "위치",
     "coordinates": "좌표",
+    "type": "문화 유형",
+    "notFound": "목적지를 찾을 수 없습니다",
     "facilities": "시설",
     "parking": "주차장",
     "toilet": "화장실",
@@ -107,6 +109,8 @@
     "duration": "방문 시간",
     "hour": "분",
     "hours_plural": "시간",
+    "minutes": "분",
+    "hoursLabel": "시간",
     "price": "티켓 가격",
     "transportation": "교통 접근성",
     "bus": "버스",
@@ -141,8 +145,11 @@
     "planRoute": "경로 계획",
     "routeResult": "경로 계획 결과",
     "totalDistance": "총 거리",
-    "totalDuration": "총 시간",
+    "totalDuration": "총 소요시간",
     "totalCost": "총 비용",
+    "distance": "거리",
+    "duration": "소요시간",
+    "cost": "비용",
     "routeVisualization": "경로 시각화",
     "startPoint": "출발점",
     "yourLocation": "내 위치",
@@ -151,6 +158,11 @@
     "realRoads": "실제 도로",
     "estimate": "예상",
     "dataSource": "데이터 출처"
+  },
+  "itinerary": {
+    "title": "문화 여행 계획",
+    "totalDestinations": "총 목적지",
+    "plannedWith": "계획 도구"
   },
   "auth": {
     "login": {

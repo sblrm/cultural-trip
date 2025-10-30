@@ -89,6 +89,8 @@
     "details": "详情",
     "location": "位置",
     "coordinates": "坐标",
+    "type": "文化类型",
+    "notFound": "未找到目的地",
     "facilities": "设施",
     "parking": "停车场",
     "toilet": "洗手间",
@@ -107,6 +109,8 @@
     "duration": "参观时长",
     "hour": "分钟",
     "hours_plural": "小时",
+    "minutes": "分钟",
+    "hoursLabel": "小时",
     "price": "门票价格",
     "transportation": "交通方式",
     "bus": "公共汽车",
@@ -143,6 +147,9 @@
     "totalDistance": "总距离",
     "totalDuration": "总时长",
     "totalCost": "总费用",
+    "distance": "距离",
+    "duration": "时长",
+    "cost": "费用",
     "routeVisualization": "路线可视化",
     "startPoint": "起点",
     "yourLocation": "您的位置",
@@ -151,6 +158,11 @@
     "realRoads": "真实道路",
     "estimate": "估计",
     "dataSource": "数据来源"
+  },
+  "itinerary": {
+    "title": "文化旅行计划",
+    "totalDestinations": "总目的地",
+    "plannedWith": "计划者"
   },
   "auth": {
     "login": {

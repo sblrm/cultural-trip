@@ -131,9 +131,9 @@ const DestinationDetailPage = () => {
   if (!destination) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold mb-4">Destinasi tidak ditemukan</h1>
+        <h1 className="text-2xl font-bold mb-4">{t('destinationDetail.notFound')}</h1>
         <Link to="/destinations">
-          <Button>Kembali ke Destinasi</Button>
+          <Button>{t('common.backToDestinations')}</Button>
         </Link>
       </div>
     );
@@ -286,7 +286,7 @@ const DestinationDetailPage = () => {
                       </Card>
                     </div>
                     
-                    <h2 className="text-2xl font-bold mb-4">Jenis Budaya</h2>
+                    <h2 className="text-2xl font-bold mb-4">{t('destinationDetail.type')}</h2>
                     <p className="text-muted-foreground mb-6">
                       {destination.type}
                     </p>

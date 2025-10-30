@@ -89,6 +89,8 @@
     "details": "詳細",
     "location": "場所",
     "coordinates": "座標",
+    "type": "文化タイプ",
+    "notFound": "目的地が見つかりません",
     "facilities": "施設",
     "parking": "駐車場",
     "toilet": "トイレ",
@@ -107,6 +109,8 @@
     "duration": "訪問時間",
     "hour": "分",
     "hours_plural": "時間",
+    "minutes": "分",
+    "hoursLabel": "時間",
     "price": "チケット価格",
     "transportation": "交通アクセス",
     "bus": "バス",
@@ -141,9 +145,12 @@
     "planRoute": "ルートを計画",
     "routeResult": "ルートプランニング結果",
     "totalDistance": "総距離",
-    "totalDuration": "総時間",
+    "totalDuration": "総所要時間",
     "totalCost": "総費用",
-    "routeVisualization": "ルートの視覚化",
+    "distance": "距離",
+    "duration": "所要時間",
+    "cost": "費用",
+    "routeVisualization": "ルート可視化",
     "startPoint": "出発点",
     "yourLocation": "あなたの場所",
     "destination": "観光地",
@@ -151,6 +158,11 @@
     "realRoads": "実際の道路",
     "estimate": "推定",
     "dataSource": "データソース"
+  },
+  "itinerary": {
+    "title": "文化旅行プラン",
+    "totalDestinations": "総目的地数",
+    "plannedWith": "計画作成"
   },
   "auth": {
     "login": {
