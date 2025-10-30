@@ -118,7 +118,7 @@ const HomePage = () => {
                           <div className="flex items-center text-muted-foreground">
                             <Calendar className="h-4 w-4 mr-1" />
                             <span className="text-sm">
-                              {destination.duration} {t('destinationDetail.duration')}
+                              {destination.duration} {t('destinationDetail.hour')}
                             </span>
                           </div>
                           <div className="mt-4 flex justify-between items-center">
