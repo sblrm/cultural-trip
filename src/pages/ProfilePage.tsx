@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Ticket, Calendar, MapPin } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ProfilePage = () => {
+  const { t } = useTranslation();
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState<any[]>([]);
@@ -40,14 +42,14 @@ const ProfilePage = () => {
         setTickets(data || []);
       } catch (error) {
         console.error('Error fetching tickets:', error);
-        toast.error('Gagal memuat data tiket');
+        toast.error(t('profile.ticketLoadError'));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchTickets();
-  }, [isAuthenticated, navigate, user?.id]);
+  }, [isAuthenticated, navigate, user?.id, t]);
 
   if (!isAuthenticated || !user) {
     return null;
@@ -55,7 +57,7 @@ const ProfilePage = () => {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">Profil Saya</h1>
+      <h1 className="text-3xl font-bold mb-8">{t('profile.title')}</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* User Info Card */}
@@ -63,26 +65,26 @@ const ProfilePage = () => {
           <CardHeader>
             <CardTitle className="flex items-center">
               <User className="mr-2 h-5 w-5" />
-              Informasi Pengguna
+              {t('profile.userInfo')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <div className="text-sm text-muted-foreground">Nama Lengkap</div>
+              <div className="text-sm text-muted-foreground">{t('booking.fullName')}</div>
               <div className="font-medium">{user.name}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Email</div>
+              <div className="text-sm text-muted-foreground">{t('booking.email')}</div>
               <div className="font-medium">{user.email}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">ID Pengguna</div>
+              <div className="text-sm text-muted-foreground">{t('profile.userId')}</div>
               <div className="font-medium">{user.id}</div>
             </div>
           </CardContent>
           <CardFooter>
             <Button variant="outline" className="w-full" onClick={() => logout()}>
-              Keluar
+              {t('nav.logout')}
             </Button>
           </CardFooter>
         </Card>
@@ -92,26 +94,26 @@ const ProfilePage = () => {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Ticket className="mr-2 h-5 w-5" />
-              Tiket Saya
+              {t('profile.myTickets')}
             </CardTitle>
             <CardDescription>
-              Tiket yang telah Anda pesan
+              {t('profile.bookedTickets')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="text-center py-8">
                 <div className="mx-auto w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                <p className="mt-2 text-sm text-muted-foreground">Memuat tiket...</p>
+                <p className="mt-2 text-sm text-muted-foreground">{t('profile.loadingTickets')}</p>
               </div>
             ) : tickets.length === 0 ? (
               <div className="text-center py-8">
                 <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
                   <Ticket className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-medium mb-1">Belum ada tiket</h3>
+                <h3 className="text-lg font-medium mb-1">{t('profile.noTickets')}</h3>
                 <p className="text-muted-foreground">
-                  Anda belum memiliki tiket yang dipesan. Mulai jelajahi destinasi budaya Indonesia sekarang!
+                  {t('profile.noTicketsDesc')}
                 </p>
               </div>
             ) : (
@@ -142,10 +144,10 @@ const ProfilePage = () => {
                           })}
                         </div>
                         <div className="mt-2 text-sm">
-                          <span className="font-medium">Jumlah:</span> {ticket.quantity} tiket
+                          <span className="font-medium">{t('booking.ticketQuantity')}:</span> {ticket.quantity} {t('profile.tickets')}
                         </div>
                         <div className="mt-1 text-sm">
-                          <span className="font-medium">Total:</span> Rp {ticket.total_price.toLocaleString('id-ID')}
+                          <span className="font-medium">{t('booking.total')}:</span> Rp {ticket.total_price.toLocaleString('id-ID')}
                         </div>
                         <div className="mt-2">
                           <span 
@@ -155,7 +157,7 @@ const ProfilePage = () => {
                                 : 'bg-yellow-100 text-yellow-800'
                             }`}
                           >
-                            {ticket.status === 'confirmed' ? 'Tiket Aktif' : 'Menunggu Konfirmasi'}
+                            {ticket.status === 'confirmed' ? t('profile.activeTicket') : t('profile.waitingConfirmation')}
                           </span>
                         </div>
                       </div>
@@ -167,7 +169,7 @@ const ProfilePage = () => {
           </CardContent>
           <CardFooter>
             <Button className="w-full" onClick={() => navigate("/destinations")}>
-              {tickets.length > 0 ? "Pesan Tiket Lagi" : "Jelajahi Destinasi"}
+              {tickets.length > 0 ? t('profile.bookAgain') : t('profile.exploreDestinations')}
             </Button>
           </CardFooter>
         </Card>

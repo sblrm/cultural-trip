@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,15 +34,15 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 batik-pattern">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Masuk ke Akun Anda</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('auth.login.title')}</CardTitle>
           <CardDescription>
-            Masuk untuk melanjutkan ke Budaya Jelajah Indonesia
+            {t('auth.login.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.login.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -52,9 +54,9 @@ const LoginPage = () => {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('auth.login.password')}</Label>
                 <Link to="#" className="text-sm text-primary hover:underline">
-                  Lupa password?
+                  {t('auth.login.forgotPassword')}
                 </Link>
               </div>
               <Input
@@ -70,10 +72,10 @@ const LoginPage = () => {
               {isLoading ? (
                 <span className="flex items-center">
                   <span className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
-                  Memproses...
+                  {t('common.loading')}
                 </span>
               ) : (
-                "Masuk"
+                t('auth.login.loginButton')
               )}
             </Button>
           </form>
@@ -81,9 +83,9 @@ const LoginPage = () => {
         <CardFooter className="text-center">
           <div className="w-full">
             <p className="text-sm text-muted-foreground">
-              Belum memiliki akun?{" "}
+              {t('auth.login.noAccount')}{" "}
               <Link to="/register" className="text-primary hover:underline">
-                Daftar
+                {t('auth.login.register')}
               </Link>
             </p>
           </div>

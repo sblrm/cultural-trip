@@ -61,3 +61,5 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
+docs/SETUP_ENV_VARIABLES.md
+setup-env.ps1

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRight, MapPin, Star, Calendar } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useDestinations } from "@/contexts/DestinationsContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 
 const HomePage = () => {
   const { destinations, loading } = useDestinations();
+  const { t } = useTranslation();
   const [featuredDestinations, setFeaturedDestinations] = useState([]);
 
   useEffect(() => {
@@ -48,19 +50,19 @@ const HomePage = () => {
         
         <div className="container mx-auto px-4 relative z-10 text-white">
           <div className="max-w-3xl mx-auto text-center hero-animation">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">Jelajahi Keindahan Budaya Indonesia</h1>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">{t('home.hero.title')}</h1>
             <p className="text-xl md:text-2xl mb-8">
-              Temukan destinasi budaya menakjubkan dengan rute wisata yang dirancang khusus untuk Anda
+              {t('home.hero.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/destinations">
                 <Button size="lg" className="bg-indonesia-red hover:bg-indonesia-red/90 text-white">
-                  Jelajahi Destinasi
+                  {t('home.hero.cta')}
                 </Button>
               </Link>
               <Link to="/planner">
                 <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/20">
-                  Rencanakan Perjalanan
+                  {t('planner.title')}
                 </Button>
               </Link>
             </div>
@@ -72,9 +74,9 @@ const HomePage = () => {
       <section className="py-16 bg-secondary/30 batik-pattern">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold">Destinasi Unggulan</h2>
+            <h2 className="text-3xl font-bold">{t('home.destinations.title')}</h2>
             <Link to="/destinations" className="text-primary flex items-center hover:underline">
-              Lihat Semua <ChevronRight className="h-4 w-4 ml-1" />
+              {t('home.destinations.viewAll')} <ChevronRight className="h-4 w-4 ml-1" />
             </Link>
           </div>
 
@@ -97,11 +99,11 @@ const HomePage = () => {
                           />
                           <div className="absolute top-2 right-2 bg-black/70 text-white py-1 px-2 rounded-full text-sm flex items-center">
                             <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
-                            {destination.rating > 0 ? destination.rating.toFixed(1) : 'Belum ada rating'}
+                            {destination.rating > 0 ? destination.rating.toFixed(1) : t('destinations.card.rating')}
                           </div>
                           {destination.reviewCount > 0 && (
                             <div className="absolute top-2 left-2 bg-black/70 text-white py-1 px-2 rounded-full text-xs">
-                              {destination.reviewCount} review
+                              {destination.reviewCount} {t('destinations.card.reviews')}
                             </div>
                           )}
                         </div>
@@ -116,7 +118,7 @@ const HomePage = () => {
                           <div className="flex items-center text-muted-foreground">
                             <Calendar className="h-4 w-4 mr-1" />
                             <span className="text-sm">
-                              {destination.duration} menit
+                              {destination.duration} {t('destinationDetail.duration')}
                             </span>
                           </div>
                           <div className="mt-4 flex justify-between items-center">
@@ -124,7 +126,7 @@ const HomePage = () => {
                               Rp {destination.price.toLocaleString('id-ID')}
                             </div>
                             <Button size="sm" variant="outline">
-                              Detail
+                              {t('common.viewDetails')}
                             </Button>
                           </div>
                         </CardContent>
@@ -144,9 +146,9 @@ const HomePage = () => {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Kenapa Memilih Kami?</h2>
+            <h2 className="text-3xl font-bold mb-4">{t('home.features.title')}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              TravoMate menawarkan pengalaman terbaik untuk menjelajahi kekayaan budaya Indonesia.
+              {t('footer.aboutText')}
             </p>
           </div>
 
@@ -169,9 +171,9 @@ const HomePage = () => {
                   <circle cx="12" cy="10" r="3" />
                 </svg>
               </div>
-              <h3 className="font-bold text-xl mb-2">Rute Wisata Cerdas</h3>
+              <h3 className="font-bold text-xl mb-2">{t('home.features.smartPlanner')}</h3>
               <p className="text-muted-foreground">
-                Algoritma AI kami merencanakan rute wisata paling efisien berdasarkan lokasi Anda dengan estimasi biaya yang akurat.
+                {t('home.features.smartPlannerDesc')}
               </p>
             </div>
 
@@ -198,9 +200,9 @@ const HomePage = () => {
                   <path d="M10 15h7" />
                 </svg>
               </div>
-              <h3 className="font-bold text-xl mb-2">Informasi Lengkap</h3>
+              <h3 className="font-bold text-xl mb-2">{t('home.features.realTime')}</h3>
               <p className="text-muted-foreground">
-                Dapatkan informasi lengkap tentang destinasi budaya, sejarah, jam buka, dan fasilitas yang tersedia.
+                {t('home.features.realTimeDesc')}
               </p>
             </div>
 
@@ -223,9 +225,9 @@ const HomePage = () => {
                   <path d="m12.2 8.2.01-.2M14 8.2l.01-.2M16 8.2l.01-.2" />
                 </svg>
               </div>
-              <h3 className="font-bold text-xl mb-2">Pemesanan Tiket Mudah</h3>
+              <h3 className="font-bold text-xl mb-2">{t('home.features.aiPowered')}</h3>
               <p className="text-muted-foreground">
-                Pesan tiket dengan cepat dan aman untuk destinasi budaya favorit Anda tanpa kerumitan.
+                {t('home.features.aiPoweredDesc')}
               </p>
             </div>
           </div>
@@ -236,13 +238,13 @@ const HomePage = () => {
       <section className="py-16 bg-primary text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">Mulai Petualangan Budaya Anda Sekarang</h2>
+            <h2 className="text-3xl font-bold mb-4">{t('home.hero.title')}</h2>
             <p className="text-xl mb-8">
-              Jelajahi keindahan budaya Indonesia dan temukan destinasi baru yang menakjubkan.
+              {t('home.hero.subtitle')}
             </p>
             <Link to="/planner">
               <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90">
-                Rencanakan Perjalanan
+                {t('planner.title')}
               </Button>
             </Link>
           </div>

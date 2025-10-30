@@ -1,0 +1,211 @@
+{
+  "common": {
+    "appName": "TravoMate",
+    "tagline": "Discover Indonesia",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "viewDetails": "View Details",
+    "learnMore": "Learn More"
+  },
+  "nav": {
+    "home": "Home",
+    "destinations": "Destinations",
+    "planner": "Trip Planner",
+    "about": "About",
+    "login": "Login",
+    "register": "Register",
+    "profile": "My Profile",
+    "wishlist": "My Wishlist",
+    "admin": "Admin Dashboard",
+    "logout": "Logout"
+  },
+  "home": {
+    "hero": {
+      "title": "Explore Indonesia's Cultural Wonders",
+      "subtitle": "Discover the best cultural tourism destinations across the archipelago",
+      "cta": "Start Your Adventure"
+    },
+    "features": {
+      "title": "Key Features",
+      "smartPlanner": "Smart Route Planning",
+      "smartPlannerDesc": "A* algorithm optimizes your travel route",
+      "realTime": "Real-Time Data",
+      "realTimeDesc": "Current traffic and route information",
+      "aiPowered": "AI-Powered",
+      "aiPoweredDesc": "Destination recommendations based on your preferences"
+    },
+    "destinations": {
+      "title": "Popular Destinations",
+      "viewAll": "View All Destinations"
+    }
+  },
+  "destinations": {
+    "title": "Cultural Tourism Destinations",
+    "subtitle": "Explore the beauty and richness of Indonesian culture",
+    "filterByType": "Filter by Type",
+    "filterByProvince": "Filter by Province",
+    "all": "All",
+    "sortBy": "Sort By",
+    "mostPopular": "Most Popular",
+    "highestRated": "Highest Rated",
+    "lowestPrice": "Lowest Price",
+    "nearest": "Nearest",
+    "noResults": "No destinations found",
+    "types": {
+      "heritage": "Heritage Sites",
+      "temple": "Temples",
+      "museum": "Museums",
+      "palace": "Palaces",
+      "traditional": "Traditional Villages",
+      "art": "Arts & Crafts",
+      "festival": "Festivals",
+      "nature": "Nature & Culture"
+    },
+    "card": {
+      "rating": "Rating",
+      "reviews": "Reviews",
+      "from": "From",
+      "per": "per",
+      "person": "person"
+    }
+  },
+  "destinationDetail": {
+    "about": "About",
+    "location": "Location",
+    "hours": "Operating Hours",
+    "open": "Open",
+    "close": "Close",
+    "duration": "Visit Duration",
+    "hour": "hour",
+    "hours_plural": "hours",
+    "price": "Ticket Price",
+    "transportation": "Transportation",
+    "bookNow": "Book Now",
+    "addToWishlist": "Add to Wishlist",
+    "reviews": "Visitor Reviews",
+    "noReviews": "No reviews yet",
+    "writeReview": "Write a Review"
+  },
+  "planner": {
+    "title": "Trip Route Planner",
+    "subtitle": "Plan your cultural tourism trip optimally",
+    "selectDestinations": "Select Destinations",
+    "selectedDestinations": "Selected Destinations",
+    "maxDestinations": "Maximum {{count}} destinations",
+    "transportMode": "Transport Mode",
+    "car": "Car",
+    "motorcycle": "Motorcycle",
+    "bus": "Bus",
+    "train": "Train",
+    "flight": "Flight",
+    "ship": "Ship",
+    "optimizationMode": "Optimization Mode",
+    "fastest": "Fastest",
+    "cheapest": "Cheapest",
+    "balanced": "Balanced",
+    "planRoute": "Plan Route",
+    "routeResult": "Route Planning Result",
+    "totalDistance": "Total Distance",
+    "totalDuration": "Total Duration",
+    "totalCost": "Total Cost",
+    "routeVisualization": "Route Visualization",
+    "startPoint": "Start Point",
+    "yourLocation": "Your Location",
+    "destination": "Tourist Destination",
+    "routePath": "Travel Route",
+    "realRoads": "Real Roads",
+    "estimate": "Estimate",
+    "dataSource": "Data Source"
+  },
+  "auth": {
+    "login": {
+      "title": "Login to TravoMate",
+      "subtitle": "Welcome back! Please login to continue",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot Password?",
+      "loginButton": "Login",
+      "noAccount": "Don't have an account?",
+      "register": "Register Now"
+    },
+    "register": {
+      "title": "Register on TravoMate",
+      "subtitle": "Start your Indonesian cultural adventure",
+      "name": "Full Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "registerButton": "Register",
+      "hasAccount": "Already have an account?",
+      "login": "Login"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "account": "My Account",
+    "bookings": "My Bookings",
+    "purchases": "Purchase History",
+    "refunds": "Refunds",
+    "editProfile": "Edit Profile",
+    "changePassword": "Change Password",
+    "settings": "Settings",
+    "language": "Language",
+    "theme": "Theme"
+  },
+  "booking": {
+    "title": "Book Ticket",
+    "destination": "Destination",
+    "visitDate": "Visit Date",
+    "quantity": "Ticket Quantity",
+    "totalPrice": "Total Price",
+    "contactInfo": "Contact Information",
+    "name": "Booking Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "payment": "Payment",
+    "paymentMethod": "Payment Method",
+    "confirmBooking": "Confirm Booking",
+    "bookingSuccess": "Booking Successful!",
+    "bookingFailed": "Booking Failed"
+  },
+  "wishlist": {
+    "title": "My Wishlist",
+    "subtitle": "Save your favorite destinations",
+    "empty": "Wishlist is empty",
+    "addDestination": "Add Destination",
+    "removeFromWishlist": "Remove from Wishlist",
+    "createWishlist": "Create New Wishlist",
+    "wishlistName": "Wishlist Name",
+    "shareWishlist": "Share Wishlist"
+  },
+  "footer": {
+    "about": "About TravoMate",
+    "aboutText": "Trusted cultural tourism platform to explore the beauty of Indonesia",
+    "quickLinks": "Quick Links",
+    "contact": "Contact",
+    "followUs": "Follow Us",
+    "copyright": "© 2025 TravoMate. All Rights Reserved."
+  },
+  "language": {
+    "select": "Select Language",
+    "id": "Bahasa Indonesia",
+    "en": "English",
+    "zh": "中文 (Mandarin)",
+    "ja": "日本語 (Japanese)",
+    "ko": "한국어 (Korean)"
+  }
+}

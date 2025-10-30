@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { LocateFixed, Map, Locate, Target, AlertCircle, Zap, DollarSign, Scale } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { Destination } from "@/contexts/DestinationsContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,7 @@ const PlannerSettingsCard = ({
 }: PlannerSettingsCardProps) => {
   const [ClientOnlyMap, setClientOnlyMap] = useState<React.ComponentType<any> | null>(null);
   const [isMapLoading, setIsMapLoading] = useState(true);
+  const { t } = useTranslation();
   
   const provinces = destinations.length > 0
     ? [...new Set(destinations.map(dest => dest.location.province))].sort()
@@ -95,13 +97,13 @@ const PlannerSettingsCard = ({
       <CardHeader>
         <CardTitle className="flex items-center">
           <Map className="mr-2 h-5 w-5" />
-          Pengaturan Rute
+          {t('planner.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Location Setting */}
         <div>
-          <h3 className="font-medium mb-2">Lokasi Anda</h3>
+          <h3 className="font-medium mb-2">{t('planner.yourLocation')}</h3>
           <div className="flex items-center space-x-2">
             <Button 
               variant="outline" 
@@ -111,10 +113,10 @@ const PlannerSettingsCard = ({
             >
               <LocateFixed className="mr-2 h-4 w-4" />
               {isLocating 
-                ? "Mencari lokasi..." 
+                ? t('common.loading')
                 : userLocation 
-                  ? "Perbarui Lokasi" 
-                  : "Dapatkan Lokasi"
+                  ? t('planner.yourLocation')
+                  : t('planner.startPoint')
               }
             </Button>
           </div>
@@ -177,7 +179,7 @@ const PlannerSettingsCard = ({
         
         {/* Province Selection */}
         <div>
-          <h3 className="font-medium mb-2">Provinsi Tujuan</h3>
+          <h3 className="font-medium mb-2">{t('planner.selectDestinations')}</h3>
           <div className="grid grid-cols-2 gap-2">
             {provinces.map((province) => (
               <div key={province} className="flex items-center">
@@ -194,34 +196,31 @@ const PlannerSettingsCard = ({
               </div>
             ))}
           </div>
-          <div className="text-xs text-muted-foreground mt-2">
-            *Jika tidak ada yang dipilih, semua provinsi akan dipertimbangkan.
-          </div>
         </div>
         
         {/* Max Destinations */}
         <div>
-          <h3 className="font-medium mb-2">Jumlah Destinasi</h3>
+          <h3 className="font-medium mb-2">{t('planner.selectedDestinations')}</h3>
           <Select 
             value={maxDestinations.toString()} 
             onValueChange={(value) => setMaxDestinations(Number(value))}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Pilih jumlah destinasi" />
+              <SelectValue placeholder={t('planner.selectDestinations')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="1">1 Destinasi</SelectItem>
-              <SelectItem value="2">2 Destinasi</SelectItem>
-              <SelectItem value="3">3 Destinasi</SelectItem>
-              <SelectItem value="4">4 Destinasi</SelectItem>
-              <SelectItem value="5">5 Destinasi</SelectItem>
+              <SelectItem value="1">1 {t('planner.destination')}</SelectItem>
+              <SelectItem value="2">2 {t('planner.destination')}</SelectItem>
+              <SelectItem value="3">3 {t('planner.destination')}</SelectItem>
+              <SelectItem value="4">4 {t('planner.destination')}</SelectItem>
+              <SelectItem value="5">5 {t('planner.destination')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         
         {/* Optimization Mode - NEW */}
         <div>
-          <h3 className="font-medium mb-3">Mode Optimasi Rute (A* Algorithm)</h3>
+          <h3 className="font-medium mb-3">{t('planner.optimizationMode')}</h3>
           <RadioGroup value={optimizationMode} onValueChange={(value) => setOptimizationMode(value as OptimizationMode)}>
             <div className="space-y-3">
               <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-accent cursor-pointer transition-colors">
@@ -229,10 +228,10 @@ const PlannerSettingsCard = ({
                 <Label htmlFor="fastest" className="cursor-pointer flex-1">
                   <div className="flex items-center mb-1">
                     <Zap className="h-4 w-4 mr-2 text-yellow-500" />
-                    <span className="font-semibold">Tercepat</span>
+                    <span className="font-semibold">{t('planner.fastest')}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Prioritaskan waktu tempuh minimum. Menggunakan jalan tol dan rute highway.
+                    {t('home.features.smartPlannerDesc')}
                   </p>
                 </Label>
               </div>
@@ -242,10 +241,10 @@ const PlannerSettingsCard = ({
                 <Label htmlFor="cheapest" className="cursor-pointer flex-1">
                   <div className="flex items-center mb-1">
                     <DollarSign className="h-4 w-4 mr-2 text-green-500" />
-                    <span className="font-semibold">Terhemat</span>
+                    <span className="font-semibold">{t('planner.cheapest')}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Prioritaskan biaya minimum. Hindari tol, gunakan jalan alternatif.
+                    {t('home.features.realTimeDesc')}
                   </p>
                 </Label>
               </div>
@@ -255,10 +254,10 @@ const PlannerSettingsCard = ({
                 <Label htmlFor="balanced" className="cursor-pointer flex-1">
                   <div className="flex items-center mb-1">
                     <Scale className="h-4 w-4 mr-2 text-blue-500" />
-                    <span className="font-semibold">Seimbang</span>
+                    <span className="font-semibold">{t('planner.balanced')}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Kombinasi optimal antara waktu dan biaya. Recommended untuk wisata.
+                    {t('home.features.aiPoweredDesc')}
                   </p>
                 </Label>
               </div>
@@ -288,12 +287,12 @@ const PlannerSettingsCard = ({
           {isPlanning ? (
             <>
               <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-              Merencanakan Rute...
+              {t('common.loading')}
             </>
           ) : (
             <>
               <Map className="mr-2 h-4 w-4" />
-              Rencanakan Rute
+              {t('planner.planRoute')}
             </>
           )}
         </Button>

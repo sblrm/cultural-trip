@@ -1,0 +1,211 @@
+{
+  "common": {
+    "appName": "TravoMate",
+    "tagline": "探索印度尼西亚",
+    "loading": "加载中...",
+    "error": "发生错误",
+    "success": "成功",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "close": "关闭",
+    "search": "搜索",
+    "filter": "筛选",
+    "sort": "排序",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步",
+    "submit": "提交",
+    "confirm": "确认",
+    "viewDetails": "查看详情",
+    "learnMore": "了解更多"
+  },
+  "nav": {
+    "home": "首页",
+    "destinations": "目的地",
+    "planner": "行程规划",
+    "about": "关于",
+    "login": "登录",
+    "register": "注册",
+    "profile": "我的资料",
+    "wishlist": "我的收藏",
+    "admin": "管理面板",
+    "logout": "登出"
+  },
+  "home": {
+    "hero": {
+      "title": "探索印度尼西亚的文化奇迹",
+      "subtitle": "发现群岛各地最好的文化旅游目的地",
+      "cta": "开始您的冒险"
+    },
+    "features": {
+      "title": "主要功能",
+      "smartPlanner": "智能路线规划",
+      "smartPlannerDesc": "A*算法优化您的旅行路线",
+      "realTime": "实时数据",
+      "realTimeDesc": "当前的交通和路线信息",
+      "aiPowered": "AI驱动",
+      "aiPoweredDesc": "基于您的偏好推荐目的地"
+    },
+    "destinations": {
+      "title": "热门目的地",
+      "viewAll": "查看所有目的地"
+    }
+  },
+  "destinations": {
+    "title": "文化旅游目的地",
+    "subtitle": "探索印度尼西亚文化的美丽和丰富",
+    "filterByType": "按类型筛选",
+    "filterByProvince": "按省份筛选",
+    "all": "全部",
+    "sortBy": "排序方式",
+    "mostPopular": "最受欢迎",
+    "highestRated": "评分最高",
+    "lowestPrice": "价格最低",
+    "nearest": "最近",
+    "noResults": "未找到目的地",
+    "types": {
+      "heritage": "遗产地",
+      "temple": "寺庙",
+      "museum": "博物馆",
+      "palace": "宫殿",
+      "traditional": "传统村落",
+      "art": "艺术与工艺",
+      "festival": "节日",
+      "nature": "自然与文化"
+    },
+    "card": {
+      "rating": "评分",
+      "reviews": "评论",
+      "from": "起价",
+      "per": "每",
+      "person": "人"
+    }
+  },
+  "destinationDetail": {
+    "about": "关于",
+    "location": "位置",
+    "hours": "营业时间",
+    "open": "开放",
+    "close": "关闭",
+    "duration": "参观时长",
+    "hour": "小时",
+    "hours_plural": "小时",
+    "price": "门票价格",
+    "transportation": "交通",
+    "bookNow": "立即预订",
+    "addToWishlist": "添加到收藏",
+    "reviews": "游客评论",
+    "noReviews": "暂无评论",
+    "writeReview": "写评论"
+  },
+  "planner": {
+    "title": "旅行路线规划器",
+    "subtitle": "最优规划您的文化旅游行程",
+    "selectDestinations": "选择目的地",
+    "selectedDestinations": "已选目的地",
+    "maxDestinations": "最多{{count}}个目的地",
+    "transportMode": "交通方式",
+    "car": "汽车",
+    "motorcycle": "摩托车",
+    "bus": "公共汽车",
+    "train": "火车",
+    "flight": "飞机",
+    "ship": "轮船",
+    "optimizationMode": "优化模式",
+    "fastest": "最快",
+    "cheapest": "最便宜",
+    "balanced": "平衡",
+    "planRoute": "规划路线",
+    "routeResult": "路线规划结果",
+    "totalDistance": "总距离",
+    "totalDuration": "总时长",
+    "totalCost": "总费用",
+    "routeVisualization": "路线可视化",
+    "startPoint": "起点",
+    "yourLocation": "您的位置",
+    "destination": "旅游目的地",
+    "routePath": "旅行路线",
+    "realRoads": "真实道路",
+    "estimate": "估计",
+    "dataSource": "数据来源"
+  },
+  "auth": {
+    "login": {
+      "title": "登录TravoMate",
+      "subtitle": "欢迎回来！请登录以继续",
+      "email": "电子邮件",
+      "password": "密码",
+      "forgotPassword": "忘记密码？",
+      "loginButton": "登录",
+      "noAccount": "还没有账户？",
+      "register": "立即注册"
+    },
+    "register": {
+      "title": "在TravoMate注册",
+      "subtitle": "开始您的印度尼西亚文化冒险",
+      "name": "全名",
+      "email": "电子邮件",
+      "password": "密码",
+      "confirmPassword": "确认密码",
+      "registerButton": "注册",
+      "hasAccount": "已有账户？",
+      "login": "登录"
+    }
+  },
+  "profile": {
+    "title": "我的资料",
+    "account": "我的账户",
+    "bookings": "我的预订",
+    "purchases": "购买历史",
+    "refunds": "退款",
+    "editProfile": "编辑资料",
+    "changePassword": "更改密码",
+    "settings": "设置",
+    "language": "语言",
+    "theme": "主题"
+  },
+  "booking": {
+    "title": "预订门票",
+    "destination": "目的地",
+    "visitDate": "参观日期",
+    "quantity": "门票数量",
+    "totalPrice": "总价",
+    "contactInfo": "联系信息",
+    "name": "预订姓名",
+    "email": "电子邮件",
+    "phone": "电话号码",
+    "payment": "付款",
+    "paymentMethod": "付款方式",
+    "confirmBooking": "确认预订",
+    "bookingSuccess": "预订成功！",
+    "bookingFailed": "预订失败"
+  },
+  "wishlist": {
+    "title": "我的收藏",
+    "subtitle": "保存您喜欢的目的地",
+    "empty": "收藏为空",
+    "addDestination": "添加目的地",
+    "removeFromWishlist": "从收藏中移除",
+    "createWishlist": "创建新收藏",
+    "wishlistName": "收藏名称",
+    "shareWishlist": "分享收藏"
+  },
+  "footer": {
+    "about": "关于TravoMate",
+    "aboutText": "值得信赖的文化旅游平台，探索印度尼西亚之美",
+    "quickLinks": "快速链接",
+    "contact": "联系",
+    "followUs": "关注我们",
+    "copyright": "© 2025 TravoMate. 保留所有权利。"
+  },
+  "language": {
+    "select": "选择语言",
+    "id": "Bahasa Indonesia",
+    "en": "English",
+    "zh": "中文 (Mandarin)",
+    "ja": "日本語 (Japanese)",
+    "ko": "한국어 (Korean)"
+  }
+}

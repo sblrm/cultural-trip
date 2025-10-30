@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const { register } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,26 +44,26 @@ const RegisterPage = () => {
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 batik-pattern">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Daftar Akun</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('auth.register.title')}</CardTitle>
           <CardDescription>
-            Buat akun baru untuk menjelajahi keindahan budaya Indonesia
+            {t('auth.register.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nama Lengkap</Label>
+              <Label htmlFor="name">{t('auth.register.name')}</Label>
               <Input
                 id="name"
                 type="text"
-                placeholder="Nama lengkap Anda"
+                placeholder={t('auth.register.name')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.register.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -72,7 +74,7 @@ const RegisterPage = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('auth.register.password')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -83,7 +85,7 @@ const RegisterPage = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Konfirmasi Password</Label>
+              <Label htmlFor="confirmPassword">{t('auth.register.confirmPassword')}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -98,10 +100,10 @@ const RegisterPage = () => {
               {isLoading ? (
                 <span className="flex items-center">
                   <span className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
-                  Memproses...
+                  {t('common.loading')}
                 </span>
               ) : (
-                "Daftar"
+                t('auth.register.registerButton')
               )}
             </Button>
           </form>
@@ -109,9 +111,9 @@ const RegisterPage = () => {
         <CardFooter className="text-center">
           <div className="w-full">
             <p className="text-sm text-muted-foreground">
-              Sudah memiliki akun?{" "}
+              {t('auth.register.hasAccount')}{" "}
               <Link to="/login" className="text-primary hover:underline">
-                Masuk
+                {t('auth.register.login')}
               </Link>
             </p>
           </div>

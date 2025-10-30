@@ -1,0 +1,211 @@
+{
+  "common": {
+    "appName": "TravoMate",
+    "tagline": "Temukan Indonesia",
+    "loading": "Memuat...",
+    "error": "Terjadi kesalahan",
+    "success": "Berhasil",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "delete": "Hapus",
+    "edit": "Edit",
+    "close": "Tutup",
+    "search": "Cari",
+    "filter": "Filter",
+    "sort": "Urutkan",
+    "back": "Kembali",
+    "next": "Selanjutnya",
+    "previous": "Sebelumnya",
+    "submit": "Kirim",
+    "confirm": "Konfirmasi",
+    "viewDetails": "Lihat Detail",
+    "learnMore": "Pelajari Lebih Lanjut"
+  },
+  "nav": {
+    "home": "Beranda",
+    "destinations": "Destinasi",
+    "planner": "Rute Wisata",
+    "about": "Tentang",
+    "login": "Masuk",
+    "register": "Daftar",
+    "profile": "Profil Saya",
+    "wishlist": "Wishlist Saya",
+    "admin": "Admin Dashboard",
+    "logout": "Keluar"
+  },
+  "home": {
+    "hero": {
+      "title": "Jelajahi Keajaiban Budaya Indonesia",
+      "subtitle": "Temukan destinasi wisata budaya terbaik di seluruh Nusantara",
+      "cta": "Mulai Petualangan"
+    },
+    "features": {
+      "title": "Fitur Unggulan",
+      "smartPlanner": "Perencanaan Rute Cerdas",
+      "smartPlannerDesc": "Algoritma A* yang mengoptimalkan rute perjalanan Anda",
+      "realTime": "Data Real-Time",
+      "realTimeDesc": "Informasi lalu lintas dan rute terkini",
+      "aiPowered": "AI-Powered",
+      "aiPoweredDesc": "Rekomendasi destinasi berdasarkan preferensi Anda"
+    },
+    "destinations": {
+      "title": "Destinasi Populer",
+      "viewAll": "Lihat Semua Destinasi"
+    }
+  },
+  "destinations": {
+    "title": "Destinasi Wisata Budaya",
+    "subtitle": "Jelajahi keindahan dan kekayaan budaya Indonesia",
+    "filterByType": "Filter Berdasarkan Jenis",
+    "filterByProvince": "Filter Berdasarkan Provinsi",
+    "all": "Semua",
+    "sortBy": "Urutkan Berdasarkan",
+    "mostPopular": "Paling Populer",
+    "highestRated": "Rating Tertinggi",
+    "lowestPrice": "Harga Terendah",
+    "nearest": "Terdekat",
+    "noResults": "Tidak ada destinasi ditemukan",
+    "types": {
+      "heritage": "Situs Warisan",
+      "temple": "Candi",
+      "museum": "Museum",
+      "palace": "Istana",
+      "traditional": "Desa Tradisional",
+      "art": "Seni & Kerajinan",
+      "festival": "Festival",
+      "nature": "Alam & Budaya"
+    },
+    "card": {
+      "rating": "Rating",
+      "reviews": "Ulasan",
+      "from": "Mulai dari",
+      "per": "per",
+      "person": "orang"
+    }
+  },
+  "destinationDetail": {
+    "about": "Tentang",
+    "location": "Lokasi",
+    "hours": "Jam Operasional",
+    "open": "Buka",
+    "close": "Tutup",
+    "duration": "Durasi Kunjungan",
+    "hour": "jam",
+    "hours_plural": "jam",
+    "price": "Harga Tiket",
+    "transportation": "Transportasi",
+    "bookNow": "Pesan Sekarang",
+    "addToWishlist": "Tambah ke Wishlist",
+    "reviews": "Ulasan Pengunjung",
+    "noReviews": "Belum ada ulasan",
+    "writeReview": "Tulis Ulasan"
+  },
+  "planner": {
+    "title": "Perencana Rute Wisata",
+    "subtitle": "Rencanakan perjalanan wisata budaya Anda dengan optimal",
+    "selectDestinations": "Pilih Destinasi",
+    "selectedDestinations": "Destinasi Terpilih",
+    "maxDestinations": "Maksimal {{count}} destinasi",
+    "transportMode": "Mode Transportasi",
+    "car": "Mobil",
+    "motorcycle": "Motor",
+    "bus": "Bus",
+    "train": "Kereta",
+    "flight": "Pesawat",
+    "ship": "Kapal Laut",
+    "optimizationMode": "Mode Optimasi",
+    "fastest": "Tercepat",
+    "cheapest": "Termurah",
+    "balanced": "Seimbang",
+    "planRoute": "Rencanakan Rute",
+    "routeResult": "Hasil Perencanaan Rute",
+    "totalDistance": "Total Jarak",
+    "totalDuration": "Total Waktu",
+    "totalCost": "Total Biaya",
+    "routeVisualization": "Visualisasi Rute Perjalanan",
+    "startPoint": "Titik Awal",
+    "yourLocation": "Lokasi Anda",
+    "destination": "Destinasi Wisata",
+    "routePath": "Rute Perjalanan",
+    "realRoads": "Jalan Real",
+    "estimate": "Estimasi",
+    "dataSource": "Sumber Data"
+  },
+  "auth": {
+    "login": {
+      "title": "Masuk ke TravoMate",
+      "subtitle": "Selamat datang kembali! Silakan masuk untuk melanjutkan",
+      "email": "Email",
+      "password": "Kata Sandi",
+      "forgotPassword": "Lupa Kata Sandi?",
+      "loginButton": "Masuk",
+      "noAccount": "Belum punya akun?",
+      "register": "Daftar Sekarang"
+    },
+    "register": {
+      "title": "Daftar di TravoMate",
+      "subtitle": "Mulai petualangan budaya Indonesia Anda",
+      "name": "Nama Lengkap",
+      "email": "Email",
+      "password": "Kata Sandi",
+      "confirmPassword": "Konfirmasi Kata Sandi",
+      "registerButton": "Daftar",
+      "hasAccount": "Sudah punya akun?",
+      "login": "Masuk"
+    }
+  },
+  "profile": {
+    "title": "Profil Saya",
+    "account": "Akun Saya",
+    "bookings": "Pemesanan Saya",
+    "purchases": "Riwayat Pembelian",
+    "refunds": "Pengembalian Dana",
+    "editProfile": "Edit Profil",
+    "changePassword": "Ubah Kata Sandi",
+    "settings": "Pengaturan",
+    "language": "Bahasa",
+    "theme": "Tema Tampilan"
+  },
+  "booking": {
+    "title": "Pesan Tiket",
+    "destination": "Destinasi",
+    "visitDate": "Tanggal Kunjungan",
+    "quantity": "Jumlah Tiket",
+    "totalPrice": "Total Harga",
+    "contactInfo": "Informasi Kontak",
+    "name": "Nama Pemesan",
+    "email": "Email",
+    "phone": "Nomor Telepon",
+    "payment": "Pembayaran",
+    "paymentMethod": "Metode Pembayaran",
+    "confirmBooking": "Konfirmasi Pemesanan",
+    "bookingSuccess": "Pemesanan Berhasil!",
+    "bookingFailed": "Pemesanan Gagal"
+  },
+  "wishlist": {
+    "title": "Wishlist Saya",
+    "subtitle": "Simpan destinasi favorit Anda",
+    "empty": "Wishlist kosong",
+    "addDestination": "Tambah Destinasi",
+    "removeFromWishlist": "Hapus dari Wishlist",
+    "createWishlist": "Buat Wishlist Baru",
+    "wishlistName": "Nama Wishlist",
+    "shareWishlist": "Bagikan Wishlist"
+  },
+  "footer": {
+    "about": "Tentang TravoMate",
+    "aboutText": "Platform wisata budaya terpercaya untuk menjelajahi keindahan Indonesia",
+    "quickLinks": "Tautan Cepat",
+    "contact": "Kontak",
+    "followUs": "Ikuti Kami",
+    "copyright": "© 2025 TravoMate. Hak Cipta Dilindungi."
+  },
+  "language": {
+    "select": "Pilih Bahasa",
+    "id": "Bahasa Indonesia",
+    "en": "English",
+    "zh": "中文 (Mandarin)",
+    "ja": "日本語 (Japanese)",
+    "ko": "한국어 (Korean)"
+  }
+}

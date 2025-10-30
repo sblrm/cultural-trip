@@ -1,0 +1,211 @@
+{
+  "common": {
+    "appName": "TravoMate",
+    "tagline": "인도네시아를 발견하다",
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "success": "성공",
+    "cancel": "취소",
+    "save": "저장",
+    "delete": "삭제",
+    "edit": "편집",
+    "close": "닫기",
+    "search": "검색",
+    "filter": "필터",
+    "sort": "정렬",
+    "back": "뒤로",
+    "next": "다음",
+    "previous": "이전",
+    "submit": "제출",
+    "confirm": "확인",
+    "viewDetails": "상세보기",
+    "learnMore": "더 알아보기"
+  },
+  "nav": {
+    "home": "홈",
+    "destinations": "목적지",
+    "planner": "여행 플래너",
+    "about": "소개",
+    "login": "로그인",
+    "register": "회원가입",
+    "profile": "내 프로필",
+    "wishlist": "위시리스트",
+    "admin": "관리자 대시보드",
+    "logout": "로그아웃"
+  },
+  "home": {
+    "hero": {
+      "title": "인도네시아의 문화적 경이로움을 탐험하세요",
+      "subtitle": "군도 전역의 최고 문화 관광지를 발견하세요",
+      "cta": "모험 시작하기"
+    },
+    "features": {
+      "title": "주요 기능",
+      "smartPlanner": "스마트 경로 계획",
+      "smartPlannerDesc": "A* 알고리즘이 여행 경로를 최적화합니다",
+      "realTime": "실시간 데이터",
+      "realTimeDesc": "현재 교통 및 경로 정보",
+      "aiPowered": "AI 기반",
+      "aiPoweredDesc": "선호도에 따른 목적지 추천"
+    },
+    "destinations": {
+      "title": "인기 목적지",
+      "viewAll": "모든 목적지 보기"
+    }
+  },
+  "destinations": {
+    "title": "문화 관광지",
+    "subtitle": "인도네시아 문화의 아름다움과 풍요로움을 탐험하세요",
+    "filterByType": "유형별 필터",
+    "filterByProvince": "지역별 필터",
+    "all": "전체",
+    "sortBy": "정렬 기준",
+    "mostPopular": "가장 인기있는",
+    "highestRated": "최고 평점",
+    "lowestPrice": "최저 가격",
+    "nearest": "가장 가까운",
+    "noResults": "목적지를 찾을 수 없습니다",
+    "types": {
+      "heritage": "유산지",
+      "temple": "사원",
+      "museum": "박물관",
+      "palace": "궁전",
+      "traditional": "전통 마을",
+      "art": "예술과 공예",
+      "festival": "축제",
+      "nature": "자연과 문화"
+    },
+    "card": {
+      "rating": "평점",
+      "reviews": "리뷰",
+      "from": "부터",
+      "per": "당",
+      "person": "인"
+    }
+  },
+  "destinationDetail": {
+    "about": "소개",
+    "location": "위치",
+    "hours": "운영 시간",
+    "open": "열림",
+    "close": "닫힘",
+    "duration": "방문 시간",
+    "hour": "시간",
+    "hours_plural": "시간",
+    "price": "티켓 가격",
+    "transportation": "교통",
+    "bookNow": "지금 예약",
+    "addToWishlist": "위시리스트에 추가",
+    "reviews": "방문객 리뷰",
+    "noReviews": "아직 리뷰가 없습니다",
+    "writeReview": "리뷰 작성"
+  },
+  "planner": {
+    "title": "여행 경로 플래너",
+    "subtitle": "문화 관광 여행을 최적으로 계획하세요",
+    "selectDestinations": "목적지 선택",
+    "selectedDestinations": "선택한 목적지",
+    "maxDestinations": "최대 {{count}}개 목적지",
+    "transportMode": "교통 수단",
+    "car": "자동차",
+    "motorcycle": "오토바이",
+    "bus": "버스",
+    "train": "기차",
+    "flight": "비행기",
+    "ship": "선박",
+    "optimizationMode": "최적화 모드",
+    "fastest": "가장 빠른",
+    "cheapest": "가장 저렴한",
+    "balanced": "균형잡힌",
+    "planRoute": "경로 계획",
+    "routeResult": "경로 계획 결과",
+    "totalDistance": "총 거리",
+    "totalDuration": "총 시간",
+    "totalCost": "총 비용",
+    "routeVisualization": "경로 시각화",
+    "startPoint": "출발점",
+    "yourLocation": "내 위치",
+    "destination": "관광지",
+    "routePath": "여행 경로",
+    "realRoads": "실제 도로",
+    "estimate": "예상",
+    "dataSource": "데이터 출처"
+  },
+  "auth": {
+    "login": {
+      "title": "TravoMate 로그인",
+      "subtitle": "환영합니다! 계속하려면 로그인하세요",
+      "email": "이메일 주소",
+      "password": "비밀번호",
+      "forgotPassword": "비밀번호를 잊으셨나요?",
+      "loginButton": "로그인",
+      "noAccount": "계정이 없으신가요?",
+      "register": "지금 가입하기"
+    },
+    "register": {
+      "title": "TravoMate 회원가입",
+      "subtitle": "인도네시아 문화 모험을 시작하세요",
+      "name": "전체 이름",
+      "email": "이메일 주소",
+      "password": "비밀번호",
+      "confirmPassword": "비밀번호 확인",
+      "registerButton": "회원가입",
+      "hasAccount": "이미 계정이 있으신가요?",
+      "login": "로그인"
+    }
+  },
+  "profile": {
+    "title": "내 프로필",
+    "account": "내 계정",
+    "bookings": "내 예약",
+    "purchases": "구매 내역",
+    "refunds": "환불",
+    "editProfile": "프로필 편집",
+    "changePassword": "비밀번호 변경",
+    "settings": "설정",
+    "language": "언어",
+    "theme": "테마"
+  },
+  "booking": {
+    "title": "티켓 예약",
+    "destination": "목적지",
+    "visitDate": "방문 날짜",
+    "quantity": "티켓 수량",
+    "totalPrice": "총 가격",
+    "contactInfo": "연락처 정보",
+    "name": "예약자 이름",
+    "email": "이메일 주소",
+    "phone": "전화번호",
+    "payment": "결제",
+    "paymentMethod": "결제 방법",
+    "confirmBooking": "예약 확인",
+    "bookingSuccess": "예약 성공!",
+    "bookingFailed": "예약 실패"
+  },
+  "wishlist": {
+    "title": "위시리스트",
+    "subtitle": "좋아하는 목적지를 저장하세요",
+    "empty": "위시리스트가 비어있습니다",
+    "addDestination": "목적지 추가",
+    "removeFromWishlist": "위시리스트에서 제거",
+    "createWishlist": "새 위시리스트 만들기",
+    "wishlistName": "위시리스트 이름",
+    "shareWishlist": "위시리스트 공유"
+  },
+  "footer": {
+    "about": "TravoMate 소개",
+    "aboutText": "인도네시아의 아름다움을 탐험하는 신뢰할 수 있는 문화 관광 플랫폼",
+    "quickLinks": "빠른 링크",
+    "contact": "문의하기",
+    "followUs": "팔로우",
+    "copyright": "© 2025 TravoMate. 모든 권리 보유."
+  },
+  "language": {
+    "select": "언어 선택",
+    "id": "Bahasa Indonesia",
+    "en": "English",
+    "zh": "中文 (Mandarin)",
+    "ja": "日本語 (Japanese)",
+    "ko": "한국어 (Korean)"
+  }
+}

@@ -1,6 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Clock, Wallet, Map, MapPin, ArrowRight, Info, TrendingUp, Database } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -18,15 +19,17 @@ interface PlannedRouteCardProps {
 }
 
 const PlannedRouteCard = ({ route }: PlannedRouteCardProps) => {
+  const { t } = useTranslation();
+  
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>Rute Wisata Anda</span>
+          <span>{t('planner.routeResult')}</span>
           <div className="flex items-center gap-2 text-sm font-normal">
             <Database className="h-4 w-4" />
             <span className="text-muted-foreground">
-              {route.dataSource === 'ors' ? 'Real-time Data' : 'Estimasi'}
+              {route.dataSource === 'ors' ? t('planner.realRoads') : t('planner.estimate')}
             </span>
           </div>
         </CardTitle>
@@ -58,15 +61,15 @@ const PlannedRouteCard = ({ route }: PlannedRouteCardProps) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-muted p-4 rounded-lg flex flex-col items-center justify-center">
               <Clock className="h-5 w-5 text-primary mb-2" />
-              <div className="text-sm text-muted-foreground">Total Waktu Perjalanan</div>
+              <div className="text-sm text-muted-foreground">{t('planner.totalDuration')}</div>
               <div className="font-bold text-lg">
-                {Math.floor(Math.round(route.totalDuration) / 60)} jam {Math.round(route.totalDuration) % 60} menit
+                {Math.floor(Math.round(route.totalDuration) / 60)} {t('destinationDetail.hour')} {Math.round(route.totalDuration) % 60} {t('destinationDetail.duration')}
               </div>
             </div>
             
             <div className="bg-muted p-4 rounded-lg flex flex-col items-center justify-center">
               <Map className="h-5 w-5 text-primary mb-2" />
-              <div className="text-sm text-muted-foreground">Total Jarak</div>
+              <div className="text-sm text-muted-foreground">{t('planner.totalDistance')}</div>
               <div className="font-bold text-lg">
                 {route.totalDistance.toFixed(1)} km
               </div>
@@ -74,7 +77,7 @@ const PlannedRouteCard = ({ route }: PlannedRouteCardProps) => {
             
             <div className="bg-muted p-4 rounded-lg flex flex-col items-center justify-center">
               <Wallet className="h-5 w-5 text-primary mb-2" />
-              <div className="text-sm text-muted-foreground">Estimasi Biaya Perjalanan</div>
+              <div className="text-sm text-muted-foreground">{t('planner.totalCost')}</div>
               <div className="font-bold text-lg">
                 Rp {route.totalCost.toLocaleString('id-ID')}
               </div>
@@ -83,7 +86,7 @@ const PlannedRouteCard = ({ route }: PlannedRouteCardProps) => {
           
           {/* Route Details */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Detail Rute</h3>
+            <h3 className="text-lg font-semibold mb-4">{t('planner.routePath')}</h3>
             <div className="space-y-4">
               {route.nodes.map((node, index) => (
                 <div key={node.destination.id} className="relative">

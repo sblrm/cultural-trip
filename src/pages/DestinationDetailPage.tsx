@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { MapPin, Calendar, Clock, Star, Users, Ticket, ArrowRight, Bus, Car, Train } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useDestinations } from "@/contexts/DestinationsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Separator } from "@/components/ui/separator";
@@ -34,6 +35,7 @@ const DestinationDetailPage = () => {
   const navigate = useNavigate();
   const { getDestinationById } = useDestinations();
   const { user, isAuthenticated } = useAuth();
+  const { t } = useTranslation();
   const [quantity, setQuantity] = useState(1);
   const [visitDate, setVisitDate] = useState("");
   const [reviews, setReviews] = useState<ReviewWithProfile[]>([]);
@@ -144,7 +146,7 @@ const DestinationDetailPage = () => {
   const handleBuyTicket = () => {
     // Validate visit date
     if (!visitDate) {
-      toast.error("Silakan pilih tanggal kunjungan");
+      toast.error(t('booking.selectDateError'));
       document.getElementById('visit-date-input')?.scrollIntoView({ behavior: 'smooth' });
       return;
     }
@@ -155,13 +157,13 @@ const DestinationDetailPage = () => {
     today.setHours(0, 0, 0, 0);
     
     if (selectedDate < today) {
-      toast.error("Tanggal kunjungan tidak boleh di masa lalu");
+      toast.error(t('booking.pastDateError'));
       return;
     }
 
     // Check authentication
     if (!isAuthenticated || !user) {
-      toast.info("Silakan login terlebih dahulu untuk melanjutkan pembelian");
+      toast.error(t('auth.login.required'));
       // Save booking data to sessionStorage
       sessionStorage.setItem('pendingBooking', JSON.stringify({
         destinationId: destination.id,
@@ -169,7 +171,7 @@ const DestinationDetailPage = () => {
         visitDate,
         returnUrl: window.location.pathname
       }));
-      navigate('/login');
+      navigate('/login', { state: { from: location.pathname } });
       return;
     }
 
@@ -237,17 +239,17 @@ const DestinationDetailPage = () => {
             <div className="lg:col-span-2">
               <Tabs defaultValue="overview">
                 <TabsList>
-                  <TabsTrigger value="overview">Ikhtisar</TabsTrigger>
-                  <TabsTrigger value="details">Detail</TabsTrigger>
-                  <TabsTrigger value="transportation">Transportasi</TabsTrigger>
+                  <TabsTrigger value="overview">{t('destinationDetail.about')}</TabsTrigger>
+                  <TabsTrigger value="details">{t('common.viewDetails')}</TabsTrigger>
+                  <TabsTrigger value="transportation">{t('destinationDetail.transportation')}</TabsTrigger>
                   <TabsTrigger value="reviews">
-                    Review ({rating?.review_count || 0})
+                    {t('destinationDetail.reviews')} ({rating?.review_count || 0})
                   </TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="overview" className="mt-6">
                   <div className="prose prose-lg max-w-none">
-                    <h2 className="text-2xl font-bold mb-4">Tentang {destination.name}</h2>
+                    <h2 className="text-2xl font-bold mb-4">{t('destinationDetail.about')} {destination.name}</h2>
                     <p className="text-muted-foreground mb-6">
                       {destination.description}
                     </p>
@@ -259,7 +261,7 @@ const DestinationDetailPage = () => {
                             <Calendar className="h-6 w-6 text-primary" />
                           </div>
                           <div>
-                            <h3 className="font-medium">Jam Operasional</h3>
+                            <h3 className="font-medium">{t('destinationDetail.hours')}</h3>
                             <p className="text-muted-foreground">
                               {destination.hours.open} - {destination.hours.close}
                             </p>
@@ -273,9 +275,9 @@ const DestinationDetailPage = () => {
                             <Clock className="h-6 w-6 text-primary" />
                           </div>
                           <div>
-                            <h3 className="font-medium">Durasi Kunjungan</h3>
+                            <h3 className="font-medium">{t('destinationDetail.duration')}</h3>
                             <p className="text-muted-foreground">
-                              {destination.duration} menit
+                              {destination.duration} {t('destinationDetail.hour')}
                             </p>
                           </div>
                         </CardContent>
@@ -291,34 +293,34 @@ const DestinationDetailPage = () => {
                 
                 <TabsContent value="details" className="mt-6">
                   <div className="prose prose-lg max-w-none">
-                    <h2 className="text-2xl font-bold mb-4">Informasi Detail</h2>
+                    <h2 className="text-2xl font-bold mb-4">{t('destinationDetail.detailedInfo')}</h2>
                     
                     <div className="space-y-6">
                       <div>
-                        <h3 className="text-xl font-semibold mb-2">Lokasi</h3>
+                        <h3 className="text-xl font-semibold mb-2">{t('destinationDetail.location')}</h3>
                         <p className="text-muted-foreground">
-                          Koordinat: {destination.coordinates.latitude}, {destination.coordinates.longitude}
+                          {t('destinationDetail.coordinates')}: {destination.coordinates.latitude}, {destination.coordinates.longitude}
                         </p>
                       </div>
                       
                       <div>
-                        <h3 className="text-xl font-semibold mb-2">Fasilitas</h3>
+                        <h3 className="text-xl font-semibold mb-2">{t('destinationDetail.facilities')}</h3>
                         <ul className="list-disc pl-5 text-muted-foreground">
-                          <li>Tempat Parkir</li>
-                          <li>Toilet</li>
-                          <li>Area Makan</li>
-                          <li>Pusat Informasi</li>
-                          <li>Toko Suvenir</li>
+                          <li>{t('destinationDetail.parking')}</li>
+                          <li>{t('destinationDetail.toilet')}</li>
+                          <li>{t('destinationDetail.diningArea')}</li>
+                          <li>{t('destinationDetail.infoCenter')}</li>
+                          <li>{t('destinationDetail.souvenirShop')}</li>
                         </ul>
                       </div>
                       
                       <div>
-                        <h3 className="text-xl font-semibold mb-2">Tips Berkunjung</h3>
+                        <h3 className="text-xl font-semibold mb-2">{t('destinationDetail.visitingTips')}</h3>
                         <ul className="list-disc pl-5 text-muted-foreground">
-                          <li>Kenakan pakaian yang nyaman dan sopan</li>
-                          <li>Bawa air minum yang cukup</li>
-                          <li>Datang lebih awal untuk menghindari keramaian</li>
-                          <li>Hormati tradisi dan budaya setempat</li>
+                          <li>{t('destinationDetail.tip1')}</li>
+                          <li>{t('destinationDetail.tip2')}</li>
+                          <li>{t('destinationDetail.tip3')}</li>
+                          <li>{t('destinationDetail.tip4')}</li>
                         </ul>
                       </div>
                     </div>
@@ -327,7 +329,7 @@ const DestinationDetailPage = () => {
                 
                 <TabsContent value="transportation" className="mt-6">
                   <div className="prose prose-lg max-w-none">
-                    <h2 className="text-2xl font-bold mb-4">Akses Transportasi</h2>
+                    <h2 className="text-2xl font-bold mb-4">{t('destinationDetail.transportation')}</h2>
                     
                     <div className="space-y-6">
                       {destination.transportation.includes("Bus") && (
@@ -336,10 +338,9 @@ const DestinationDetailPage = () => {
                             <Bus className="h-6 w-6 text-primary" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-semibold mb-2">Bus</h3>
+                            <h3 className="text-xl font-semibold mb-2">{t('destinationDetail.bus')}</h3>
                             <p className="text-muted-foreground">
-                              Tersedia layanan bus umum yang berhenti di dekat lokasi. 
-                              Cek jadwal dan rute bus lokal untuk informasi lebih lanjut.
+                              {t('destinationDetail.busInfo')}
                             </p>
                           </div>
                         </div>
@@ -351,10 +352,9 @@ const DestinationDetailPage = () => {
                             <Car className="h-6 w-6 text-primary" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-semibold mb-2">Taksi</h3>
+                            <h3 className="text-xl font-semibold mb-2">{t('destinationDetail.taxi')}</h3>
                             <p className="text-muted-foreground">
-                              Taksi tersedia dan merupakan cara yang nyaman untuk mencapai destinasi.
-                              Gunakan aplikasi transportasi online untuk kemudahan pemesanan.
+                              {t('destinationDetail.taxiInfo')}
                             </p>
                           </div>
                         </div>
@@ -366,10 +366,9 @@ const DestinationDetailPage = () => {
                             <Train className="h-6 w-6 text-primary" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-semibold mb-2">Kereta</h3>
+                            <h3 className="text-xl font-semibold mb-2">{t('destinationDetail.train')}</h3>
                             <p className="text-muted-foreground">
-                              Stasiun kereta terdekat berada di Cirebon. Dari stasiun, 
-                              Anda dapat menggunakan taksi atau transportasi lokal menuju destinasi.
+                              {t('destinationDetail.trainInfo')}
                             </p>
                           </div>
                         </div>
@@ -458,13 +457,13 @@ const DestinationDetailPage = () => {
             <div>
               <Card className="sticky top-24">
                 <CardContent className="p-6">
-                  <h2 className="text-xl font-bold mb-4">Pesan Tiket</h2>
+                  <h2 className="text-xl font-bold mb-4">{t('destinationDetail.bookNow')}</h2>
                   
                   <div className="space-y-4">
                     {/* Visit Date Picker */}
                     <div>
                       <Label htmlFor="visit-date-input" className="block text-sm mb-2">
-                        Tanggal Kunjungan
+                        {t('booking.visitDate')}
                       </Label>
                       <div className="relative">
                         <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -480,13 +479,13 @@ const DestinationDetailPage = () => {
                         />
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Pilih tanggal kunjungan (minimal besok)
+                        {t('booking.selectDateInfo')}
                       </p>
                     </div>
 
                     {/* Quantity Selector */}
                     <div>
-                      <Label className="block text-sm mb-2">Jumlah Tiket</Label>
+                      <Label className="block text-sm mb-2">{t('booking.ticketQuantity')}</Label>
                       <div className="flex items-center">
                         <button
                           className="bg-muted rounded-l-md px-3 py-2 border border-input hover:bg-muted/80 transition-colors"
@@ -507,7 +506,7 @@ const DestinationDetailPage = () => {
                         </button>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Maksimal 10 tiket per transaksi
+                        {t('booking.maxTickets')}
                       </p>
                     </div>
                     
@@ -516,16 +515,16 @@ const DestinationDetailPage = () => {
                     {/* Price Summary */}
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span>Harga per tiket</span>
+                        <span>{t('booking.pricePerTicket')}</span>
                         <span>Rp {destination.price.toLocaleString('id-ID')}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span>Jumlah tiket</span>
+                        <span>{t('booking.ticketQuantity')}</span>
                         <span>× {quantity}</span>
                       </div>
                       <Separator />
                       <div className="flex justify-between font-bold text-lg">
-                        <span>Total</span>
+                        <span>{t('booking.total')}</span>
                         <span className="text-primary">Rp {totalPrice.toLocaleString('id-ID')}</span>
                       </div>
                     </div>
@@ -538,11 +537,11 @@ const DestinationDetailPage = () => {
                       disabled={!visitDate}
                     >
                       {!visitDate ? (
-                        "Pilih Tanggal Kunjungan"
+                        t('booking.selectDateButton')
                       ) : !isAuthenticated ? (
                         <>Login & Beli Tiket <ArrowRight className="ml-2 h-4 w-4" /></>
                       ) : (
-                        <>Lanjut ke Pembayaran <ArrowRight className="ml-2 h-4 w-4" /></>
+                        <>{t('booking.proceedToPayment')} <ArrowRight className="ml-2 h-4 w-4" /></>
                       )}
                     </Button>
 
@@ -556,9 +555,9 @@ const DestinationDetailPage = () => {
 
                     {/* Info */}
                     <div className="text-xs text-muted-foreground space-y-1">
-                      <p>✓ Pembayaran aman dengan Midtrans</p>
-                      <p>✓ E-Ticket dikirim via email</p>
-                      <p>✓ Tiket dapat diunduh dari akun Anda</p>
+                      <p>✓ {t('booking.securePayment')}</p>
+                      <p>✓ {t('booking.eTicketEmail')}</p>
+                      <p>✓ {t('booking.downloadTicket')}</p>
                     </div>
                   </div>
                 </CardContent>

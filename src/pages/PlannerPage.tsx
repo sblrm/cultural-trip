@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { useDestinations } from "@/contexts/DestinationsContext";
 import { useMap } from "@/contexts/MapContext";
 import { findOptimalRoute, Route as TravelRoute, OptimizationMode } from "@/services/routePlanner";
@@ -16,6 +17,7 @@ import { getCurrentFuelPrice } from "@/services/dynamicPricing";
 const PlannerPage = () => {
   const { destinations, loading } = useDestinations();
   const { userLocation, locateUser, isLocating, hasLocationPermission } = useMap();
+  const { t } = useTranslation();
   
   const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);
   const [maxDestinations, setMaxDestinations] = useState<number>(3);
@@ -193,10 +195,9 @@ const PlannerPage = () => {
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-2xl">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Rencanakan Rute Wisata Budaya</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">{t('planner.title')}</h1>
             <p className="text-lg">
-              Gunakan fitur AI kami untuk merencanakan rute wisata budaya yang optimal berdasarkan 
-              lokasi Anda dengan estimasi biaya dan waktu yang akurat.
+              {t('planner.subtitle')}
             </p>
           </div>
         </div>

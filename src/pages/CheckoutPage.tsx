@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Calendar, Clock, MapPin, User, Mail, Phone, CreditCard, ArrowRight, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useDestinations } from "@/contexts/DestinationsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -24,6 +25,7 @@ import {
 } from "@/services/paymentService";
 
 const CheckoutPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const quantity = parseInt(searchParams.get("quantity") || "1", 10);
@@ -97,7 +99,7 @@ const CheckoutPage = () => {
       })
       .catch((error) => {
         console.error('Failed to load Midtrans:', error);
-        toast.error('Gagal memuat sistem pembayaran');
+        toast.error(t('booking.paymentLoadError'));
         setIsLoadingScript(false);
       });
   }, []);
@@ -105,9 +107,9 @@ const CheckoutPage = () => {
   if (!destination) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold mb-4">Destinasi tidak ditemukan</h1>
+        <h1 className="text-2xl font-bold mb-4">{t('destinations.notFound')}</h1>
         <Button onClick={() => navigate("/destinations")}>
-          Kembali ke Destinasi
+          {t('common.backToDestinations')}
         </Button>
       </div>
     );
@@ -129,13 +131,13 @@ const CheckoutPage = () => {
     
     // Validate form data and visitDate from URL
     if (!formData.fullName || !formData.email || !formData.phone) {
-      toast.error("Mohon isi semua data pengunjung");
+      toast.error(t('booking.fillAllFields'));
       setIsSubmitting(false);
       return;
     }
     
     if (!visitDate) {
-      toast.error("Tanggal kunjungan tidak valid");
+      toast.error(t('booking.invalidDate'));
       setIsSubmitting(false);
       return;
     }
@@ -143,7 +145,7 @@ const CheckoutPage = () => {
     try {
       // Check if user is logged in
       if (!user?.id) {
-        toast.error("Silakan login terlebih dahulu");
+        toast.error(t('auth.login.required'));
         navigate("/login");
         return;
       }
@@ -163,7 +165,7 @@ const CheckoutPage = () => {
       const itemDetails: TransactionItem[] = [
         {
           id: `DEST-${destination.id}`,
-          name: `Tiket ${destination.name}`,
+          name: `${t('booking.ticket')} ${destination.name}`,
           price: destination.price,
           quantity: quantity,
         },
@@ -178,7 +180,7 @@ const CheckoutPage = () => {
       };
 
       // Create Midtrans transaction
-      toast.loading('Memproses pembayaran...', { id: 'payment' });
+      toast.loading(t('booking.processingPayment'), { id: 'payment' });
       
       const { token, orderId: createdOrderId } = await createTransaction({
         orderId,
@@ -188,43 +190,43 @@ const CheckoutPage = () => {
         metadata,
       });
 
-      toast.success('Mengarahkan ke halaman pembayaran...', { id: 'payment' });
+      toast.success(t('booking.redirectingPayment'), { id: 'payment' });
 
       // Show Midtrans Snap payment popup
       await showSnapPayment(token, {
         onSuccess: async (result) => {
           console.log('Payment success:', result);
-          toast.success('Pembayaran berhasil!');
+          toast.success(t('booking.paymentSuccess'));
           
           // Redirect to payment finish page with order_id
           navigate(`/payment/finish?order_id=${result.order_id || createdOrderId}&transaction_status=settlement&status_code=200`);
         },
         onPending: (result) => {
           console.log('Payment pending:', result);
-          toast.info('Pembayaran pending. Silakan selesaikan pembayaran Anda.');
+          toast.info(t('booking.paymentPending'));
           
           // Redirect to payment pending page
           navigate(`/payment/pending?order_id=${result.order_id || createdOrderId}&transaction_status=pending&status_code=201`);
         },
         onError: (result) => {
           console.error('Payment error:', result);
-          toast.error('Pembayaran gagal. Silakan coba lagi.');
+          toast.error(t('booking.paymentFailed'));
           
           // Redirect to payment error page
           navigate(`/payment/error?order_id=${result.order_id || createdOrderId}&transaction_status=failed&status_code=400`);
         },
         onClose: () => {
           console.log('Payment popup closed');
-          toast.info('Pembayaran dibatalkan');
+          toast.info(t('booking.paymentCancelled'));
         },
       });
 
     } catch (error) {
       console.error('Error processing payment:', error);
       if (error instanceof Error) {
-        toast.error(`Kesalahan: ${error.message}`);
+        toast.error(`${t('common.error')}: ${error.message}`);
       } else {
-        toast.error("Terjadi kesalahan saat memproses pembayaran");
+        toast.error(t('booking.paymentProcessError'));
       }
     } finally {
       setIsSubmitting(false);
@@ -233,8 +235,8 @@ const CheckoutPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-2">Checkout</h1>
-      <p className="text-muted-foreground mb-8">Selesaikan pemesanan tiket Anda</p>
+      <h1 className="text-3xl font-bold mb-2">{t('booking.checkout')}</h1>
+      <p className="text-muted-foreground mb-8">{t('booking.completeBooking')}</p>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column - Form */}
@@ -244,28 +246,28 @@ const CheckoutPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <User className="mr-2 h-5 w-5" />
-                  Konfirmasi Data Pengunjung
+                  {t('booking.visitorData')}
                 </CardTitle>
                 <CardDescription>
-                  Pastikan data Anda sudah benar
+                  {t('booking.verifyData')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">Nama Lengkap</Label>
+                    <Label htmlFor="fullName">{t('booking.fullName')}</Label>
                     <Input
                       id="fullName"
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleInputChange}
                       required
-                      placeholder="Nama lengkap sesuai KTP"
+                      placeholder={t('booking.fullNamePlaceholder')}
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t('booking.email')}</Label>
                     <Input
                       id="email"
                       name="email"
@@ -273,15 +275,15 @@ const CheckoutPage = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       required
-                      placeholder="Email untuk menerima e-ticket"
+                      placeholder={t('booking.emailPlaceholder')}
                     />
                     <p className="text-xs text-muted-foreground">
-                      E-ticket akan dikirim ke email ini
+                      {t('booking.eTicketInfo')}
                     </p>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Nomor Telepon</Label>
+                    <Label htmlFor="phone">{t('booking.phone')}</Label>
                     
                     {profilePhones.length > 0 && !useCustomPhone ? (
                       <div className="space-y-3">
@@ -309,7 +311,7 @@ const CheckoutPage = () => {
                           onClick={() => setUseCustomPhone(true)}
                           className="w-full"
                         >
-                          Gunakan nomor lain
+                          {t('booking.useOtherPhone')}
                         </Button>
                       </div>
                     ) : (
@@ -335,7 +337,7 @@ const CheckoutPage = () => {
                             }}
                             className="w-full"
                           >
-                            Pilih dari nomor tersimpan
+                            {t('booking.selectSavedPhone')}
                           </Button>
                         )}
                       </div>
@@ -365,10 +367,10 @@ const CheckoutPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <CreditCard className="mr-2 h-5 w-5" />
-                  Metode Pembayaran
+                  {t('booking.paymentMethod')}
                 </CardTitle>
                 <CardDescription>
-                  Pembayaran aman melalui Midtrans
+                  {t('booking.securePaymentMidtrans')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -382,12 +384,12 @@ const CheckoutPage = () => {
                     />
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Metode pembayaran yang tersedia:
+                    {t('booking.availablePaymentMethods')}
                   </p>
                   <div className="flex flex-wrap gap-2 text-xs">
-                    <span className="bg-background px-2 py-1 rounded">💳 Kartu Kredit</span>
-                    <span className="bg-background px-2 py-1 rounded">🏦 Transfer Bank</span>
-                    <span className="bg-background px-2 py-1 rounded">🏪 Indomaret/Alfamart</span>
+                    <span className="bg-background px-2 py-1 rounded">💳 {t('booking.creditCard')}</span>
+                    <span className="bg-background px-2 py-1 rounded">🏦 {t('booking.bankTransfer')}</span>
+                    <span className="bg-background px-2 py-1 rounded">🏪 {t('booking.convenience')}</span>
                     <span className="bg-background px-2 py-1 rounded">📱 GoPay</span>
                     <span className="bg-background px-2 py-1 rounded">📱 ShopeePay</span>
                   </div>
@@ -403,16 +405,16 @@ const CheckoutPage = () => {
               {isLoadingScript ? (
                 <span className="flex items-center">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Memuat sistem pembayaran...
+                  {t('booking.loadingPaymentSystem')}
                 </span>
               ) : isSubmitting ? (
                 <span className="flex items-center">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Memproses Pembayaran...
+                  {t('booking.processingPayment')}
                 </span>
               ) : (
                 <>
-                  Lanjutkan ke Pembayaran <ArrowRight className="ml-2 h-4 w-4" />
+                  {t('booking.proceedToPayment')} <ArrowRight className="ml-2 h-4 w-4" />
                 </>
               )}
             </Button>
@@ -423,7 +425,7 @@ const CheckoutPage = () => {
         <div>
           <Card className="sticky top-24">
             <CardHeader>
-              <CardTitle>Ringkasan Pesanan</CardTitle>
+              <CardTitle>{t('booking.orderSummary')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-4">
@@ -444,21 +446,21 @@ const CheckoutPage = () => {
               <div className="space-y-1 text-sm">
                 <div className="flex items-center">
                   <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span>Durasi: {destination.duration} menit</span>
+                  <span>{t('destinationDetail.duration')}: {destination.duration} {t('destinationDetail.hour')}</span>
                 </div>
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span>Jam Buka: {destination.hours.open} - {destination.hours.close}</span>
+                  <span>{t('destinationDetail.hours')}: {destination.hours.open} - {destination.hours.close}</span>
                 </div>
               </div>
               
               <Separator />
               
               <div>
-                <div className="font-medium mb-2">Detail Pesanan</div>
+                <div className="font-medium mb-2">{t('booking.orderDetails')}</div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tanggal Kunjungan</span>
+                    <span className="text-muted-foreground">{t('booking.visitDate')}</span>
                     <span className="font-medium">
                       {new Date(visitDate).toLocaleDateString('id-ID', { 
                         day: 'numeric',
@@ -468,11 +470,11 @@ const CheckoutPage = () => {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Jumlah Tiket</span>
+                    <span className="text-muted-foreground">{t('booking.ticketQuantity')}</span>
                     <span>× {quantity}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Harga per tiket</span>
+                    <span className="text-muted-foreground">{t('booking.pricePerTicket')}</span>
                     <span>Rp {destination.price.toLocaleString('id-ID')}</span>
                   </div>
                 </div>
@@ -481,7 +483,7 @@ const CheckoutPage = () => {
               <Separator />
               
               <div className="flex justify-between font-semibold">
-                <span>Total</span>
+                <span>{t('booking.total')}</span>
                 <span>Rp {totalPrice.toLocaleString('id-ID')}</span>
               </div>
             </CardContent>
