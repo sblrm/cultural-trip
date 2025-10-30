@@ -496,7 +496,7 @@ const DestinationDetailPage = () => {
                         >
                           -
                         </button>
-                        <div className="px-4 py-2 border-t border-b border-input bg-white text-center min-w-[50px] font-medium">
+                        <div className="px-4 py-2 border-t border-b border-input bg-background text-center min-w-[50px] font-medium">
                           {quantity}
                         </div>
                         <button

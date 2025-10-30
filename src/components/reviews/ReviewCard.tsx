@@ -98,7 +98,7 @@ export function ReviewCard({ review, isOwnReview, onEdit, onDelete }: ReviewCard
               </div>
 
               {review.comment && (
-                <p className="mt-3 text-sm text-gray-700 whitespace-pre-wrap">
+                <p className="mt-3 text-sm text-foreground whitespace-pre-wrap">
                   {review.comment}
                 </p>
               )}

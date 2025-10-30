@@ -61,7 +61,7 @@ const ShareTripModal = ({ tripPlan, trigger }: ShareTripModalProps) => {
 
         <div className="space-y-6">
           {/* Preview Card */}
-          <div className="border rounded-lg p-4 bg-gray-50">
+          <div className="border border-border rounded-lg p-4 bg-muted/30 dark:bg-muted/10">
             <ItineraryCard tripPlan={tripPlan} cardId="shareable-itinerary-card" />
           </div>
 
@@ -93,8 +93,8 @@ const ShareTripModal = ({ tripPlan, trigger }: ShareTripModalProps) => {
 
           {/* Text Preview (for copy-paste) */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Teks Itinerary (untuk copy-paste):</label>
-            <div className="bg-white border rounded-lg p-4 text-sm whitespace-pre-wrap max-h-40 overflow-y-auto">
+            <label className="text-sm font-medium text-foreground">Teks Itinerary (untuk copy-paste):</label>
+            <div className="bg-background border border-border rounded-lg p-4 text-sm text-foreground whitespace-pre-wrap max-h-40 overflow-y-auto">
               {shareData.description}
             </div>
           </div>

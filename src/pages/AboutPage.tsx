@@ -8,7 +8,7 @@ const AboutPage = () => {
     <div className="container mx-auto py-12">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Tentang Cultural Trip</h1>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+        <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
           Kami adalah platform yang membantu wisatawan menemukan dan merencanakan
           perjalanan budaya di seluruh Indonesia dengan cara yang mudah dan terpersonalisasi.
         </p>
@@ -17,13 +17,13 @@ const AboutPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
         <div>
           <h2 className="text-2xl font-bold mb-4">Misi Kami</h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-muted-foreground mb-6">
             Cultural Trip didirikan dengan misi untuk melestarikan dan mempromosikan 
             kekayaan budaya Indonesia melalui teknologi. Kami ingin memudahkan para 
             wisatawan lokal dan mancanegara untuk menjelajahi warisan budaya yang 
             beragam di seluruh nusantara.
           </p>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Dengan menggunakan teknologi AI dan pemetaan digital, kami menciptakan 
             pengalaman perjalanan yang personal, informatif, dan memudahkan para 
             wisatawan menemukan tempat-tempat budaya yang mungkin belum banyak 
@@ -32,12 +32,12 @@ const AboutPage = () => {
         </div>
         <div>
           <h2 className="text-2xl font-bold mb-4">Visi Kami</h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-muted-foreground mb-6">
             Kami memimpikan Indonesia sebagai destinasi wisata budaya utama di dunia, 
             dengan keanekaragaman budaya yang dihargai dan dilestarikan oleh generasi 
             mendatang.
           </p>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Cultural Trip berusaha menjadi jembatan digital antara warisan budaya 
             Indonesia dengan teknologi modern, memastikan bahwa kisah-kisah sejarah 
             dan tradisi kita terus hidup dan dapat diakses oleh semua orang, di 
@@ -46,16 +46,16 @@ const AboutPage = () => {
         </div>
       </div>
 
-      <div className="bg-primary/5 rounded-lg p-8 mb-16">
+      <div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-8 mb-16">
         <h2 className="text-2xl font-bold text-center mb-8">Mengapa Memilih Cultural Trip?</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardContent className="pt-6">
-              <div className="rounded-full bg-primary/10 p-3 w-12 h-12 flex items-center justify-center mb-4">
+              <div className="rounded-full bg-primary/10 dark:bg-primary/20 p-3 w-12 h-12 flex items-center justify-center mb-4">
                 <MapPin className="text-primary" />
               </div>
               <h3 className="text-lg font-bold mb-2">Rute Perjalanan Cerdas</h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 AI kami membuat rute optimal berdasarkan preferensi dan lokasi Anda, menghemat waktu dan biaya.
               </p>
             </CardContent>
@@ -63,11 +63,11 @@ const AboutPage = () => {
           
           <Card>
             <CardContent className="pt-6">
-              <div className="rounded-full bg-primary/10 p-3 w-12 h-12 flex items-center justify-center mb-4">
+              <div className="rounded-full bg-primary/10 dark:bg-primary/20 p-3 w-12 h-12 flex items-center justify-center mb-4">
                 <Award className="text-primary" />
               </div>
               <h3 className="text-lg font-bold mb-2">Konten Budaya Berkualitas</h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Informasi akurat dan mendalam tentang setiap destinasi budaya di Indonesia.
               </p>
             </CardContent>
@@ -75,11 +75,11 @@ const AboutPage = () => {
           
           <Card>
             <CardContent className="pt-6">
-              <div className="rounded-full bg-primary/10 p-3 w-12 h-12 flex items-center justify-center mb-4">
+              <div className="rounded-full bg-primary/10 dark:bg-primary/20 p-3 w-12 h-12 flex items-center justify-center mb-4">
                 <Users className="text-primary" />
               </div>
               <h3 className="text-lg font-bold mb-2">Pengalaman Lokal</h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Temukan tempat-tempat yang dicintai penduduk lokal dan pengalaman otentik.
               </p>
             </CardContent>
@@ -92,9 +92,9 @@ const AboutPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="text-center">
-              <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4"></div>
+              <div className="w-32 h-32 bg-muted/30 dark:bg-muted/20 rounded-full mx-auto mb-4"></div>
               <h3 className="font-bold">Nama Lengkap</h3>
-              <p className="text-gray-600">Posisi / Jabatan</p>
+              <p className="text-muted-foreground">Posisi / Jabatan</p>
             </div>
           ))}
         </div>

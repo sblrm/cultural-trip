@@ -141,7 +141,7 @@ const PlannerSettingsCard = ({
         {/* Map Section */}
         <div className="mt-4">
           <h3 className="font-medium mb-2">Peta Lokasi</h3>
-          <div className="h-[200px] bg-gray-100 rounded-lg overflow-hidden mb-2">
+          <div className="h-[200px] bg-muted/20 dark:bg-muted/10 rounded-lg overflow-hidden mb-2">
             {currentPosition && ClientOnlyMap ? (
               <ClientOnlyMap
                 userLocation={currentPosition}
@@ -157,7 +157,7 @@ const PlannerSettingsCard = ({
               <div className="h-full flex items-center justify-center">
                 <div className="text-center">
                   <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-                  <p className="text-sm">Memuat peta...</p>
+                  <p className="text-sm text-muted-foreground">Memuat peta...</p>
                 </div>
               </div>
             )}

@@ -47,13 +47,13 @@ export function StarRating({
               sizeClasses[size],
               star <= rating
                 ? 'fill-yellow-400 text-yellow-400'
-                : 'fill-none text-gray-300'
+                : 'fill-none text-muted-foreground dark:text-muted'
             )}
           />
         </button>
       ))}
       {showNumber && (
-        <span className="ml-2 text-sm font-medium text-gray-700">
+        <span className="ml-2 text-sm font-medium text-foreground">
           {rating.toFixed(1)}
         </span>
       )}

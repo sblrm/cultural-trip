@@ -11,8 +11,8 @@ const ItineraryCard = ({ tripPlan, cardId = "itinerary-card" }: ItineraryCardPro
   const { destinations, totalDistance, totalDuration, totalCost, startDate } = tripPlan;
 
   return (
-    <div id={cardId} className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 max-w-2xl mx-auto">
-      <Card className="border-2 border-primary/20 shadow-xl">
+    <div id={cardId} className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 p-8 max-w-2xl mx-auto">
+      <Card className="border-2 border-primary/20 shadow-xl dark:bg-card">
         <CardHeader className="bg-gradient-to-r from-primary to-primary/80 text-white p-6">
           <div className="flex items-start justify-between">
             <div>
@@ -38,10 +38,10 @@ const ItineraryCard = ({ tripPlan, cardId = "itinerary-card" }: ItineraryCardPro
           </div>
         </CardHeader>
 
-        <CardContent className="p-6 space-y-6">
+        <CardContent className="p-6 space-y-6 dark:bg-card">
           {/* Destinations List */}
           <div>
-            <h3 className="font-semibold text-lg mb-3 flex items-center">
+            <h3 className="font-semibold text-lg mb-3 flex items-center text-foreground">
               <MapPin className="h-5 w-5 mr-2 text-primary" />
               Destinasi
             </h3>
@@ -49,10 +49,10 @@ const ItineraryCard = ({ tripPlan, cardId = "itinerary-card" }: ItineraryCardPro
               {destinations.map((dest, index) => (
                 <div
                   key={dest.id}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-white border border-gray-200"
+                  className="flex items-start gap-3 p-3 rounded-lg bg-background dark:bg-muted/50 border border-border"
                 >
                   {/* Number Badge */}
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
                     {index + 1}
                   </div>
 
@@ -67,7 +67,7 @@ const ItineraryCard = ({ tripPlan, cardId = "itinerary-card" }: ItineraryCardPro
 
                   {/* Destination Info */}
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-sm truncate">{dest.name}</h4>
+                    <h4 className="font-semibold text-sm truncate text-foreground">{dest.name}</h4>
                     <p className="text-xs text-muted-foreground">
                       {dest.location.city}, {dest.location.province}
                     </p>
@@ -81,32 +81,32 @@ const ItineraryCard = ({ tripPlan, cardId = "itinerary-card" }: ItineraryCardPro
           </div>
 
           {/* Summary Stats */}
-          <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
             <div className="text-center">
               <div className="flex items-center justify-center mb-1">
                 <Navigation className="h-4 w-4 text-primary" />
               </div>
               <div className="text-xs text-muted-foreground">Jarak</div>
-              <div className="font-bold text-sm">{totalDistance.toFixed(1)} km</div>
+              <div className="font-bold text-sm text-foreground">{totalDistance.toFixed(1)} km</div>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center mb-1">
                 <Clock className="h-4 w-4 text-primary" />
               </div>
               <div className="text-xs text-muted-foreground">Durasi</div>
-              <div className="font-bold text-sm">{Math.round(totalDuration)} min</div>
+              <div className="font-bold text-sm text-foreground">{Math.round(totalDuration)} min</div>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center mb-1">
                 <DollarSign className="h-4 w-4 text-primary" />
               </div>
               <div className="text-xs text-muted-foreground">Biaya</div>
-              <div className="font-bold text-sm">Rp {(totalCost / 1000).toFixed(0)}k</div>
+              <div className="font-bold text-sm text-foreground">Rp {(totalCost / 1000).toFixed(0)}k</div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="pt-4 border-t text-center">
+          <div className="pt-4 border-t border-border text-center">
             <p className="text-xs text-muted-foreground">
               Direncanakan dengan
             </p>

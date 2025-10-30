@@ -243,7 +243,7 @@ const HomePage = () => {
               {t('home.hero.subtitle')}
             </p>
             <Link to="/planner">
-              <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90">
+              <Button size="lg" variant="secondary" className="bg-background dark:bg-card text-primary hover:bg-muted dark:hover:bg-muted/80">
                 {t('planner.title')}
               </Button>
             </Link>

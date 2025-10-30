@@ -55,10 +55,10 @@ const LiveMapPage: React.FC = () => {
   
   // Map loading component
   const MapLoading = () => (
-    <div className="h-[500px] w-full flex items-center justify-center bg-gray-100 rounded-lg">
+    <div className="h-[500px] w-full flex items-center justify-center bg-muted/20 dark:bg-muted/10 rounded-lg">
       <div className="text-center">
         <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-        <p>Memuat peta...</p>
+        <p className="text-muted-foreground">Memuat peta...</p>
       </div>
     </div>
   );
@@ -82,7 +82,7 @@ const LiveMapPage: React.FC = () => {
         )}
       </div>
       
-      <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+      <div className="bg-card rounded-lg shadow-md p-4 mb-6">
         <div style={{ height: '500px', width: '100%' }}>
           {isMapLoading || !ClientOnlyMap ? (
             <MapLoading />
@@ -97,15 +97,15 @@ const LiveMapPage: React.FC = () => {
         </div>
       </div>
       
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="bg-card rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <Compass className="text-primary" />
           Info Navigasi
         </h2>
         <div className="space-y-2">
-          <p><strong>Koordinat Anda:</strong> {userLocation[0].toFixed(6)}, {userLocation[1].toFixed(6)}</p>
-          <p><strong>Status Pelacakan:</strong> {isTracking ? 'Aktif' : 'Tidak Aktif'}</p>
-          <p className="text-sm text-gray-600">
+          <p className="text-foreground"><strong>Koordinat Anda:</strong> {userLocation[0].toFixed(6)}, {userLocation[1].toFixed(6)}</p>
+          <p className="text-foreground"><strong>Status Pelacakan:</strong> {isTracking ? 'Aktif' : 'Tidak Aktif'}</p>
+          <p className="text-sm text-muted-foreground">
             Gunakan peta ini untuk menemukan lokasi Anda saat ini dan melihat objek wisata budaya di sekitar Anda.
             Anda dapat mengaktifkan pelacakan untuk memperbarui lokasi Anda secara otomatis saat Anda bergerak.
           </p>
@@ -125,10 +125,10 @@ const LiveMapPage: React.FC = () => {
         />
       </div>
       
-      <div className="bg-gray-50 rounded-lg p-4 mt-4">
-        <h3 className="text-lg font-semibold mb-2">Petunjuk Penggunaan:</h3>
-        <ul className="list-disc pl-6 space-y-1">
-          <li>Klik tombol "Mulai Pelacakan" untuk melacak lokasi Anda secara realtime.</li>
+      <div className="bg-muted/20 dark:bg-muted/10 rounded-lg p-4 mt-4">
+        <h3 className="text-lg font-semibold mb-2 text-foreground">Petunjuk Penggunaan:</h3>
+        <ul className="list-disc pl-6 space-y-1 text-foreground">
+          <li>Klik "Mulai Pelacakan" untuk mengaktifkan pemantauan lokasi realtime</li>
           <li>Geser peta untuk melihat area sekitar.</li>
           <li>Klik dan tahan untuk menggeser peta.</li>
           <li>Gunakan tombol + dan - di pojok kiri atas untuk memperbesar atau memperkecil tampilan.</li>

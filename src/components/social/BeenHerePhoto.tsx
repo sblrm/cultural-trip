@@ -149,10 +149,10 @@ const BeenHerePhoto = ({ destinationId, destinationName, onUploadSuccess }: Been
           {!photoData ? (
             <div className="space-y-4">
               <div
-                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
+                className="border-2 border-dashed border-border dark:border-muted rounded-lg p-8 text-center cursor-pointer hover:border-primary dark:hover:border-primary transition-colors bg-muted/20"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-sm text-muted-foreground mb-2">
                   Klik untuk upload foto atau drag & drop
                 </p>
