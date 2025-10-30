@@ -8,6 +8,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { MapProvider } from "@/contexts/MapContext";
 import { DestinationsProvider } from "@/contexts/DestinationsContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 import Layout from "./components/Layout";
 import HomePage from "./pages/HomePage";
@@ -38,13 +39,14 @@ const queryClient = new QueryClient();
 const App = () => (
   <BrowserRouter>
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <DestinationsProvider>
-          <MapProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <Analytics />
+      <ThemeProvider>
+        <AuthProvider>
+          <DestinationsProvider>
+            <MapProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <Analytics />
               <Routes>
                 <Route path="/" element={<Layout />}>
                   <Route index element={<HomePage />} />
@@ -88,6 +90,7 @@ const App = () => (
           </MapProvider>
         </DestinationsProvider>
       </AuthProvider>
+    </ThemeProvider>
     </QueryClientProvider>
   </BrowserRouter>
 );

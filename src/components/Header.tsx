@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -45,7 +46,7 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b">
+    <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-sm border-b">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
@@ -89,6 +90,7 @@ const Header = () => {
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
+            <ThemeToggle />
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -141,7 +143,7 @@ const Header = () => {
 
       {/* Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-b">
+        <div className="md:hidden bg-background border-b">
           <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
             <Link
               to="/"
@@ -220,6 +222,12 @@ const Header = () => {
                   </Link>
                 </div>
               )}
+            </div>
+            
+            {/* Theme Toggle in Mobile Menu */}
+            <div className="pt-2 border-t flex items-center justify-between">
+              <span className="text-sm font-medium">Tema Tampilan</span>
+              <ThemeToggle />
             </div>
           </div>
         </div>
