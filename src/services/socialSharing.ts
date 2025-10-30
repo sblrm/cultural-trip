@@ -1,7 +1,5 @@
-import { Destination } from "@/types/supabase";
-
 export interface TripPlan {
-  destinations: Destination[];
+  destinations: any[]; // Destination array
   totalDistance: number;
   totalDuration: number;
   totalCost: number;
