@@ -38,6 +38,19 @@ END $$;
 ALTER TABLE public.bookings 
   ADD COLUMN IF NOT EXISTS trip_data_id INTEGER REFERENCES public.trip_data(id) ON DELETE SET NULL;
 
+-- 3a. Add visit_date column to bookings (separate from booking_date)
+ALTER TABLE public.bookings 
+  ADD COLUMN IF NOT EXISTS visit_date DATE;
+
+-- Update existing bookings to have visit_date = booking_date if null
+UPDATE public.bookings 
+SET visit_date = booking_date 
+WHERE visit_date IS NULL;
+
+-- Make visit_date NOT NULL after backfill
+ALTER TABLE public.bookings 
+  ALTER COLUMN visit_date SET NOT NULL;
+
 -- 4. Link bookings back to transactions
 ALTER TABLE public.bookings 
   ADD COLUMN IF NOT EXISTS transaction_id UUID REFERENCES public.transactions(id) ON DELETE SET NULL;
@@ -121,10 +134,21 @@ DECLARE
   dest_id INTEGER;
   qty INTEGER;
   visit_date DATE;
+  existing_booking_count INTEGER;
 BEGIN
   -- Only create booking on successful payment
   IF NEW.transaction_status IN ('settlement', 'capture') 
      AND (OLD.transaction_status IS NULL OR OLD.transaction_status != NEW.transaction_status) THEN
+    
+    -- Check if booking already exists for this transaction
+    SELECT COUNT(*) INTO existing_booking_count
+    FROM public.bookings
+    WHERE transaction_id = NEW.id;
+    
+    -- Skip if booking already created
+    IF existing_booking_count > 0 THEN
+      RETURN NEW;
+    END IF;
     
     -- Extract destination ID from trip_data_id
     dest_id := NEW.trip_data_id;
@@ -141,8 +165,17 @@ BEGIN
     -- Get quantity from item_details
     SELECT COALESCE((NEW.item_details->0->>'quantity')::INTEGER, 1) INTO qty;
     
-    -- Set visit date to tomorrow if not specified
-    visit_date := CURRENT_DATE + INTERVAL '1 day';
+    -- Get visit date from metadata (stored in custom_field1) or default to tomorrow
+    IF NEW.custom_field1 IS NOT NULL AND NEW.custom_field1 != '' THEN
+      BEGIN
+        visit_date := NEW.custom_field1::DATE;
+      EXCEPTION
+        WHEN OTHERS THEN
+          visit_date := CURRENT_DATE + INTERVAL '1 day';
+      END;
+    ELSE
+      visit_date := CURRENT_DATE + INTERVAL '1 day';
+    END IF;
     
     -- Create booking if we have destination_id and user_id
     IF dest_id IS NOT NULL AND NEW.user_id IS NOT NULL THEN
@@ -150,6 +183,7 @@ BEGIN
         user_id,
         destination_id,
         booking_date,
+        visit_date,
         quantity,
         total_price,
         status,
@@ -157,13 +191,13 @@ BEGIN
       ) VALUES (
         NEW.user_id,
         dest_id,
+        CURRENT_DATE,
         visit_date,
         qty,
         NEW.gross_amount,
         'confirmed',
         NEW.id
-      )
-      ON CONFLICT DO NOTHING; -- Prevent duplicate bookings
+      );
       
       -- Also create purchase record
       INSERT INTO public.purchases (
@@ -183,8 +217,7 @@ BEGIN
         b.id
       FROM public.bookings b
       WHERE b.transaction_id = NEW.id
-      LIMIT 1
-      ON CONFLICT DO NOTHING;
+      LIMIT 1;
     END IF;
   END IF;
   

@@ -184,6 +184,7 @@ const saveTransactionToDb = async (data: {
       trip_data_id: data.metadata?.tripDataId,
       item_details: data.itemDetails,
       transaction_time: new Date().toISOString(),
+      custom_field1: data.metadata?.visitDate, // Store visit date for booking creation
     });
 
     if (error) {
