@@ -329,43 +329,75 @@ export const getUserPurchases = async (userId: string) => {
  * Get all refund requests for user
  */
 export const getUserRefunds = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('refunds')
+      .select(`
+        *,
+        bookings!booking_id (
+          id,
+          booking_code,
+          visit_date,
+          total_price,
+          status,
+          destination_id,
+          destinations!destination_id (
+            id,
+            name,
+            city,
+            province,
+            image
+          )
+        ),
+        tickets!ticket_id (
+          id,
+          visit_date,
+          status,
+          destination_id,
+          destinations!destination_id (
+            id,
+            name,
+            city,
+            province,
+            image
+          )
+        )
+      `)
+      .eq('user_id', userId)
+      .order('requested_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching refunds:', error);
+      // If foreign key constraint error, try without nested joins
+      if (error.message?.includes('foreign key') || error.message?.includes('relationship')) {
+        return await getUserRefundsSimple(userId);
+      }
+      return [];
+    }
+    
+    return data || [];
+  } catch (err) {
+    console.error('Error in getUserRefunds:', err);
+    // Fallback to simple query
+    return await getUserRefundsSimple(userId);
+  }
+};
+
+/**
+ * Simple refunds query without joins (fallback)
+ */
+const getUserRefundsSimple = async (userId: string) => {
   const { data, error } = await supabase
     .from('refunds')
-    .select(`
-      *,
-      bookings!booking_id (
-        id,
-        booking_code,
-        visit_date,
-        total_price,
-        status,
-        destination_id,
-        destinations:destination_id (
-          id,
-          name,
-          city,
-          province,
-          image
-        )
-      ),
-      tickets!ticket_id (
-        id,
-        visit_date,
-        status,
-        destination_id,
-        destinations:destination_id (
-          id,
-          name,
-          city,
-          province,
-          image
-        )
-      )
-    `)
+    .select('*')
     .eq('user_id', userId)
     .order('requested_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error in simple refunds query:', error);
+    return [];
+  }
+
   return data || [];
 };
 
@@ -374,14 +406,127 @@ export const getUserRefunds = async (userId: string) => {
  * Returns eligibility status and calculated refund amount
  */
 export const checkRefundEligibility = async (bookingId: number): Promise<RefundEligibility> => {
-  const { data, error } = await supabase
-    .rpc('check_refund_eligibility', {
-      booking_id_param: bookingId
-    })
-    .single();
+  try {
+    const { data, error } = await supabase
+      .rpc('check_refund_eligibility', {
+        booking_id_param: bookingId
+      })
+      .single();
 
-  if (error) throw error;
-  return data as RefundEligibility;
+    if (error) {
+      // If RPC function doesn't exist, calculate manually
+      console.warn('RPC function not found, using manual calculation:', error);
+      return await checkRefundEligibilityManual(bookingId);
+    }
+    
+    return data as RefundEligibility;
+  } catch (err) {
+    console.error('Error checking refund eligibility:', err);
+    // Fallback to manual calculation
+    return await checkRefundEligibilityManual(bookingId);
+  }
+};
+
+/**
+ * Manual refund eligibility check (fallback)
+ */
+const checkRefundEligibilityManual = async (bookingId: number): Promise<RefundEligibility> => {
+  try {
+    // Get booking details
+    const { data: booking, error } = await supabase
+      .from('bookings')
+      .select('id, status, visit_date, total_price, created_at')
+      .eq('id', bookingId)
+      .single();
+
+    if (error || !booking) {
+      return {
+        eligible: false,
+        message: 'Booking tidak ditemukan',
+        refund_percentage: 0,
+        refund_amount: 0
+      };
+    }
+
+    // Check status
+    if (!['paid', 'confirmed'].includes(booking.status)) {
+      return {
+        eligible: false,
+        message: 'Status booking tidak memenuhi syarat refund. Hanya tiket dengan status "paid" atau "confirmed" yang bisa direfund.',
+        refund_percentage: 0,
+        refund_amount: 0
+      };
+    }
+
+    // Check visit date
+    const visitDate = new Date(booking.visit_date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    visitDate.setHours(0, 0, 0, 0);
+
+    if (visitDate <= today) {
+      return {
+        eligible: false,
+        message: 'Tanggal kunjungan sudah lewat. Refund tidak dapat diajukan.',
+        refund_percentage: 0,
+        refund_amount: 0
+      };
+    }
+
+    // Check existing refund
+    const { data: existingRefund } = await supabase
+      .from('refunds')
+      .select('id')
+      .eq('booking_id', bookingId)
+      .in('status', ['pending', 'approved', 'completed'])
+      .limit(1);
+
+    if (existingRefund && existingRefund.length > 0) {
+      return {
+        eligible: false,
+        message: 'Sudah ada permintaan refund untuk booking ini',
+        refund_percentage: 0,
+        refund_amount: 0
+      };
+    }
+
+    // Calculate days until visit
+    const daysUntilVisit = Math.ceil((visitDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Determine refund percentage
+    let refundPercentage = 0;
+    let message = '';
+
+    if (daysUntilVisit >= 7) {
+      refundPercentage = 100;
+      message = 'Refund penuh (100%) - pembatalan lebih dari 7 hari sebelum kunjungan';
+    } else if (daysUntilVisit >= 3) {
+      refundPercentage = 50;
+      message = 'Refund 50% - pembatalan 3-7 hari sebelum kunjungan';
+    } else {
+      refundPercentage = 25;
+      message = 'Refund 25% - pembatalan kurang dari 3 hari sebelum kunjungan';
+    }
+
+    const refundAmount = booking.total_price * (refundPercentage / 100);
+
+    return {
+      eligible: true,
+      message,
+      refund_percentage: refundPercentage,
+      refund_amount: refundAmount,
+      days_until_visit: daysUntilVisit,
+      original_amount: booking.total_price
+    };
+  } catch (err) {
+    console.error('Error in manual eligibility check:', err);
+    return {
+      eligible: false,
+      message: 'Terjadi kesalahan saat mengecek kelayakan refund',
+      refund_percentage: 0,
+      refund_amount: 0
+    };
+  }
 };
 
 /**
@@ -393,16 +538,88 @@ export const requestRefund = async (
   bookingId: number,
   reason: string
 ): Promise<RefundResult> => {
-  const { data, error } = await supabase
-    .rpc('request_refund', {
-      user_id_param: userId,
-      booking_id_param: bookingId,
-      reason_param: reason
-    })
-    .single();
+  try {
+    const { data, error } = await supabase
+      .rpc('request_refund', {
+        user_id_param: userId,
+        booking_id_param: bookingId,
+        reason_param: reason
+      })
+      .single();
 
-  if (error) throw error;
-  return data as RefundResult;
+    if (error) {
+      // If RPC function doesn't exist, create refund manually
+      console.warn('RPC function not found, using manual creation:', error);
+      return await requestRefundManual(userId, bookingId, reason);
+    }
+    
+    return data as RefundResult;
+  } catch (err) {
+    console.error('Error requesting refund:', err);
+    // Fallback to manual creation
+    return await requestRefundManual(userId, bookingId, reason);
+  }
+};
+
+/**
+ * Manual refund request (fallback)
+ */
+const requestRefundManual = async (
+  userId: string,
+  bookingId: number,
+  reason: string
+): Promise<RefundResult> => {
+  try {
+    // Check eligibility first
+    const eligibility = await checkRefundEligibility(bookingId);
+    
+    if (!eligibility.eligible) {
+      return {
+        success: false,
+        message: eligibility.message
+      };
+    }
+
+    // Create refund record
+    const { data: refund, error } = await supabase
+      .from('refunds')
+      .insert({
+        user_id: userId,
+        booking_id: bookingId,
+        ticket_id: null,
+        reason: reason,
+        status: 'pending',
+        refund_amount: eligibility.refund_amount,
+        requested_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Update booking status
+    await supabase
+      .from('bookings')
+      .update({ 
+        status: 'refund_requested',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', bookingId);
+
+    return {
+      success: true,
+      message: 'Permintaan refund berhasil diajukan',
+      refund_id: refund.id,
+      refund_amount: eligibility.refund_amount,
+      refund_percentage: eligibility.refund_percentage
+    };
+  } catch (err: any) {
+    console.error('Error in manual refund creation:', err);
+    return {
+      success: false,
+      message: err.message || 'Gagal mengajukan refund'
+    };
+  }
 };
 
 /**

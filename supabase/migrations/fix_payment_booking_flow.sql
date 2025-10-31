@@ -1,9 +1,19 @@
 -- Fix Payment to Booking Flow
 -- This migration ensures proper linking between transactions, bookings, and purchases
 
+-- 0. Drop existing views that may conflict with table alterations
+DROP VIEW IF EXISTS public.booking_details CASCADE;
+DROP VIEW IF EXISTS public.purchase_details CASCADE;
+
 -- 1. Make trip_data_id nullable and allow storing destination_id directly
-ALTER TABLE public.transactions 
-  ALTER COLUMN trip_data_id DROP NOT NULL;
+DO $$ 
+BEGIN
+  -- Try to alter column, ignore if already nullable
+  ALTER TABLE public.transactions 
+    ALTER COLUMN trip_data_id DROP NOT NULL;
+EXCEPTION
+  WHEN OTHERS THEN NULL; -- Ignore if already nullable
+END $$;
 
 -- Add comment to clarify usage
 COMMENT ON COLUMN public.transactions.trip_data_id IS 'Can store destination_id for direct ticket purchases or trip_data_id for planned trips';
