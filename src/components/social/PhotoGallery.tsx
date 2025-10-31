@@ -1,9 +1,21 @@
 import { useState, useEffect } from "react";
-import { Camera, X, Loader2, Calendar, User } from "lucide-react";
+import { Camera, X, Loader2, Calendar, User, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface PhotoWithUser {
   id: number;
@@ -24,9 +36,12 @@ interface PhotoGalleryProps {
 }
 
 const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => {
+  const { user } = useAuth();
   const [photos, setPhotos] = useState<PhotoWithUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPhoto, setSelectedPhoto] = useState<{ url: string; user: PhotoWithUser } | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<{ url: string; user: PhotoWithUser; photoIndex: number } | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadPhotos();
@@ -87,6 +102,56 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
     });
   };
 
+  const handleDeletePhoto = async () => {
+    if (!selectedPhoto || !user) return;
+
+    setDeleting(true);
+    try {
+      const review = selectedPhoto.user;
+      const photoUrl = selectedPhoto.url;
+      
+      // Extract file path from URL
+      const urlParts = photoUrl.split('/');
+      const bucketIndex = urlParts.indexOf('culture-uploads');
+      if (bucketIndex === -1) throw new Error('Invalid photo URL');
+      
+      const filePath = urlParts.slice(bucketIndex + 1).join('/');
+
+      // Remove photo from array
+      const updatedPhotos = review.photos.filter((_, idx) => idx !== selectedPhoto.photoIndex);
+
+      // Update review in database
+      const { error: dbError } = await supabase
+        .from('reviews')
+        .update({ photos: updatedPhotos })
+        .eq('id', review.id);
+
+      if (dbError) throw dbError;
+
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('culture-uploads')
+        .remove([filePath]);
+
+      if (storageError) {
+        console.error('Storage delete error (non-critical):', storageError);
+        // Don't throw - photo reference already removed from DB
+      }
+
+      toast.success('Foto berhasil dihapus');
+      setDeleteDialogOpen(false);
+      setSelectedPhoto(null);
+      
+      // Reload photos
+      loadPhotos();
+    } catch (error: any) {
+      console.error('Delete photo error:', error);
+      toast.error(error.message || 'Gagal menghapus foto');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -128,7 +193,7 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
             review.photos.map((photoUrl, index) => (
               <button
                 key={`${review.id}-${index}`}
-                onClick={() => setSelectedPhoto({ url: photoUrl, user: review })}
+                onClick={() => setSelectedPhoto({ url: photoUrl, user: review, photoIndex: index })}
                 className="relative aspect-square rounded-lg overflow-hidden group cursor-pointer bg-muted"
               >
                 <img
@@ -159,15 +224,30 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
         <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
           <DialogContent className="max-w-4xl max-h-[90vh] p-0">
             <div className="relative">
-              {/* Close button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full"
-                onClick={() => setSelectedPhoto(null)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              {/* Action buttons */}
+              <div className="absolute top-4 right-4 z-10 flex gap-2">
+                {/* Delete button - only show for photo owner */}
+                {user && selectedPhoto.user.user_id === user.id && (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="rounded-full"
+                    onClick={() => setDeleteDialogOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+                
+                {/* Close button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="bg-black/50 hover:bg-black/70 text-white rounded-full"
+                  onClick={() => setSelectedPhoto(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
 
               {/* Photo */}
               <div className="bg-black">
@@ -224,6 +304,38 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Foto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Foto ini akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeletePhoto}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Menghapus...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Hapus Foto
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
