@@ -410,16 +410,17 @@ export const checkRefundEligibility = async (bookingId: number): Promise<RefundE
     const { data, error } = await supabase
       .rpc('check_refund_eligibility', {
         booking_id_param: bookingId
-      })
-      .single();
+      });
 
-    if (error) {
-      // If RPC function doesn't exist, calculate manually
-      console.warn('RPC function not found, using manual calculation:', error);
+    // If error or no data, use manual calculation
+    if (error || !data || (Array.isArray(data) && data.length === 0)) {
+      console.warn('RPC function not available or returned no data, using manual calculation');
       return await checkRefundEligibilityManual(bookingId);
     }
     
-    return data as RefundEligibility;
+    // Handle both array and single object responses
+    const result = Array.isArray(data) ? data[0] : data;
+    return result as RefundEligibility;
   } catch (err) {
     console.error('Error checking refund eligibility:', err);
     // Fallback to manual calculation
@@ -544,16 +545,17 @@ export const requestRefund = async (
         user_id_param: userId,
         booking_id_param: bookingId,
         reason_param: reason
-      })
-      .single();
+      });
 
-    if (error) {
-      // If RPC function doesn't exist, create refund manually
-      console.warn('RPC function not found, using manual creation:', error);
+    // If error or no data, use manual creation
+    if (error || !data || (Array.isArray(data) && data.length === 0)) {
+      console.warn('RPC function not available or returned no data, using manual creation');
       return await requestRefundManual(userId, bookingId, reason);
     }
     
-    return data as RefundResult;
+    // Handle both array and single object responses
+    const result = Array.isArray(data) ? data[0] : data;
+    return result as RefundResult;
   } catch (err) {
     console.error('Error requesting refund:', err);
     // Fallback to manual creation
