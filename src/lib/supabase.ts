@@ -264,7 +264,7 @@ export const getUserBookings = async (userId: string) => {
     .from('bookings')
     .select(`
       *,
-      destinations:destination_id (
+      destinations!destination_id (
         id,
         name,
         city,
@@ -272,7 +272,7 @@ export const getUserBookings = async (userId: string) => {
         image,
         price
       ),
-      transactions:transaction_id (
+      transactions!transaction_id (
         order_id,
         payment_type,
         transaction_status
@@ -295,7 +295,7 @@ export const getUserPurchases = async (userId: string) => {
     .from('bookings')
     .select(`
       *,
-      destinations:destination_id (
+      destinations!destination_id (
         id,
         name,
         city,
@@ -303,13 +303,13 @@ export const getUserPurchases = async (userId: string) => {
         image,
         price
       ),
-      transactions:transaction_id (
+      transactions!transaction_id (
         order_id,
         payment_type,
         transaction_status,
         gross_amount
       ),
-      purchases:purchases!booking_id (
+      purchases!purchases_booking_id_fkey (
         id,
         amount,
         payment_method,
@@ -333,12 +333,13 @@ export const getUserRefunds = async (userId: string) => {
     .from('refunds')
     .select(`
       *,
-      bookings:booking_id (
+      bookings!booking_id (
         id,
         booking_code,
         visit_date,
         total_price,
         status,
+        destination_id,
         destinations:destination_id (
           id,
           name,
@@ -347,10 +348,11 @@ export const getUserRefunds = async (userId: string) => {
           image
         )
       ),
-      tickets:ticket_id (
+      tickets!ticket_id (
         id,
         visit_date,
         status,
+        destination_id,
         destinations:destination_id (
           id,
           name,
