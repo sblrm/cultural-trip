@@ -628,6 +628,8 @@ const requestRefundManual = async (
  * Update booking to cancel it
  */
 export const cancelBooking = async (bookingId: number) => {
+  console.log('Attempting to cancel booking:', bookingId);
+  
   const { data, error } = await supabase
     .from('bookings')
     .update({ 
@@ -635,11 +637,18 @@ export const cancelBooking = async (bookingId: number) => {
       updated_at: new Date().toISOString()
     })
     .eq('id', bookingId)
-    .select()
-    .single();
+    .select();
 
-  if (error) throw error;
-  return data;
+  console.log('Cancel booking result:', { data, error });
+
+  if (error) {
+    console.error('Cancel booking error:', error);
+    throw error;
+  }
+  if (!data || data.length === 0) {
+    throw new Error('Booking not found or already cancelled');
+  }
+  return data[0];
 };
 
 /**
@@ -653,11 +662,13 @@ export const rescheduleBooking = async (bookingId: number, newVisitDate: string)
       updated_at: new Date().toISOString()
     })
     .eq('id', bookingId)
-    .select()
-    .single();
+    .select();
 
   if (error) throw error;
-  return data;
+  if (!data || data.length === 0) {
+    throw new Error('Booking not found');
+  }
+  return data[0];
 };
 
 /**
