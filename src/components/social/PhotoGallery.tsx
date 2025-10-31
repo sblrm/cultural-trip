@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { Camera, X, Loader2, Calendar, User, Trash2 } from "lucide-react";
+import { Camera, X, Loader2, Calendar, User, Trash2, Edit2, Save } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -42,6 +44,10 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
   const [selectedPhoto, setSelectedPhoto] = useState<{ url: string; user: PhotoWithUser; photoIndex: number } | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedComment, setEditedComment] = useState('');
+  const [editedRating, setEditedRating] = useState(5);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadPhotos();
@@ -149,6 +155,52 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
       toast.error(error.message || 'Gagal menghapus foto');
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleStartEdit = () => {
+    if (!selectedPhoto) return;
+    setEditedComment(selectedPhoto.user.comment || '');
+    setEditedRating(selectedPhoto.user.rating);
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditedComment('');
+    setEditedRating(5);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedPhoto || !user) return;
+
+    setSaving(true);
+    try {
+      const review = selectedPhoto.user;
+
+      // Update review in database
+      const { error } = await supabase
+        .from('reviews')
+        .update({
+          comment: editedComment.trim() || null,
+          rating: editedRating,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', review.id);
+
+      if (error) throw error;
+
+      toast.success('Caption berhasil diperbarui');
+      setIsEditing(false);
+      setSelectedPhoto(null);
+      
+      // Reload photos
+      loadPhotos();
+    } catch (error: any) {
+      console.error('Update review error:', error);
+      toast.error(error.message || 'Gagal memperbarui caption');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -278,25 +330,107 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
 
                   {/* User Info */}
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold">
-                        {selectedPhoto.user.profiles?.full_name || 'User'}
-                      </h4>
-                      <span className="text-yellow-500">
-                        {'⭐'.repeat(selectedPhoto.user.rating)}
-                      </span>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-semibold">
+                          {selectedPhoto.user.profiles?.full_name || 'User'}
+                        </h4>
+                        {!isEditing && (
+                          <span className="text-yellow-500">
+                            {'⭐'.repeat(selectedPhoto.user.rating)}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Edit button - only show for photo owner */}
+                      {user && selectedPhoto.user.user_id === user.id && !isEditing && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleStartEdit}
+                        >
+                          <Edit2 className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                      )}
                     </div>
                     
-                    {selectedPhoto.user.comment && (
-                      <p className="text-muted-foreground mb-2">
-                        {selectedPhoto.user.comment}
-                      </p>
+                    {isEditing ? (
+                      /* Edit Mode */
+                      <div className="space-y-4 mt-4">
+                        {/* Rating Editor */}
+                        <div className="space-y-2">
+                          <Label>Rating</Label>
+                          <div className="flex gap-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                type="button"
+                                onClick={() => setEditedRating(star)}
+                                className="text-2xl focus:outline-none transition-transform hover:scale-110"
+                              >
+                                {star <= editedRating ? '⭐' : '☆'}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Caption Editor */}
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-caption">Caption</Label>
+                          <Textarea
+                            id="edit-caption"
+                            value={editedComment}
+                            onChange={(e) => setEditedComment(e.target.value)}
+                            placeholder="Ceritakan pengalaman Anda..."
+                            rows={3}
+                          />
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleCancelEdit}
+                            disabled={saving}
+                          >
+                            Batal
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={handleSaveEdit}
+                            disabled={saving}
+                          >
+                            {saving ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Menyimpan...
+                              </>
+                            ) : (
+                              <>
+                                <Save className="h-4 w-4 mr-2" />
+                                Simpan
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* View Mode */
+                      <>
+                        {selectedPhoto.user.comment && (
+                          <p className="text-muted-foreground mb-2">
+                            {selectedPhoto.user.comment}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span>{formatDate(selectedPhoto.user.created_at)}</span>
+                        </div>
+                      </>
                     )}
-                    
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>{formatDate(selectedPhoto.user.created_at)}</span>
-                    </div>
                   </div>
                 </div>
               </div>
