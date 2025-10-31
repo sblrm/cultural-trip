@@ -237,55 +237,90 @@ export const createTicket = async ({
 };
 
 // New helpers for Profile pages
+
+/**
+ * Get active bookings for user (not yet used/cancelled/refunded)
+ * For "My Booking" page - shows upcoming trips
+ */
 export const getUserBookings = async (userId: string) => {
   const { data, error } = await supabase
     .from('bookings')
     .select(`
       *,
-      destinations:destinations (
+      destinations:destination_id (
         id,
         name,
         city,
         province,
-        image
+        image,
+        price
+      ),
+      transactions:transaction_id (
+        order_id,
+        payment_type,
+        transaction_status
       )
     `)
     .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+    .in('status', ['pending_payment', 'paid', 'confirmed']) // Only active bookings
+    .order('visit_date', { ascending: true }); // Soonest first
 
   if (error) throw error;
-  return data;
+  return data || [];
 };
 
+/**
+ * Get completed/past bookings for user (used, refunded, cancelled, expired)
+ * For "Purchase List" page - shows transaction history
+ */
 export const getUserPurchases = async (userId: string) => {
   const { data, error } = await supabase
-    .from('purchases')
+    .from('bookings')
+    .select(`
+      *,
+      destinations:destination_id (
+        id,
+        name,
+        city,
+        province,
+        image,
+        price
+      ),
+      transactions:transaction_id (
+        order_id,
+        payment_type,
+        transaction_status,
+        gross_amount
+      ),
+      purchases:purchases!booking_id (
+        id,
+        amount,
+        payment_method,
+        status,
+        created_at
+      )
+    `)
+    .eq('user_id', userId)
+    .in('status', ['used', 'refunded', 'cancelled']) // Only completed bookings
+    .order('created_at', { ascending: false }); // Most recent first
+
+  if (error) throw error;
+  return data || [];
+};
+
+/**
+ * Get all refund requests for user
+ */
+export const getUserRefunds = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('refunds')
     .select(`
       *,
       bookings:booking_id (
         id,
         booking_code,
-        quantity,
-        ticket_quantity,
-        total_price,
         visit_date,
-        status,
-        qr_code_url,
-        destination_id,
-        destinations:destination_id (
-          id,
-          name,
-          city,
-          province,
-          image,
-          price
-        )
-      ),
-      tickets:ticket_id (
-        id,
-        quantity,
         total_price,
-        visit_date,
         status,
         destinations:destination_id (
           id,
@@ -294,25 +329,12 @@ export const getUserPurchases = async (userId: string) => {
           province,
           image
         )
-      )
-    `)
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return data;
-};
-
-export const getUserRefunds = async (userId: string) => {
-  const { data, error } = await supabase
-    .from('refunds')
-    .select(`
-      *,
-      tickets:tickets (
+      ),
+      tickets:ticket_id (
         id,
         visit_date,
         status,
-        destinations:destinations (
+        destinations:destination_id (
           id,
           name,
           city,
@@ -325,9 +347,83 @@ export const getUserRefunds = async (userId: string) => {
     .order('requested_at', { ascending: false });
 
   if (error) throw error;
+  return data || [];
+};
+
+/**
+ * Check if a booking is eligible for refund
+ * Returns eligibility status and calculated refund amount
+ */
+export const checkRefundEligibility = async (bookingId: number) => {
+  const { data, error } = await supabase
+    .rpc('check_refund_eligibility', {
+      booking_id_param: bookingId
+    });
+
+  if (error) throw error;
   return data;
 };
 
+/**
+ * Request a refund for a booking
+ * Checks eligibility and creates refund request
+ */
+export const requestRefund = async (
+  userId: string,
+  bookingId: number,
+  reason: string
+) => {
+  const { data, error } = await supabase
+    .rpc('request_refund', {
+      user_id_param: userId,
+      booking_id_param: bookingId,
+      reason_param: reason
+    });
+
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * Update booking to cancel it
+ */
+export const cancelBooking = async (bookingId: number) => {
+  const { data, error } = await supabase
+    .from('bookings')
+    .update({ 
+      status: 'cancelled',
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', bookingId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * Update booking visit date (reschedule)
+ */
+export const rescheduleBooking = async (bookingId: number, newVisitDate: string) => {
+  const { data, error } = await supabase
+    .from('bookings')
+    .update({ 
+      visit_date: newVisitDate,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', bookingId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * Legacy function - kept for backwards compatibility
+ * @deprecated Use requestRefund instead
+ */
 export const createRefund = async (
   userId: string,
   ticketId: number,
@@ -338,9 +434,9 @@ export const createRefund = async (
     .insert({ user_id: userId, ticket_id: ticketId, reason })
     .select(`
       *,
-      tickets:tickets (
+      tickets:ticket_id (
         id,
-        destinations:destinations (id, name, city, province, image)
+        destinations:destination_id (id, name, city, province, image)
       )
     `)
     .single();
