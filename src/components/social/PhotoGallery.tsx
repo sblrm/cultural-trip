@@ -41,17 +41,26 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
   const { user } = useAuth();
   const [photos, setPhotos] = useState<PhotoWithUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPhoto, setSelectedPhoto] = useState<{ url: string; user: PhotoWithUser; photoIndex: number } | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<{ url: string; review: PhotoWithUser; photoIndex: number } | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedComment, setEditedComment] = useState('');
   const [editedRating, setEditedRating] = useState(5);
   const [saving, setSaving] = useState(false);
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const photosPerPage = 12; // 3x4 grid
 
   useEffect(() => {
     loadPhotos();
   }, [destinationId]);
+
+  // Reset to page 1 when photos change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [photos.length]);
 
   const loadPhotos = async () => {
     try {
@@ -113,7 +122,7 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
 
     setDeleting(true);
     try {
-      const review = selectedPhoto.user;
+      const review = selectedPhoto.review;
       const photoUrl = selectedPhoto.url;
       
       // Extract file path from URL
@@ -160,8 +169,8 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
 
   const handleStartEdit = () => {
     if (!selectedPhoto) return;
-    setEditedComment(selectedPhoto.user.comment || '');
-    setEditedRating(selectedPhoto.user.rating);
+    setEditedComment(selectedPhoto.review.comment || '');
+    setEditedRating(selectedPhoto.review.rating);
     setIsEditing(true);
   };
 
@@ -176,7 +185,7 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
 
     setSaving(true);
     try {
-      const review = selectedPhoto.user;
+      const review = selectedPhoto.review;
 
       // Update review in database
       const { error } = await supabase
@@ -226,6 +235,21 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
     );
   }
 
+  // Flatten photos array for pagination
+  const allPhotos = photos.flatMap((review) =>
+    review.photos.map((photoUrl, index) => ({
+      url: photoUrl,
+      review,
+      photoIndex: index
+    }))
+  );
+
+  // Calculate pagination
+  const totalPages = Math.ceil(allPhotos.length / photosPerPage);
+  const startIndex = (currentPage - 1) * photosPerPage;
+  const endIndex = startIndex + photosPerPage;
+  const currentPhotos = allPhotos.slice(startIndex, endIndex);
+
   return (
     <>
       <div className="space-y-6">
@@ -234,52 +258,99 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
           <div>
             <h3 className="text-2xl font-bold">Galeri Foto Pengunjung</h3>
             <p className="text-muted-foreground">
-              {photos.length} foto dari pengunjung di {destinationName}
+              {allPhotos.length} foto dari pengunjung di {destinationName}
             </p>
           </div>
         </div>
 
         {/* Photo Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {photos.flatMap((review) =>
-            review.photos.map((photoUrl, index) => (
-              <button
-                key={`${review.id}-${index}`}
-                onClick={() => setSelectedPhoto({ url: photoUrl, user: review, photoIndex: index })}
-                className="relative aspect-square rounded-lg overflow-hidden group cursor-pointer bg-muted"
-              >
-                <img
-                  src={photoUrl}
-                  alt={`Foto oleh ${review.profiles?.full_name || 'User'}`}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                  loading="lazy"
-                />
-                
-                {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4">
-                  <User className="h-6 w-6 mb-2" />
-                  <p className="text-sm font-medium text-center">
-                    {review.profiles?.full_name || 'User'}
-                  </p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <span className="text-yellow-400">{'⭐'.repeat(review.rating)}</span>
-                  </div>
+          {currentPhotos.map((photo, idx) => (
+            <button
+              key={`${photo.review.id}-${photo.photoIndex}-${idx}`}
+              onClick={() => setSelectedPhoto(photo)}
+              className="relative aspect-square rounded-lg overflow-hidden group cursor-pointer bg-muted"
+            >
+              <img
+                src={photo.url}
+                alt={`Foto oleh ${photo.review.profiles?.full_name || 'User'}`}
+                className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                loading="lazy"
+              />
+              
+              {/* Overlay on hover */}
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4">
+                <User className="h-6 w-6 mb-2" />
+                <p className="text-sm font-medium text-center">
+                  {photo.review.profiles?.full_name || 'User'}
+                </p>
+                <div className="flex items-center gap-1 mt-1">
+                  <span className="text-yellow-400">{'⭐'.repeat(photo.review.rating)}</span>
                 </div>
-              </button>
-            ))
-          )}
+              </div>
+            </button>
+          ))}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 pt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              Sebelumnya
+            </Button>
+            
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                // Show first, last, current, and adjacent pages
+                if (
+                  page === 1 ||
+                  page === totalPages ||
+                  (page >= currentPage - 1 && page <= currentPage + 1)
+                ) {
+                  return (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      className="min-w-[40px]"
+                    >
+                      {page}
+                    </Button>
+                  );
+                } else if (page === currentPage - 2 || page === currentPage + 2) {
+                  return <span key={page} className="px-2">...</span>;
+                }
+                return null;
+              })}
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Selanjutnya
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Photo Detail Modal */}
       {selectedPhoto && (
         <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-          <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-            <div className="relative">
+          <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
+            <div className="flex flex-col max-h-[90vh]">
               {/* Action buttons */}
               <div className="absolute top-4 right-4 z-10 flex gap-2">
                 {/* Delete button - only show for photo owner */}
-                {user && selectedPhoto.user.user_id === user.id && (
+                {user && selectedPhoto.review.user_id === user.id && (
                   <Button
                     variant="destructive"
                     size="icon"
@@ -302,23 +373,23 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
               </div>
 
               {/* Photo */}
-              <div className="bg-black">
+              <div className="bg-black flex-shrink-0">
                 <img
                   src={selectedPhoto.url}
                   alt="Foto destinasi"
-                  className="w-full max-h-[70vh] object-contain"
+                  className="w-full max-h-[50vh] object-contain"
                 />
               </div>
 
-              {/* Photo Info */}
-              <div className="p-6 bg-background">
+              {/* Photo Info - Scrollable */}
+              <div className="p-6 bg-background overflow-y-auto">
                 <div className="flex items-start gap-4">
                   {/* User Avatar */}
                   <div className="flex-shrink-0">
-                    {selectedPhoto.user.profiles?.avatar_url ? (
+                    {selectedPhoto.review.profiles?.avatar_url ? (
                       <img
-                        src={selectedPhoto.user.profiles.avatar_url}
-                        alt={selectedPhoto.user.profiles?.full_name || 'User'}
+                        src={selectedPhoto.review.profiles.avatar_url}
+                        alt={selectedPhoto.review.profiles?.full_name || 'User'}
                         className="w-12 h-12 rounded-full object-cover"
                       />
                     ) : (
@@ -333,17 +404,17 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
                         <h4 className="font-semibold">
-                          {selectedPhoto.user.profiles?.full_name || 'User'}
+                          {selectedPhoto.review.profiles?.full_name || 'User'}
                         </h4>
                         {!isEditing && (
                           <span className="text-yellow-500">
-                            {'⭐'.repeat(selectedPhoto.user.rating)}
+                            {'⭐'.repeat(selectedPhoto.review.rating)}
                           </span>
                         )}
                       </div>
                       
                       {/* Edit button - only show for photo owner */}
-                      {user && selectedPhoto.user.user_id === user.id && !isEditing && (
+                      {user && selectedPhoto.review.user_id === user.id && !isEditing && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -419,15 +490,15 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
                     ) : (
                       /* View Mode */
                       <>
-                        {selectedPhoto.user.comment && (
+                        {selectedPhoto.review.comment && (
                           <p className="text-muted-foreground mb-2">
-                            {selectedPhoto.user.comment}
+                            {selectedPhoto.review.comment}
                           </p>
                         )}
                         
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
-                          <span>{formatDate(selectedPhoto.user.created_at)}</span>
+                          <span>{formatDate(selectedPhoto.review.created_at)}</span>
                         </div>
                       </>
                     )}

@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { ReviewCard } from './ReviewCard';
 import { StarRating } from './StarRating';
 import { Progress } from '@/components/ui/progress';
@@ -19,6 +21,9 @@ export function ReviewList({
   onEditReview,
   onDeleteReview,
 }: ReviewListProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const reviewsPerPage = 5;
+
   if (!rating || rating.review_count === 0) {
     return (
       <Card>
@@ -88,15 +93,77 @@ export function ReviewList({
         <h3 className="font-semibold text-lg">
           Semua Review ({reviews.length})
         </h3>
-        {reviews.map((review) => (
-          <ReviewCard
-            key={review.id}
-            review={review}
-            isOwnReview={currentUserId === review.user_id}
-            onEdit={() => onEditReview?.(review)}
-            onDelete={() => onDeleteReview?.(review.id)}
-          />
-        ))}
+        
+        {/* Paginated Reviews */}
+        {(() => {
+          const totalPages = Math.ceil(reviews.length / reviewsPerPage);
+          const startIndex = (currentPage - 1) * reviewsPerPage;
+          const endIndex = startIndex + reviewsPerPage;
+          const currentReviews = reviews.slice(startIndex, endIndex);
+
+          return (
+            <>
+              {currentReviews.map((review) => (
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  isOwnReview={currentUserId === review.user_id}
+                  onEdit={() => onEditReview?.(review)}
+                  onDelete={() => onDeleteReview?.(review.id)}
+                />
+              ))}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 pt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Sebelumnya
+                  </Button>
+                  
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                      // Show first, last, current, and adjacent pages
+                      if (
+                        page === 1 ||
+                        page === totalPages ||
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      ) {
+                        return (
+                          <Button
+                            key={page}
+                            variant={currentPage === page ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setCurrentPage(page)}
+                            className="min-w-[40px]"
+                          >
+                            {page}
+                          </Button>
+                        );
+                      } else if (page === currentPage - 2 || page === currentPage + 2) {
+                        return <span key={page} className="px-2">...</span>;
+                      }
+                      return null;
+                    })}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Selanjutnya
+                  </Button>
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
     </div>
   );
