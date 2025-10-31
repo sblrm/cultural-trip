@@ -8,15 +8,22 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { GuestRestrictionModal } from "@/components/GuestRestrictionModal";
 
 const ProfilePage = () => {
   const { t } = useTranslation();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isGuest, logout } = useAuth();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showGuestModal, setShowGuestModal] = useState(false);
 
   useEffect(() => {
+    if (isGuest) {
+      setShowGuestModal(true);
+      return;
+    }
+
     if (!isAuthenticated) {
       navigate("/login");
       return;
@@ -174,6 +181,16 @@ const ProfilePage = () => {
           </CardFooter>
         </Card>
       </div>
+
+      {/* Guest Restriction Modal */}
+      <GuestRestrictionModal
+        isOpen={showGuestModal}
+        onClose={() => {
+          setShowGuestModal(false);
+          navigate("/");
+        }}
+        feature={t('guest.features.profile') || 'Profil & Riwayat'}
+      />
     </div>
   );
 };

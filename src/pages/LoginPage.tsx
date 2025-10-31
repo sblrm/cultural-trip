@@ -12,7 +12,7 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, continueAsGuest } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -32,6 +32,11 @@ const LoginPage = () => {
 
   const handleGoogleLogin = async () => {
     await loginWithGoogle();
+  };
+
+  const handleGuestMode = () => {
+    continueAsGuest();
+    navigate("/");
   };
 
   return (
@@ -125,7 +130,17 @@ const LoginPage = () => {
           </Button>
         </CardContent>
         <CardFooter className="text-center">
-          <div className="w-full">
+          <div className="w-full space-y-4">
+            {/* Browse as Guest Button */}
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleGuestMode}
+              className="w-full text-muted-foreground hover:text-primary"
+            >
+              {t('auth.login.browseAsGuest') || 'Jelajahi sebagai Tamu'}
+            </Button>
+            
             <p className="text-sm text-muted-foreground">
               {t('auth.login.noAccount')}{" "}
               <Link to="/register" className="text-primary hover:underline">

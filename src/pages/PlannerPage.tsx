@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/contexts/AuthContext";
 import { useDestinations } from "@/contexts/DestinationsContext";
 import { useMap } from "@/contexts/MapContext";
 import { findOptimalRoute, Route as TravelRoute, OptimizationMode } from "@/services/routePlanner";
@@ -11,12 +12,14 @@ import PlannedRouteCard from "@/components/planner/PlannedRouteCard";
 import RouteMapVisualization from "@/components/planner/RouteMapVisualization";
 import ChatSidebar from "@/components/planner/ChatSidebar";
 import EmptyRouteState from "@/components/planner/EmptyRouteState";
+import { GuestRestrictionModal } from "@/components/GuestRestrictionModal";
 import { saveTripData, logPrediction } from "@/services/mlDataCollection";
 import { getCurrentFuelPrice } from "@/services/dynamicPricing";
 
 const PlannerPage = () => {
   const { destinations, loading } = useDestinations();
   const { userLocation, locateUser, isLocating, hasLocationPermission } = useMap();
+  const { isGuest } = useAuth();
   const { t } = useTranslation();
   
   const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);
@@ -27,6 +30,7 @@ const PlannerPage = () => {
   const [isPlanning, setIsPlanning] = useState<boolean>(false);
   const [currentPosition, setCurrentPosition] = useState<[number, number] | null>(null);
   const [isTracking, setIsTracking] = useState<boolean>(false);
+  const [showGuestModal, setShowGuestModal] = useState(false);
   
   const [landmarks, setLandmarks] = useState<Array<{id: number, name: string, location: [number, number], type: string}>>([]);
   
@@ -57,6 +61,12 @@ const PlannerPage = () => {
   };
 
   const handlePlanRoute = async () => {
+    // Check if guest user
+    if (isGuest) {
+      setShowGuestModal(true);
+      return;
+    }
+
     if (!userLocation) {
       toast.error("Mohon aktifkan lokasi Anda terlebih dahulu");
       return;
@@ -261,6 +271,13 @@ const PlannerPage = () => {
       
       {/* Floating Chat Button */}
       <ChatSidebar route={plannedRoute} />
+
+      {/* Guest Restriction Modal */}
+      <GuestRestrictionModal
+        isOpen={showGuestModal}
+        onClose={() => setShowGuestModal(false)}
+        feature={t('guest.features.routePlanning') || 'Perencanaan Rute'}
+      />
     </div>
   );
 };

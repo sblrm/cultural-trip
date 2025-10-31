@@ -8,6 +8,7 @@ interface AuthUser {
   id: string;
   name: string;
   email: string;
+  isGuest?: boolean;
 }
 
 interface AuthContextType {
@@ -16,7 +17,9 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  continueAsGuest: () => void;
   isAuthenticated: boolean;
+  isGuest: boolean;
   loading: boolean;
 }
 
@@ -33,9 +36,24 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isGuest, setIsGuest] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    // Check for guest mode in localStorage
+    const guestMode = localStorage.getItem('guestMode');
+    if (guestMode === 'true') {
+      setIsGuest(true);
+      setUser({
+        id: 'guest',
+        name: 'Guest User',
+        email: 'guest@travomate.com',
+        isGuest: true
+      });
+      setLoading(false);
+      return;
+    }
+
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -144,6 +162,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
+      // Clear guest mode if active
+      if (isGuest) {
+        localStorage.removeItem('guestMode');
+        setIsGuest(false);
+        setUser(null);
+        toast.info("Anda telah keluar dari mode tamu");
+        return;
+      }
+
       await supabase.auth.signOut();
       setUser(null);
       setIsAuthenticated(false);
@@ -153,13 +180,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const continueAsGuest = () => {
+    localStorage.setItem('guestMode', 'true');
+    setIsGuest(true);
+    setUser({
+      id: 'guest',
+      name: 'Guest User',
+      email: 'guest@travomate.com',
+      isGuest: true
+    });
+    toast.success("Melanjutkan sebagai tamu - fitur terbatas");
+  };
+
   const value = {
     user,
     login,
     loginWithGoogle,
     register,
     logout,
+    continueAsGuest,
     isAuthenticated,
+    isGuest,
     loading
   };
 

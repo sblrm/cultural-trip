@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { GuestRestrictionModal } from "@/components/GuestRestrictionModal";
 import {
   createTransaction,
   showSnapPayment,
@@ -31,7 +32,7 @@ const CheckoutPage = () => {
   const quantity = parseInt(searchParams.get("quantity") || "1", 10);
   const visitDate = searchParams.get("visitDate") || "";
   const { getDestinationById } = useDestinations();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isGuest } = useAuth();
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
@@ -44,8 +45,16 @@ const CheckoutPage = () => {
   const [profilePhones, setProfilePhones] = useState<string[]>([]);
   const [useCustomPhone, setUseCustomPhone] = useState(false);
   const [selectedPhone, setSelectedPhone] = useState("");
+  const [showGuestModal, setShowGuestModal] = useState(false);
 
   const destination = getDestinationById(Number(id));
+
+  // Check if guest user tries to access checkout
+  useEffect(() => {
+    if (isGuest) {
+      setShowGuestModal(true);
+    }
+  }, [isGuest]);
 
   useEffect(() => {
     const loadProfileData = async () => {
@@ -490,6 +499,16 @@ const CheckoutPage = () => {
           </Card>
         </div>
       </div>
+
+      {/* Guest Restriction Modal */}
+      <GuestRestrictionModal
+        isOpen={showGuestModal}
+        onClose={() => {
+          setShowGuestModal(false);
+          navigate(-1);
+        }}
+        feature={t('guest.features.booking') || 'Pemesanan Tiket'}
+      />
     </div>
   );
 };

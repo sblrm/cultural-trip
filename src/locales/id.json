@@ -173,7 +173,8 @@
       "loginButton": "Masuk",
       "noAccount": "Belum punya akun?",
       "register": "Daftar Sekarang",
-      "orContinueWith": "Atau lanjutkan dengan"
+      "orContinueWith": "Atau lanjutkan dengan",
+      "browseAsGuest": "Jelajahi sebagai Tamu"
     },
     "register": {
       "title": "Daftar di TravoMate",
@@ -184,7 +185,36 @@
       "confirmPassword": "Konfirmasi Kata Sandi",
       "registerButton": "Daftar",
       "hasAccount": "Sudah punya akun?",
-      "login": "Masuk"
+      "login": "Masuk",
+      "browseAsGuest": "Jelajahi sebagai Tamu"
+    }
+  },
+  "guest": {
+    "banner": {
+      "message": "Anda sedang menjelajah sebagai tamu dengan fitur terbatas.",
+      "register": "Daftar sekarang",
+      "forFullAccess": "untuk akses penuh"
+    },
+    "restriction": {
+      "title": "Fitur Terbatas untuk Tamu",
+      "message": "Fitur \"{{feature}}\" tidak tersedia untuk mode tamu. Daftar atau login untuk mengakses semua fitur.",
+      "benefits": {
+        "title": "Keuntungan Akun Terdaftar:",
+        "plan": "Buat dan simpan rencana perjalanan",
+        "book": "Pesan tiket dan akomodasi",
+        "review": "Tulis ulasan destinasi",
+        "save": "Simpan destinasi favorit",
+        "history": "Akses riwayat perjalanan"
+      },
+      "register": "Daftar Sekarang",
+      "login": "Login"
+    },
+    "features": {
+      "booking": "Pemesanan Tiket",
+      "routePlanning": "Perencanaan Rute",
+      "profile": "Profil & Riwayat",
+      "wishlist": "Wishlist",
+      "review": "Ulasan"
     }
   },
   "profile": {

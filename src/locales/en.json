@@ -174,7 +174,8 @@
       "loginButton": "Login",
       "noAccount": "Don't have an account?",
       "register": "Register Now",
-      "orContinueWith": "Or continue with"
+      "orContinueWith": "Or continue with",
+      "browseAsGuest": "Browse as Guest"
     },
     "register": {
       "title": "Register on TravoMate",
@@ -185,7 +186,36 @@
       "confirmPassword": "Confirm Password",
       "registerButton": "Register",
       "hasAccount": "Already have an account?",
+      "login": "Login",
+      "browseAsGuest": "Browse as Guest"
+    }
+  },
+  "guest": {
+    "banner": {
+      "message": "You are browsing as a guest with limited features.",
+      "register": "Register now",
+      "forFullAccess": "for full access"
+    },
+    "restriction": {
+      "title": "Limited Features for Guests",
+      "message": "The \"{{feature}}\" feature is not available in guest mode. Register or login to access all features.",
+      "benefits": {
+        "title": "Benefits of Registered Account:",
+        "plan": "Create and save trip plans",
+        "book": "Book tickets and accommodations",
+        "review": "Write destination reviews",
+        "save": "Save favorite destinations",
+        "history": "Access travel history"
+      },
+      "register": "Register Now",
       "login": "Login"
+    },
+    "features": {
+      "booking": "Ticket Booking",
+      "routePlanning": "Route Planning",
+      "profile": "Profile & History",
+      "wishlist": "Wishlist",
+      "review": "Reviews"
     }
   },
   "profile": {

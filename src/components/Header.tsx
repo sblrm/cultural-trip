@@ -19,7 +19,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userIsAdmin, setUserIsAdmin] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, isGuest } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -162,7 +162,7 @@ const Header = () => {
             <div className="animate-fade-in animation-delay-100">
               <ThemeToggle />
             </div>
-            {isAuthenticated ? (
+            {isAuthenticated || isGuest ? (
               <div className="animate-fade-in animation-delay-200">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -172,20 +172,29 @@ const Header = () => {
                     >
                       <User size={16} className="transition-transform duration-300 group-hover:rotate-12" />
                       <span className="font-medium">{user?.name}</span>
+                      {isGuest && (
+                        <span className="ml-1 px-2 py-0.5 text-xs bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 rounded-full">
+                          Guest
+                        </span>
+                      )}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48 animate-in slide-in-from-top-2">
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile" className="cursor-pointer hover:bg-teal-50 dark:hover:bg-teal-950 transition-colors">
-                        <User size={16} className="mr-2" /> {t('nav.profile')}
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/wishlist" className="cursor-pointer hover:bg-teal-50 dark:hover:bg-teal-950 transition-colors">
-                        <Heart size={16} className="mr-2" /> {t('nav.wishlist')}
-                      </Link>
-                    </DropdownMenuItem>
-                    {userIsAdmin && (
+                    {!isGuest && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/profile" className="cursor-pointer hover:bg-teal-50 dark:hover:bg-teal-950 transition-colors">
+                            <User size={16} className="mr-2" /> {t('nav.profile')}
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/wishlist" className="cursor-pointer hover:bg-teal-50 dark:hover:bg-teal-950 transition-colors">
+                            <Heart size={16} className="mr-2" /> {t('nav.wishlist')}
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    {userIsAdmin && !isGuest && (
                       <DropdownMenuItem asChild>
                         <Link to="/admin" className="cursor-pointer hover:bg-teal-50 dark:hover:bg-teal-950 transition-colors">
                           <Shield size={16} className="mr-2" /> {t('nav.admin')}
