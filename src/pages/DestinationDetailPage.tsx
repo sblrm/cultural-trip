@@ -21,6 +21,7 @@ import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { ReviewList } from "@/components/reviews/ReviewList";
 import WishlistButton from "@/components/wishlist/WishlistButton";
 import BeenHerePhoto from "@/components/social/BeenHerePhoto";
+import PhotoGallery from "@/components/social/PhotoGallery";
 import ShareButton from "@/components/social/ShareButton";
 import type { ReviewWithProfile, DestinationRating } from "@/types/review";
 import {
@@ -244,6 +245,9 @@ const DestinationDetailPage = () => {
                   <TabsTrigger value="overview">{t('destinationDetail.about')}</TabsTrigger>
                   <TabsTrigger value="details">{t('common.viewDetails')}</TabsTrigger>
                   <TabsTrigger value="transportation">{t('destinationDetail.transportation')}</TabsTrigger>
+                  <TabsTrigger value="photos">
+                    📸 Foto
+                  </TabsTrigger>
                   <TabsTrigger value="reviews">
                     {t('destinationDetail.reviews')} ({rating?.review_count || 0})
                   </TabsTrigger>
@@ -394,9 +398,15 @@ const DestinationDetailPage = () => {
                   </div>
                 </TabsContent>
                 
+                <TabsContent value="photos" className="mt-6">
+                  <PhotoGallery
+                    destinationId={destination.id}
+                    destinationName={destination.name}
+                  />
+                </TabsContent>
+                
                 <TabsContent value="reviews" className="mt-6">
-                  <div className="space-y-8">
-                    {/* Review Form (only for logged in users) */}
+                  <div className="space-y-8">{/* Review Form (only for logged in users) */}
                     {user && (
                       <div id="review-form">
                         {!userReview || isEditingReview ? (
