@@ -9,7 +9,13 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('culture-uploads', 'culture-uploads', true)
 ON CONFLICT (id) DO NOTHING;
 
--- 2. Allow authenticated users to upload their own photos
+-- 2. Drop existing policies if they exist (to allow re-running this script)
+DROP POLICY IF EXISTS "Users can upload their own photos" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their own photos" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their own photos" ON storage.objects;
+DROP POLICY IF EXISTS "Public read access to culture photos" ON storage.objects;
+
+-- 3. Allow authenticated users to upload their own photos
 CREATE POLICY "Users can upload their own photos"
 ON storage.objects FOR INSERT
 TO authenticated
@@ -19,7 +25,7 @@ WITH CHECK (
   auth.uid()::text = (storage.foldername(name))[2]
 );
 
--- 3. Allow authenticated users to update their own photos
+-- 4. Allow authenticated users to update their own photos
 CREATE POLICY "Users can update their own photos"
 ON storage.objects FOR UPDATE
 TO authenticated
@@ -29,7 +35,7 @@ USING (
   auth.uid()::text = (storage.foldername(name))[2]
 );
 
--- 4. Allow authenticated users to delete their own photos
+-- 5. Allow authenticated users to delete their own photos
 CREATE POLICY "Users can delete their own photos"
 ON storage.objects FOR DELETE
 TO authenticated
@@ -39,7 +45,7 @@ USING (
   auth.uid()::text = (storage.foldername(name))[2]
 );
 
--- 5. Allow public read access to all photos
+-- 6. Allow public read access to all photos
 CREATE POLICY "Public read access to culture photos"
 ON storage.objects FOR SELECT
 TO public
