@@ -13,7 +13,7 @@ interface PhotoWithUser {
   photos: string[];
   created_at: string;
   profiles: {
-    name: string;
+    full_name: string;
     avatar_url: string | null;
   };
 }
@@ -46,8 +46,8 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
           comment,
           photos,
           created_at,
-          profiles:user_id (
-            name,
+          profiles (
+            full_name,
             avatar_url
           )
         `)
@@ -55,7 +55,10 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
         .not('photos', 'is', null)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading photos:', error);
+        throw error;
+      }
 
       // Filter out reviews with empty photo arrays and map to correct type
       const photosData = (data || [])
@@ -70,6 +73,7 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
       setPhotos(photosData);
     } catch (error) {
       console.error('Error loading photos:', error);
+      setPhotos([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -129,7 +133,7 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
               >
                 <img
                   src={photoUrl}
-                  alt={`Foto oleh ${review.profiles?.name || 'User'}`}
+                  alt={`Foto oleh ${review.profiles?.full_name || 'User'}`}
                   className="w-full h-full object-cover transition-transform group-hover:scale-110"
                   loading="lazy"
                 />
@@ -138,7 +142,7 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4">
                   <User className="h-6 w-6 mb-2" />
                   <p className="text-sm font-medium text-center">
-                    {review.profiles?.name || 'User'}
+                    {review.profiles?.full_name || 'User'}
                   </p>
                   <div className="flex items-center gap-1 mt-1">
                     <span className="text-yellow-400">{'⭐'.repeat(review.rating)}</span>
@@ -182,7 +186,7 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
                     {selectedPhoto.user.profiles?.avatar_url ? (
                       <img
                         src={selectedPhoto.user.profiles.avatar_url}
-                        alt={selectedPhoto.user.profiles?.name || 'User'}
+                        alt={selectedPhoto.user.profiles?.full_name || 'User'}
                         className="w-12 h-12 rounded-full object-cover"
                       />
                     ) : (
@@ -196,7 +200,7 @@ const PhotoGallery = ({ destinationId, destinationName }: PhotoGalleryProps) => 
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-semibold">
-                        {selectedPhoto.user.profiles?.name || 'User'}
+                        {selectedPhoto.user.profiles?.full_name || 'User'}
                       </h4>
                       <span className="text-yellow-500">
                         {'⭐'.repeat(selectedPhoto.user.rating)}
