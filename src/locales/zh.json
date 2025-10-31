@@ -166,14 +166,15 @@
   },
   "auth": {
     "login": {
-      "title": "登录TravoMate",
-      "subtitle": "欢迎回来！请登录以继续",
+      "title": "登录 TravoMate",
+      "subtitle": "欢迎回来！请登录继续",
       "email": "电子邮件",
       "password": "密码",
       "forgotPassword": "忘记密码？",
       "loginButton": "登录",
       "noAccount": "还没有账户？",
-      "register": "立即注册"
+      "register": "立即注册",
+      "orContinueWith": "或继续使用"
     },
     "register": {
       "title": "在TravoMate注册",

@@ -172,7 +172,8 @@
       "forgotPassword": "Lupa Kata Sandi?",
       "loginButton": "Masuk",
       "noAccount": "Belum punya akun?",
-      "register": "Daftar Sekarang"
+      "register": "Daftar Sekarang",
+      "orContinueWith": "Atau lanjutkan dengan"
     },
     "register": {
       "title": "Daftar di TravoMate",

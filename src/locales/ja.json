@@ -167,13 +167,14 @@
   "auth": {
     "login": {
       "title": "TravoMateにログイン",
-      "subtitle": "お帰りなさい！続けるにはログインしてください",
+      "subtitle": "おかえりなさい！続行するにはログインしてください",
       "email": "メールアドレス",
       "password": "パスワード",
       "forgotPassword": "パスワードをお忘れですか？",
       "loginButton": "ログイン",
       "noAccount": "アカウントをお持ちでないですか？",
-      "register": "今すぐ登録"
+      "register": "今すぐ登録",
+      "orContinueWith": "または続ける"
     },
     "register": {
       "title": "TravoMateに登録",

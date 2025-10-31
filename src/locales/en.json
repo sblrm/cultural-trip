@@ -173,7 +173,8 @@
       "forgotPassword": "Forgot Password?",
       "loginButton": "Login",
       "noAccount": "Don't have an account?",
-      "register": "Register Now"
+      "register": "Register Now",
+      "orContinueWith": "Or continue with"
     },
     "register": {
       "title": "Register on TravoMate",
