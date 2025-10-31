@@ -68,6 +68,23 @@ export interface Ticket {
   destinations?: Destination;
 }
 
+export interface RefundEligibility {
+  eligible: boolean;
+  message: string;
+  refund_percentage?: number;
+  refund_amount?: number;
+  days_until_visit?: number;
+  original_amount?: number;
+}
+
+export interface RefundResult {
+  success: boolean;
+  message: string;
+  refund_id?: number;
+  refund_amount?: number;
+  refund_percentage?: number;
+}
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -354,14 +371,15 @@ export const getUserRefunds = async (userId: string) => {
  * Check if a booking is eligible for refund
  * Returns eligibility status and calculated refund amount
  */
-export const checkRefundEligibility = async (bookingId: number) => {
+export const checkRefundEligibility = async (bookingId: number): Promise<RefundEligibility> => {
   const { data, error } = await supabase
     .rpc('check_refund_eligibility', {
       booking_id_param: bookingId
-    });
+    })
+    .single();
 
   if (error) throw error;
-  return data;
+  return data as RefundEligibility;
 };
 
 /**
@@ -372,16 +390,17 @@ export const requestRefund = async (
   userId: string,
   bookingId: number,
   reason: string
-) => {
+): Promise<RefundResult> => {
   const { data, error } = await supabase
     .rpc('request_refund', {
       user_id_param: userId,
       booking_id_param: bookingId,
       reason_param: reason
-    });
+    })
+    .single();
 
   if (error) throw error;
-  return data;
+  return data as RefundResult;
 };
 
 /**
